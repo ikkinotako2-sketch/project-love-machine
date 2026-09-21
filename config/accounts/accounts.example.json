@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "accounts": [
+    {
+      "account_id": "youtube_game_001",
+      "platform": "youtube",
+      "display_name": "YouTube Game 001",
+      "enabled": false,
+      "credential_ref": "n8n://youtube_game_001",
+      "posting_policy": {
+        "daily_limit": 2,
+        "min_interval_seconds": 21600,
+        "max_retries": 2,
+        "timezone": "Asia/Tokyo"
+      },
+      "adapter_config": {
+        "content_type": "short"
+      },
+      "tags": ["game", "shorts"]
+    },
+    {
+      "account_id": "youtube_game_002",
+      "platform": "youtube",
+      "display_name": "YouTube Game 002",
+      "enabled": false,
+      "credential_ref": "n8n://youtube_game_002",
+      "posting_policy": {
+        "daily_limit": 2,
+        "min_interval_seconds": 21600,
+        "max_retries": 2,
+        "timezone": "Asia/Tokyo"
+      },
+      "adapter_config": {
+        "content_type": "short"
+      },
+      "tags": ["game", "shorts"]
+    },
+    {
+      "account_id": "twitch_game_001",
+      "platform": "twitch",
+      "display_name": "Twitch Game 001",
+      "enabled": false,
+      "credential_ref": "n8n://twitch_game_001",
+      "posting_policy": {
+        "daily_limit": 1,
+        "min_interval_seconds": 43200,
+        "max_retries": 1,
+        "timezone": "Asia/Tokyo"
+      },
+      "adapter_config": {
+        "content_type": "live"
+      },
+      "tags": ["game", "live"]
+    }
+  ]
+}
