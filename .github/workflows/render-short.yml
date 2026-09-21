@@ -2,10 +2,59 @@ name: Render YouTube Short
 
 on:
   workflow_dispatch:
+    inputs:
+      title:
+        description: Video title
+        required: false
+        type: string
+      hook:
+        description: Opening hook
+        required: false
+        type: string
+      narration:
+        description: Japanese narration for VOICEVOX
+        required: true
+        type: string
+      speaker:
+        description: VOICEVOX speaker/style ID
+        required: true
+        default: "1"
+        type: string
+      scenes_json:
+        description: JSON array of V2 scenes
+        required: false
+        default: "[]"
+        type: string
+      captions_json:
+        description: JSON array of V2 captions
+        required: false
+        default: "[]"
+        type: string
+      bgm_json:
+        description: JSON object for V2 BGM settings
+        required: false
+        default: "{}"
+        type: string
+      output_json:
+        description: JSON output specification
+        required: false
+        default: '{"format":"mp4","width":1080,"height":1920,"fps":30}'
+        type: string
 
 jobs:
   render:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      INPUT_TITLE: ${{ inputs.title }}
+      INPUT_HOOK: ${{ inputs.hook }}
+      INPUT_NARRATION: ${{ inputs.narration }}
+      INPUT_SPEAKER: ${{ inputs.speaker }}
+      INPUT_SCENES_JSON: ${{ inputs.scenes_json }}
+      INPUT_CAPTIONS_JSON: ${{ inputs.captions_json }}
+      INPUT_BGM_JSON: ${{ inputs.bgm_json }}
+      INPUT_OUTPUT_JSON: ${{ inputs.output_json }}
 
     steps:
       - name: Checkout
@@ -14,8 +63,38 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
-      - name: Test worker
+      - name: Install FFmpeg and Japanese fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
+
+      - name: Start VOICEVOX Engine
+        run: |
+          docker pull voicevox/voicevox_engine:cpu-latest
+          docker run -d --rm             --name voicevox             -e VV_DISABLE_MUTABLE_API=1             -p 127.0.0.1:50021:50021             voicevox/voicevox_engine:cpu-latest
+
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:50021/version >/dev/null; then
+              echo "VOICEVOX is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          docker logs voicevox
+          exit 1
+
+      - name: Render Short
         run: |
           python render-worker/render.py
+
+      - name: Upload test render
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-short
+          path: |
+            short.mp4
+            payload_snapshot.json
+          retention-days: 1
