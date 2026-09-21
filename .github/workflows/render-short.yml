@@ -1,8 +1,14 @@
 name: Render YouTube Short
+run-name: Render ${{ inputs.render_id }}
 
 on:
   workflow_dispatch:
     inputs:
+      render_id:
+        description: Unique render request ID
+        required: true
+        default: "manual-test"
+        type: string
       title:
         description: Video title
         required: false
@@ -58,10 +64,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -73,7 +79,11 @@ jobs:
       - name: Start VOICEVOX Engine
         run: |
           docker pull voicevox/voicevox_engine:cpu-latest
-          docker run -d --rm             --name voicevox             -e VV_DISABLE_MUTABLE_API=1             -p 127.0.0.1:50021:50021             voicevox/voicevox_engine:cpu-latest
+          docker run -d --rm \
+            --name voicevox \
+            -e VV_DISABLE_MUTABLE_API=1 \
+            -p 127.0.0.1:50021:50021 \
+            voicevox/voicevox_engine:cpu-latest
 
           for i in {1..60}; do
             if curl -fsS http://127.0.0.1:50021/version >/dev/null; then
@@ -91,9 +101,9 @@ jobs:
           python render-worker/render.py
 
       - name: Upload test render
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: rendered-short
+          name: rendered-short-${{ inputs.render_id }}
           path: |
             short.mp4
             payload_snapshot.json
