@@ -10,6 +10,7 @@
 | PLM Content Engine | テーマ、台本、字幕、投稿文の生成 | n8n/Geminiで稼働中 |
 | PLM Render Cloud | VOICEVOX + FFmpeg + Quality Gateで動画生成 | GitHub Actionsで初回成功 |
 | PLM YouTube Pipeline | RenderからYouTube結果までの一括実行 | v1実装済み |
+| Pipeline Result Fetcher | job_idだけでPipeline結果をHTTP取得 | v1実装済み |
 | PLM Social Hub | 各SNSへの投稿Adapterをまとめる層 | 共通Interface・再試行・重複防止を実装済み |
 | PLM YouTube Adapter | YouTube投稿・予約・状態・分析 | v1実装・private実投稿成功 |
 | PLM Bluesky Adapter | Bluesky投稿・反応取得 | 既存n8n基盤あり |
@@ -160,6 +161,16 @@ Render CloudとAdapterには単独実行を保ったまま再利用用入口と�
 - 投稿はprivateが既定で、既存の二重投稿防止をそのまま使用
 
 入力・出力契約は `docs/YOUTUBE_PIPELINE_V1.md` を正式仕様とする。
+
+## Pipeline Result Fetcher v1
+
+- Pipeline開始時に`processing`を`plm-results`ブランチへ保存
+- Pipeline終了時に同じ`job_id`のJSONを`succeeded`または`failed`へ更新
+- n8nは固定形式のRaw URLを1回GETし、Run ID / Artifact ID探索を不要化
+- 公開JSONはstatus / video_id / youtube_status / youtube_url / failed_stage /
+  errorの許可項目だけに限定
+- 従来の30日間保持artifactは互換性のため継続
+- 詳細: `docs/PIPELINE_RESULT_FETCHER_V1.md`
 
 ## 命名ルール
 
