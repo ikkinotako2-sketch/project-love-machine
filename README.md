@@ -1,16 +1,54 @@
-# Project Love Machine
+# Project Love Machine (PLM)
 
-Cloud-first automation core for AI-assisted short-form video production and social distribution.
+AI-assisted SNS automation platform.
 
-## Goals
+## What this repository is
 
-- Run without a local Windows PC
-- Use GitHub Actions as the cloud render worker
-- Receive structured V2 payloads from n8n
-- Generate narration, subtitles, motion, BGM/SFX, and MP4
-- Add quality checks before upload
-- Keep secrets out of the repository
+Project Love Machine is the shared automation foundation for:
 
-## Planned flow
+- YouTube Shorts
+- Bluesky
+- Twitch / TwitCasting LIVE
+- note
+- Patreon
+- future TikTok / Instagram / X adapters
 
-n8n → Cloud Render Payload → GitHub Actions → VOICEVOX/FFmpeg → Quality Gate → MP4 → social upload
+The goal is to reuse one common engine instead of building a separate system for every account.
+
+## Current working component
+
+### PLM Render Cloud
+
+Current flow:
+
+```
+n8n
+→ PLM Render Request
+→ GitHub Actions
+→ VOICEVOX
+→ FFmpeg
+→ Quality Gate
+→ MP4
+```
+
+A first PC-free 1080x1920 H.264/AAC render has already completed successfully on GitHub Actions.
+
+## Architecture
+
+- **n8n**: orchestration and schedules
+- **GitHub**: source of truth, Actions, render jobs, tests, version history
+- **PLM Render Cloud**: cloud video generation
+- **Social Adapters**: platform-specific posting
+- **PLM Account Manager**: multi-account configuration
+- **PLM Improvement Engine**: performance-driven iteration
+- **PLM Trend Radar**: content/editing trend monitoring
+- **PLM Tool Radar**: GitHub OSS / MOGE technology discovery
+- **PLM Command Center**: status, errors, performance and revenue dashboard
+
+See [docs/PROJECT_MAP.md](docs/PROJECT_MAP.md) for the complete naming map and roadmap.
+
+## Security
+
+- Never commit API keys or access tokens
+- Store credentials in n8n Credentials or GitHub Secrets
+- Keep platform adapters isolated from the common core
