@@ -137,7 +137,7 @@ jobs:
       PLM_RENDER_JOB_STATUS: ${{ needs.render.result }}
       PLM_YOUTUBE_JOB_STATUS: ${{ needs.youtube.result }}
       PLM_RENDER_RESULT_JSON: ${{ needs.render.outputs.result_json }}
-      PLM_YOUTUBE_RESULT_JSON: ${{ needs.youtube.outputs.result_json }}
+      PLM_YOUTUBE_RESULT_PATH: adapter-result/youtube-result.json
       PLM_PIPELINE_RESULT_PATH: pipeline-result.json
     steps:
       - name: Checkout
@@ -147,6 +147,16 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+
+      - name: Download YouTube Adapter result artifact
+        if: needs.youtube.result != 'skipped'
+        continue-on-error: true
+        uses: actions/download-artifact@v7
+        with:
+          name: youtube-result-${{ github.run_id }}
+          path: adapter-result
+          run-id: ${{ github.run_id }}
+          github-token: ${{ github.token }}
 
       - name: Build pipeline result
         run: python -m plm.entrypoints.pipeline_result

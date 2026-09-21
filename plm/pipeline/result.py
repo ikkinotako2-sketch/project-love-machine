@@ -58,6 +58,7 @@ def build_pipeline_result(
         "failed_stage": failed_stage,
         "video_id": youtube_data.get("post_id"),
         "youtube_status": youtube_data.get("state"),
+        "youtube_url": youtube_data.get("url"),
         "error": error,
         "stages": {
             "render_cloud": {

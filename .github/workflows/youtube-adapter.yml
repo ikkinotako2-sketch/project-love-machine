@@ -118,10 +118,6 @@ on:
       idempotency_key:
         required: false
         type: string
-    outputs:
-      result_json:
-        description: Normalized YouTube Adapter result JSON
-        value: ${{ jobs.execute.outputs.result_json }}
 
 permissions:
   actions: read
@@ -135,8 +131,6 @@ jobs:
   execute:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    outputs:
-      result_json: ${{ steps.result.outputs.result_json }}
     env:
       PLM_OPERATION: ${{ inputs.operation }}
       PLM_ACCOUNT_ID: ${{ inputs.account_id }}
@@ -228,17 +222,6 @@ jobs:
 
       - name: Execute Social Hub and YouTube Adapter
         run: python -m plm.entrypoints.youtube_job
-
-      - name: Export normalized result
-        id: result
-        if: always()
-        run: |
-          if [[ -f youtube-result.json ]]; then
-            RESULT=$(python -c 'import json; print(json.dumps(json.load(open("youtube-result.json")), separators=(",", ":")))')
-          else
-            RESULT='{"ok":false,"error":{"stage":"youtube_adapter_setup","type":"WorkflowFailure","message":"YouTube Adapter stopped before execution"}}'
-          fi
-          echo "result_json=$RESULT" >> "$GITHUB_OUTPUT"
 
       - name: Upload normalized result
         if: always()

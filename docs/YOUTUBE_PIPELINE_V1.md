@@ -63,8 +63,13 @@ YouTube Adapter's cross-run claim and Social Hub idempotency checks.
 
 ## Result JSON
 
-The final artifact always uses one stable schema. On success it contains `video_id`
-and `youtube_status`. On failure, `failed_stage` identifies `render_request`, `voice`,
+The YouTube reusable workflow writes `youtube-result.json` to the existing
+`youtube-result-<run_id>` artifact. The final job downloads and parses that file
+directly. It does not pass the JSON through a reusable-workflow output, so GitHub's
+secret redaction remains intact.
+
+The final artifact always uses one stable schema. On success it contains `video_id`,
+`youtube_status`, and `youtube_url`. On failure, `failed_stage` identifies `render_request`, `voice`,
 `render`, `quality_gate`, `render_cloud_setup`, `youtube_adapter`, or
 `youtube_adapter_setup`. Nested stage results retain the normalized error code and
 message without credentials.

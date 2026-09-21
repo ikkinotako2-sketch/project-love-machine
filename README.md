@@ -99,7 +99,9 @@ upload. See [docs/YOUTUBE_ADAPTER_V1.md](docs/YOUTUBE_ADAPTER_V1.md).
 `youtube-pipeline.yml` gives n8n one dispatch entrypoint for Render Request, Render
 Cloud, Quality Gate, YouTube upload, and normalized results. It reuses both existing
 workflows through `workflow_call`; n8n supplies only one `job_id` and never supplies a
-Render Run ID or artifact name. The final artifact is `pipeline-result-<job_id>`.
+Render Run ID or artifact name. The final artifact is `pipeline-result-<job_id>`. YouTube results are handed to the
+final job through the existing `youtube-result-<run_id>` artifact, not through a
+secret-tainted reusable-workflow output.
 
 See [docs/YOUTUBE_PIPELINE_V1.md](docs/YOUTUBE_PIPELINE_V1.md) for the n8n JSON contract.
 

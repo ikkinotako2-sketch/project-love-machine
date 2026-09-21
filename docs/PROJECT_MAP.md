@@ -154,6 +154,7 @@ Render CloudとAdapterには単独実行を保ったまま再利用用入口と�
 - `job_id`を同じ`render_id`とidempotency keyとして全工程で使用
 - Render Run IDとArtifact名はGitHub Actions内で自動的に受け渡す
 - 既存`render-short.yml`と`youtube-adapter.yml`をreusable workflowとして呼ぶ
+- YouTube結果はReusable Workflow outputではなく既存の安全なArtifactで受け渡す
 - 最終結果を`pipeline-result-<job_id>`へ保存
 - `failed_stage`でRender Request、VOICEVOX、Render、Quality Gate、YouTubeを識別
 - 投稿はprivateが既定で、既存の二重投稿防止をそのまま使用
@@ -185,7 +186,7 @@ Render CloudとAdapterには単独実行を保ったまま再利用用入口と�
 
 ## 次の優先実装
 
-1. n8nからYouTube Pipelineを1回dispatchしてprivate投稿を実証
+1. 修正後Pipelineをprivateで1回再実行し、video_id / status / URLのhandoffを確認
 2. pipeline resultをGoogle Sheets / Command Centerへ自動記録
 3. durable idempotency / job state store（無料構成を優先）
 4. 既存n8n資産を移植するBluesky Adapter
