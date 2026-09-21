@@ -91,8 +91,17 @@ The first real platform adapter is implemented in `plm/social_adapters/youtube/`
 - n8n-callable GitHub Actions entrypoint in `youtube-adapter.yml`
 - cross-run upload claims plus SocialHub idempotency protection
 
-The implementation is tested with mocks and remains inactive until Google OAuth is
-completed manually. See [docs/YOUTUBE_ADAPTER_V1.md](docs/YOUTUBE_ADAPTER_V1.md).
+The implementation is tested with mocks and has completed one real-account private
+upload. See [docs/YOUTUBE_ADAPTER_V1.md](docs/YOUTUBE_ADAPTER_V1.md).
+
+### PLM YouTube Pipeline v1
+
+`youtube-pipeline.yml` gives n8n one dispatch entrypoint for Render Request, Render
+Cloud, Quality Gate, YouTube upload, and normalized results. It reuses both existing
+workflows through `workflow_call`; n8n supplies only one `job_id` and never supplies a
+Render Run ID or artifact name. The final artifact is `pipeline-result-<job_id>`.
+
+See [docs/YOUTUBE_PIPELINE_V1.md](docs/YOUTUBE_PIPELINE_V1.md) for the n8n JSON contract.
 
 ## Tests
 

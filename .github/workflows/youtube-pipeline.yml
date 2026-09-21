@@ -1,0 +1,166 @@
+name: PLM YouTube Pipeline
+run-name: Pipeline ${{ inputs.job_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: Unique n8n job ID; also used as render_id and idempotency key
+        required: true
+        type: string
+      account_id:
+        description: PLM YouTube account ID
+        required: true
+        type: string
+      oauth_secret_name:
+        description: Repository secret name beginning with PLM_YOUTUBE_
+        required: true
+        type: string
+      title:
+        description: YouTube video title
+        required: true
+        type: string
+      hook:
+        description: Opening hook
+        required: false
+        type: string
+      narration:
+        description: Japanese narration for VOICEVOX
+        required: true
+        type: string
+      speaker:
+        description: VOICEVOX speaker/style ID
+        required: true
+        default: "1"
+        type: string
+      scenes_json:
+        description: JSON array of V2 scenes
+        required: false
+        default: "[]"
+        type: string
+      captions_json:
+        description: JSON array of V2 captions
+        required: false
+        default: "[]"
+        type: string
+      bgm_json:
+        description: JSON object for V2 BGM settings
+        required: false
+        default: "{}"
+        type: string
+      output_json:
+        description: Render output specification
+        required: false
+        default: '{"format":"mp4","width":1080,"height":1920,"fps":30}'
+        type: string
+      description:
+        description: YouTube description
+        required: false
+        type: string
+      tags:
+        description: Comma-separated YouTube tags
+        required: false
+        type: string
+      privacy_status:
+        description: private is the safe default
+        required: true
+        default: private
+        type: choice
+        options: [private, unlisted, public]
+      scheduled_for:
+        description: Future RFC3339 publish time; blank means immediate private upload
+        required: false
+        type: string
+      made_for_kids:
+        description: Explicit audience declaration
+        required: true
+        type: boolean
+      contains_synthetic_media:
+        description: Explicit synthetic/altered content declaration
+        required: true
+        type: boolean
+      notify_subscribers:
+        description: Notify subscribers
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: youtube-pipeline-${{ inputs.job_id }}
+  cancel-in-progress: false
+
+jobs:
+  render:
+    uses: ./.github/workflows/render-short.yml
+    with:
+      render_id: ${{ inputs.job_id }}
+      title: ${{ inputs.title }}
+      hook: ${{ inputs.hook }}
+      narration: ${{ inputs.narration }}
+      speaker: ${{ inputs.speaker }}
+      scenes_json: ${{ inputs.scenes_json }}
+      captions_json: ${{ inputs.captions_json }}
+      bgm_json: ${{ inputs.bgm_json }}
+      output_json: ${{ inputs.output_json }}
+
+  youtube:
+    needs: render
+    uses: ./.github/workflows/youtube-adapter.yml
+    secrets: inherit
+    with:
+      operation: upload
+      account_id: ${{ inputs.account_id }}
+      oauth_secret_name: ${{ inputs.oauth_secret_name }}
+      render_run_id: ${{ format('{0}', github.run_id) }}
+      render_artifact_name: ${{ needs.render.outputs.artifact_name }}
+      title: ${{ inputs.title }}
+      description: ${{ inputs.description }}
+      tags: ${{ inputs.tags }}
+      privacy_status: ${{ inputs.privacy_status }}
+      scheduled_for: ${{ inputs.scheduled_for }}
+      made_for_kids: ${{ inputs.made_for_kids }}
+      contains_synthetic_media: ${{ inputs.contains_synthetic_media }}
+      notify_subscribers: ${{ inputs.notify_subscribers }}
+      idempotency_key: ${{ inputs.job_id }}
+
+  result:
+    if: always()
+    needs: [render, youtube]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PLM_JOB_ID: ${{ inputs.job_id }}
+      PLM_RENDER_JOB_STATUS: ${{ needs.render.result }}
+      PLM_YOUTUBE_JOB_STATUS: ${{ needs.youtube.result }}
+      PLM_RENDER_RESULT_JSON: ${{ needs.render.outputs.result_json }}
+      PLM_YOUTUBE_RESULT_JSON: ${{ needs.youtube.outputs.result_json }}
+      PLM_PIPELINE_RESULT_PATH: pipeline-result.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Build pipeline result
+        run: python -m plm.entrypoints.pipeline_result
+
+      - name: Upload pipeline result for n8n
+        uses: actions/upload-artifact@v7
+        with:
+          name: pipeline-result-${{ inputs.job_id }}
+          path: pipeline-result.json
+          retention-days: 30
+
+      - name: Write job summary
+        run: |
+          echo '## PLM YouTube Pipeline Result' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat pipeline-result.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

@@ -1,5 +1,9 @@
 # PLM YouTube Adapter v1
 
+Status: a real-account private upload from a PLM Render Cloud artifact succeeded and
+returned a YouTube video ID. The Adapter is reused by `youtube-pipeline.yml`; its
+standalone workflow remains available.
+
 Official specifications were checked on 2026-09-21. This implementation uses only the
 Python standard library and adds no paid service.
 

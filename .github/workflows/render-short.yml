@@ -46,11 +46,55 @@ on:
         required: false
         default: '{"format":"mp4","width":1080,"height":1920,"fps":30}'
         type: string
+  workflow_call:
+    inputs:
+      render_id:
+        required: true
+        type: string
+      title:
+        required: false
+        type: string
+      hook:
+        required: false
+        type: string
+      narration:
+        required: true
+        type: string
+      speaker:
+        required: true
+        type: string
+        default: "1"
+      scenes_json:
+        required: false
+        type: string
+        default: "[]"
+      captions_json:
+        required: false
+        type: string
+        default: "[]"
+      bgm_json:
+        required: false
+        type: string
+        default: "{}"
+      output_json:
+        required: false
+        type: string
+        default: '{"format":"mp4","width":1080,"height":1920,"fps":30}'
+    outputs:
+      artifact_name:
+        description: Deterministic Render Cloud artifact name
+        value: ${{ jobs.render.outputs.artifact_name }}
+      result_json:
+        description: Render and Quality Gate result JSON
+        value: ${{ jobs.render.outputs.result_json }}
 
 jobs:
   render:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      artifact_name: ${{ steps.result.outputs.artifact_name }}
+      result_json: ${{ steps.result.outputs.result_json }}
 
     env:
       INPUT_TITLE: ${{ inputs.title }}
@@ -63,6 +107,15 @@ jobs:
       INPUT_OUTPUT_JSON: ${{ inputs.output_json }}
 
     steps:
+      - name: Validate render ID
+        env:
+          RENDER_ID: ${{ inputs.render_id }}
+        run: |
+          if [[ ! "$RENDER_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]; then
+            echo "render_id must contain 1-64 safe identifier characters"
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v7
 
@@ -100,11 +153,28 @@ jobs:
         run: |
           python render-worker/render.py
 
-      - name: Upload test render
+      - name: Upload render result
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: rendered-short-${{ inputs.render_id }}
           path: |
             short.mp4
             payload_snapshot.json
+            render-result.json
+          if-no-files-found: ignore
           retention-days: 1
+
+      - name: Export render result
+        id: result
+        if: always()
+        env:
+          ARTIFACT_NAME: rendered-short-${{ inputs.render_id }}
+        run: |
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          if [[ -f render-result.json ]]; then
+            RESULT=$(python -c 'import json; print(json.dumps(json.load(open("render-result.json")), separators=(",", ":")))')
+          else
+            RESULT='{"ok":false,"error":{"stage":"render_cloud_setup","type":"WorkflowFailure","message":"Render Cloud stopped before render execution"}}'
+          fi
+          echo "result_json=$RESULT" >> "$GITHUB_OUTPUT"
