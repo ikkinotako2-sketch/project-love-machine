@@ -79,6 +79,21 @@ requirements are verified.
 
 See [docs/PROJECT_MAP.md](docs/PROJECT_MAP.md) for the complete naming map and roadmap.
 
+### PLM YouTube Adapter v1
+
+The first real platform adapter is implemented in `plm/social_adapters/youtube/`.
+
+- official YouTube Data API resumable video upload
+- private-by-default immediate upload and verified `publishAt` scheduling
+- normalized video ID, upload/processing status, and analytics
+- transient-only retry classification and conservative quota guards
+- one shared Adapter for every `youtube_*_NNN` account
+- n8n-callable GitHub Actions entrypoint in `youtube-adapter.yml`
+- cross-run upload claims plus SocialHub idempotency protection
+
+The implementation is tested with mocks and remains inactive until Google OAuth is
+completed manually. See [docs/YOUTUBE_ADAPTER_V1.md](docs/YOUTUBE_ADAPTER_V1.md).
+
 ## Tests
 
 ```bash
