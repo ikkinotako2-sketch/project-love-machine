@@ -1,0 +1,30 @@
+{
+  "adapter_spec_version": "1.0",
+  "platforms": [
+    "youtube",
+    "bluesky",
+    "twitch",
+    "twitcasting",
+    "note",
+    "patreon",
+    "tiktok",
+    "instagram",
+    "x"
+  ],
+  "implementation_status": {
+    "youtube": "not_connected",
+    "bluesky": "not_connected",
+    "twitch": "not_connected",
+    "twitcasting": "not_connected",
+    "note": "not_connected",
+    "patreon": "not_connected",
+    "tiktok": "future",
+    "instagram": "future",
+    "x": "future"
+  },
+  "policy": {
+    "capabilities_require_official_documentation_verification": true,
+    "secrets_in_repository": false,
+    "default_to_disabled": true
+  }
+}

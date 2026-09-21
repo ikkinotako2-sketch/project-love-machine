@@ -45,7 +45,48 @@ A first PC-free 1080x1920 H.264/AAC render has already completed successfully on
 - **PLM Tool Radar**: GitHub OSS / MOGE technology discovery
 - **PLM Command Center**: status, errors, performance and revenue dashboard
 
+## Implemented common core
+
+### PLM Account Manager
+
+The initial account registry is implemented in `plm/account_manager/`.
+
+- validated IDs such as `youtube_game_001`
+- YouTube, Bluesky, Twitch, TwitCasting, note, Patreon and future platform IDs
+- one account configuration per account instead of one copied workflow
+- O(1) account lookup and a validated 100-account limit
+- disabled-by-default accounts and bounded posting policies
+- credential references only; common inline secret fields are rejected
+
+Start from `config/accounts/accounts.example.json`. Keep real credentials in n8n
+Credentials or GitHub Secrets.
+
+### PLM Social Hub / Adapter Contract
+
+The common adapter contract is implemented in `plm/social_adapters/`.
+
+- publish and optional scheduling
+- normalized post IDs and states
+- normalized analytics snapshots
+- typed permanent/transient errors
+- bounded transient retries
+- idempotency-based duplicate prevention
+- platform adapter registry
+
+See [docs/SOCIAL_ADAPTER_SPEC.md](docs/SOCIAL_ADAPTER_SPEC.md). Platform network
+integrations remain disabled until current official API, pricing, eligibility and policy
+requirements are verified.
+
 See [docs/PROJECT_MAP.md](docs/PROJECT_MAP.md) for the complete naming map and roadmap.
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+The independent `Test PLM Core` workflow tests the shared core without modifying or
+executing PLM Render Cloud.
 
 ## Security
 

@@ -6,15 +6,15 @@
 
 | Name | Role | Current status |
 |---|---|---|
-| PLM Core | 共通基盤・設定・ジョブ管理 | Planned |
+| PLM Core | 共通基盤・設定・ジョブ管理 | Account/Social初期版実装済み |
 | PLM Content Engine | テーマ、台本、字幕、投稿文の生成 | n8n/Geminiで稼働中 |
 | PLM Render Cloud | VOICEVOX + FFmpeg + Quality Gateで動画生成 | GitHub Actionsで初回成功 |
-| PLM Social Hub | 各SNSへの投稿Adapterをまとめる層 | Planned |
+| PLM Social Hub | 各SNSへの投稿Adapterをまとめる層 | 共通Interface・再試行・重複防止を実装済み |
 | PLM YouTube Adapter | YouTube投稿・状態取得 | V1/V2で一部稼働 |
 | PLM Bluesky Adapter | Bluesky投稿・反応取得 | 既存n8n基盤あり |
 | PLM Live Engine | Twitch / ツイキャス等のLIVE配信共通基盤 | Planned |
 | PLM Note Adapter | note記事生成・下書き・公開支援 | Planned |
-| PLM Account Manager | 複数アカウントの設定・認証・実行順管理 | Planned |
+| PLM Account Manager | 複数アカウントの設定・認証・実行順管理 | 設定Registry・100件検証を実装済み |
 | PLM Improvement Engine | 投稿結果から次回改善を決める | Planned |
 | PLM Trend Radar | YouTube等の編集・コンテンツ傾向監視 | Planned |
 | PLM Tool Radar | GitHub OSS / MOGEの新技術を監視 | Planned |
@@ -67,6 +67,9 @@ File:
 
 ```
 project-love-machine/
+├─ plm/
+│  ├─ account_manager/
+│  └─ social_adapters/
 ├─ core/
 ├─ config/
 │  ├─ accounts/
@@ -94,6 +97,41 @@ project-love-machine/
 └─ .github/workflows/
 ```
 
+現在の実装では、Pythonから利用する共通基盤を `plm/` パッケージに配置する。
+`config/accounts/` は秘密情報を含まないアカウント設定、`config/platforms/` は
+Adapterの接続状態と検証方針を保持する。既存の `render-worker/` と
+`render-short.yml` は独立しており、今回の共通基盤から変更していない。
+
+## Account Manager v1
+
+- `account_id`: `<platform>_<genre>_<number>`
+- 対応ID: YouTube / Bluesky / Twitch / TwitCasting / note / Patreon / TikTok / Instagram / X
+- 最大100件を設定ファイルから一括読み込み
+- `enabled: false` が既定
+- 認証情報本体は禁止し、`n8n://` / `github-secret://` / `env://` の参照のみ保持
+- 同一ID、platform不一致、上限超過、秘密情報らしいキーを拒否
+
+## Social Adapter v1
+
+共通処理:
+- account解決
+- Adapter選択
+- 有効/無効判定
+- 投稿・予約投稿の振り分け
+- 有限再試行
+- idempotency keyによる重複防止
+- 共通PostResult / PostState / AnalyticsSnapshot
+
+SNS固有処理:
+- 公式APIのリクエスト形式
+- 認証更新
+- メディアアップロード
+- 状態・分析値のマッピング
+- 公式仕様に基づくrate limit判定
+
+詳細は `docs/SOCIAL_ADAPTER_SPEC.md` を正式規格とする。実API Adapterは、
+現行の公式仕様・費用・利用条件を検証するまで有効化しない。
+
 ## 命名ルール
 
 - 全体: `PLM`
@@ -116,3 +154,11 @@ project-love-machine/
 4. 足りない部分だけ自作
 5. n8nは「司令塔」、重い処理はGitHub側へ寄せる
 6. 同じ処理を100個複製せず、共通基盤 + account configで増やす
+
+## 次の優先実装
+
+1. durable idempotency / job state store（SQLiteまたは既存DB。無料構成を優先）
+2. 公式仕様を確認したYouTube Adapter
+3. 既存n8n資産を移植するBluesky Adapter
+4. Adapter contract test suiteを各実Adapterへ適用
+5. Command Centerへaccount/job/error状態を公開

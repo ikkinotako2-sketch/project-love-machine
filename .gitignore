@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+config/accounts/accounts.local.json
+config/accounts/*.secret.json
+credentials/
+secrets/
