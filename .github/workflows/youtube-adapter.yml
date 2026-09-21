@@ -69,6 +69,59 @@ on:
         description: Unique n8n job ID (required for upload)
         required: false
         type: string
+  workflow_call:
+    inputs:
+      operation:
+        required: true
+        type: string
+      account_id:
+        required: true
+        type: string
+      oauth_secret_name:
+        required: true
+        type: string
+      render_run_id:
+        required: false
+        type: string
+      render_artifact_name:
+        required: false
+        type: string
+      video_id:
+        required: false
+        type: string
+      title:
+        required: false
+        type: string
+      description:
+        required: false
+        type: string
+      tags:
+        required: false
+        type: string
+      privacy_status:
+        required: false
+        type: string
+        default: private
+      scheduled_for:
+        required: false
+        type: string
+      made_for_kids:
+        required: true
+        type: boolean
+      contains_synthetic_media:
+        required: true
+        type: boolean
+      notify_subscribers:
+        required: false
+        type: boolean
+        default: false
+      idempotency_key:
+        required: false
+        type: string
+    outputs:
+      result_json:
+        description: Normalized YouTube Adapter result JSON
+        value: ${{ jobs.execute.outputs.result_json }}
 
 permissions:
   actions: read
@@ -82,6 +135,8 @@ jobs:
   execute:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      result_json: ${{ steps.result.outputs.result_json }}
     env:
       PLM_OPERATION: ${{ inputs.operation }}
       PLM_ACCOUNT_ID: ${{ inputs.account_id }}
@@ -173,6 +228,17 @@ jobs:
 
       - name: Execute Social Hub and YouTube Adapter
         run: python -m plm.entrypoints.youtube_job
+
+      - name: Export normalized result
+        id: result
+        if: always()
+        run: |
+          if [[ -f youtube-result.json ]]; then
+            RESULT=$(python -c 'import json; print(json.dumps(json.load(open("youtube-result.json")), separators=(",", ":")))')
+          else
+            RESULT='{"ok":false,"error":{"stage":"youtube_adapter_setup","type":"WorkflowFailure","message":"YouTube Adapter stopped before execution"}}'
+          fi
+          echo "result_json=$RESULT" >> "$GITHUB_OUTPUT"
 
       - name: Upload normalized result
         if: always()

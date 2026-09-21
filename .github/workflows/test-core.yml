@@ -8,6 +8,9 @@ on:
       - "tests/**"
       - ".github/workflows/test-core.yml"
       - ".github/workflows/youtube-adapter.yml"
+      - ".github/workflows/youtube-pipeline.yml"
+      - ".github/workflows/render-short.yml"
+      - "render-worker/**"
   pull_request:
     paths:
       - "plm/**"
@@ -15,6 +18,9 @@ on:
       - "tests/**"
       - ".github/workflows/test-core.yml"
       - ".github/workflows/youtube-adapter.yml"
+      - ".github/workflows/youtube-pipeline.yml"
+      - ".github/workflows/render-short.yml"
+      - "render-worker/**"
 
 jobs:
   test:

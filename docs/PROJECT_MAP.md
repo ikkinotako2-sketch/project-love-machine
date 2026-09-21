@@ -9,8 +9,9 @@
 | PLM Core | 共通基盤・設定・ジョブ管理 | Account/Social初期版実装済み |
 | PLM Content Engine | テーマ、台本、字幕、投稿文の生成 | n8n/Geminiで稼働中 |
 | PLM Render Cloud | VOICEVOX + FFmpeg + Quality Gateで動画生成 | GitHub Actionsで初回成功 |
+| PLM YouTube Pipeline | RenderからYouTube結果までの一括実行 | v1実装済み |
 | PLM Social Hub | 各SNSへの投稿Adapterをまとめる層 | 共通Interface・再試行・重複防止を実装済み |
-| PLM YouTube Adapter | YouTube投稿・予約・状態・分析 | v1実装済み・OAuth接続待ち |
+| PLM YouTube Adapter | YouTube投稿・予約・状態・分析 | v1実装・private実投稿成功 |
 | PLM Bluesky Adapter | Bluesky投稿・反応取得 | 既存n8n基盤あり |
 | PLM Live Engine | Twitch / ツイキャス等のLIVE配信共通基盤 | Planned |
 | PLM Note Adapter | note記事生成・下書き・公開支援 | Planned |
@@ -143,8 +144,21 @@ SNS固有処理:
 - n8nから `youtube-adapter.yml` をworkflow dispatchして呼び出し
 - 同一Adapterを全YouTubeアカウントで共有し、認証Secretだけを切り替え
 
-公式仕様と運用境界は `docs/YOUTUBE_ADAPTER_V1.md` を参照する。実投稿はGoogle
-OAuth完了後にのみ有効になる。既存YouTube V1とPLM Render Cloudには変更を加えない。
+公式仕様と運用境界は `docs/YOUTUBE_ADAPTER_V1.md` を参照する。OAuth接続済み
+アカウントでprivate実投稿とvideo_id取得まで成功している。既存YouTube V1は維持し、
+Render CloudとAdapterには単独実行を保ったまま再利用用入口と結果出力だけを追加する。
+
+## YouTube Pipeline v1
+
+- n8nは `.github/workflows/youtube-pipeline.yml` を1回dispatchする
+- `job_id`を同じ`render_id`とidempotency keyとして全工程で使用
+- Render Run IDとArtifact名はGitHub Actions内で自動的に受け渡す
+- 既存`render-short.yml`と`youtube-adapter.yml`をreusable workflowとして呼ぶ
+- 最終結果を`pipeline-result-<job_id>`へ保存
+- `failed_stage`でRender Request、VOICEVOX、Render、Quality Gate、YouTubeを識別
+- 投稿はprivateが既定で、既存の二重投稿防止をそのまま使用
+
+入力・出力契約は `docs/YOUTUBE_PIPELINE_V1.md` を正式仕様とする。
 
 ## 命名ルール
 
@@ -171,8 +185,8 @@ OAuth完了後にのみ有効になる。既存YouTube V1とPLM Render Cloudに�
 
 ## 次の優先実装
 
-1. Google OAuthを手動接続し、private動画1本でYouTube Adapterを実証
-2. durable idempotency / job state store（無料構成を優先）
-3. 既存n8n資産を移植するBluesky Adapter
-4. Adapter contract test suiteを各実Adapterへ適用
+1. n8nからYouTube Pipelineを1回dispatchしてprivate投稿を実証
+2. pipeline resultをGoogle Sheets / Command Centerへ自動記録
+3. durable idempotency / job state store（無料構成を優先）
+4. 既存n8n資産を移植するBluesky Adapter
 5. Command Centerへaccount/job/error状態を公開
