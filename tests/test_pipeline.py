@@ -1,6 +1,9 @@
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
+from plm.entrypoints.pipeline_result import _json_file
 from plm.pipeline import build_pipeline_result
 
 
@@ -15,6 +18,13 @@ class PipelineResultTests(unittest.TestCase):
         self.assertNotIn("docker run", workflow)
         self.assertNotIn("youtube_job", workflow)
         self.assertIn("default: private", workflow)
+        self.assertIn("Download YouTube Adapter result artifact", workflow)
+        self.assertNotIn("needs.youtube.outputs.result_json", workflow)
+        adapter_workflow = (
+            Path(__file__).parents[1]
+            / ".github/workflows/youtube-adapter.yml"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("jobs.execute.outputs.result_json", adapter_workflow)
 
     def test_success_exposes_video_id_and_status(self):
         result = build_pipeline_result(
@@ -27,14 +37,36 @@ class PipelineResultTests(unittest.TestCase):
             },
             youtube_result={
                 "ok": True,
-                "result": {"post_id": "video-123", "state": "queued"},
+                "result": {
+                    "post_id": "video-123",
+                    "state": "queued",
+                    "url": "https://www.youtube.com/watch?v=video-123",
+                },
             },
         )
         self.assertEqual(result["status"], "succeeded")
         self.assertEqual(result["job_id"], result["render_id"])
         self.assertEqual(result["video_id"], "video-123")
         self.assertEqual(result["youtube_status"], "queued")
+        self.assertEqual(
+            result["youtube_url"],
+            "https://www.youtube.com/watch?v=video-123",
+        )
         self.assertIsNone(result["failed_stage"])
+
+    def test_youtube_result_artifact_is_loaded(self):
+        payload = {
+            "ok": True,
+            "result": {
+                "post_id": "video-123",
+                "state": "queued",
+                "url": "https://www.youtube.com/watch?v=video-123",
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "youtube-result.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(_json_file(str(path)), payload)
 
     def test_quality_gate_failure_is_preserved(self):
         result = build_pipeline_result(
