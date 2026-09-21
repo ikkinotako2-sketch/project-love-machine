@@ -7,12 +7,14 @@ on:
       - "config/**"
       - "tests/**"
       - ".github/workflows/test-core.yml"
+      - ".github/workflows/youtube-adapter.yml"
   pull_request:
     paths:
       - "plm/**"
       - "config/**"
       - "tests/**"
       - ".github/workflows/test-core.yml"
+      - ".github/workflows/youtube-adapter.yml"
 
 jobs:
   test:

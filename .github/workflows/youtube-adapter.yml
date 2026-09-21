@@ -1,0 +1,184 @@
+name: PLM YouTube Adapter
+run-name: YouTube ${{ inputs.operation }} / ${{ inputs.account_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: upload, status, or analytics
+        required: true
+        default: upload
+        type: choice
+        options: [upload, status, analytics]
+      account_id:
+        description: PLM account ID
+        required: true
+        type: string
+      oauth_secret_name:
+        description: Repository secret name beginning with PLM_YOUTUBE_
+        required: true
+        type: string
+      render_run_id:
+        description: PLM Render Cloud workflow run ID (upload only)
+        required: false
+        type: string
+      render_artifact_name:
+        description: Render artifact name (upload only)
+        required: false
+        type: string
+      video_id:
+        description: Existing YouTube video ID (status/analytics only)
+        required: false
+        type: string
+      title:
+        description: Video title (upload only)
+        required: false
+        type: string
+      description:
+        description: Video description
+        required: false
+        type: string
+      tags:
+        description: Comma-separated tags
+        required: false
+        type: string
+      privacy_status:
+        description: private, unlisted, or public
+        required: false
+        default: private
+        type: choice
+        options: [private, unlisted, public]
+      scheduled_for:
+        description: Future RFC3339 time; blank means immediate upload
+        required: false
+        type: string
+      made_for_kids:
+        description: Explicit audience declaration
+        required: true
+        type: boolean
+      contains_synthetic_media:
+        description: Explicit synthetic/altered content declaration
+        required: true
+        type: boolean
+      notify_subscribers:
+        description: Notify subscribers
+        required: true
+        default: false
+        type: boolean
+      idempotency_key:
+        description: Unique n8n job ID (required for upload)
+        required: false
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: youtube-${{ inputs.account_id }}-${{ inputs.idempotency_key || inputs.video_id }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PLM_OPERATION: ${{ inputs.operation }}
+      PLM_ACCOUNT_ID: ${{ inputs.account_id }}
+      PLM_VIDEO_ID: ${{ inputs.video_id }}
+      PLM_TITLE: ${{ inputs.title }}
+      PLM_DESCRIPTION: ${{ inputs.description }}
+      PLM_TAGS: ${{ inputs.tags }}
+      PLM_PRIVACY_STATUS: ${{ inputs.privacy_status }}
+      PLM_SCHEDULED_FOR: ${{ inputs.scheduled_for }}
+      PLM_MADE_FOR_KIDS: ${{ inputs.made_for_kids }}
+      PLM_CONTAINS_SYNTHETIC_MEDIA: ${{ inputs.contains_synthetic_media }}
+      PLM_NOTIFY_SUBSCRIBERS: ${{ inputs.notify_subscribers }}
+      PLM_IDEMPOTENCY_KEY: ${{ inputs.idempotency_key }}
+      PLM_VIDEO_PATH: render-output/short.mp4
+      PLM_RESULT_PATH: youtube-result.json
+      PLM_YOUTUBE_OAUTH_JSON: ${{ secrets[inputs.oauth_secret_name] }}
+
+    steps:
+      - name: Validate secret selector
+        env:
+          SECRET_NAME: ${{ inputs.oauth_secret_name }}
+        run: |
+          if [[ "$SECRET_NAME" != PLM_YOUTUBE_* ]]; then
+            echo "oauth_secret_name must start with PLM_YOUTUBE_"
+            exit 1
+          fi
+          if [[ -z "$PLM_YOUTUBE_OAUTH_JSON" ]]; then
+            echo "Selected OAuth repository secret is missing"
+            exit 1
+          fi
+
+      - name: Validate upload inputs
+        if: inputs.operation == 'upload'
+        env:
+          RUN_ID: ${{ inputs.render_run_id }}
+          ARTIFACT_NAME: ${{ inputs.render_artifact_name }}
+          IDEMPOTENCY_KEY: ${{ inputs.idempotency_key }}
+        run: |
+          test -n "$RUN_ID"
+          test -n "$ARTIFACT_NAME"
+          test -n "$IDEMPOTENCY_KEY"
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check cross-run duplicate claim
+        if: inputs.operation == 'upload'
+        id: claim
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IDEMPOTENCY_KEY: ${{ inputs.idempotency_key }}
+        run: |
+          CLAIM_HASH=$(python -c 'import hashlib,os; print(hashlib.sha256(os.environ["IDEMPOTENCY_KEY"].encode()).hexdigest())')
+          CLAIM_NAME="plm-youtube-claim-${CLAIM_HASH}"
+          COUNT=$(curl -fsS \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${CLAIM_NAME}" \
+            | python -c 'import json,sys; print(json.load(sys.stdin)["total_count"])')
+          if [[ "$COUNT" != "0" ]]; then
+            echo "Duplicate upload blocked for this idempotency key"
+            exit 1
+          fi
+          mkdir -p claim
+          printf '%s\n' "$GITHUB_RUN_ID" > claim/run-id.txt
+          echo "name=$CLAIM_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Persist upload claim
+        if: inputs.operation == 'upload'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.claim.outputs.name }}
+          path: claim/run-id.txt
+          retention-days: 30
+
+      - name: Download PLM Render Cloud output
+        if: inputs.operation == 'upload'
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ inputs.render_artifact_name }}
+          path: render-output
+          run-id: ${{ inputs.render_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Execute Social Hub and YouTube Adapter
+        run: python -m plm.entrypoints.youtube_job
+
+      - name: Upload normalized result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: youtube-result-${{ github.run_id }}
+          path: youtube-result.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -99,3 +99,13 @@ publishing or incurring fees.
 3. Add contract tests for publish, scheduling, status, analytics, errors, and retries.
 4. Store no credentials in the repository.
 5. Update the platform manifest and this document with verified capabilities.
+
+## Verified adapter implementations
+
+### YouTube v1
+
+`plm.social_adapters.youtube.YouTubeAdapter` implements all four common operations.
+It uses one injected YouTube API client for all accounts; account-specific OAuth is
+resolved only at the execution boundary. Official behavior, quota assumptions, retry
+classification, n8n dispatch, and manual authentication steps are documented in
+`docs/YOUTUBE_ADAPTER_V1.md`.

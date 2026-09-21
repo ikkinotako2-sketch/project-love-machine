@@ -12,7 +12,7 @@
     "x"
   ],
   "implementation_status": {
-    "youtube": "not_connected",
+    "youtube": "implemented_auth_required",
     "bluesky": "not_connected",
     "twitch": "not_connected",
     "twitcasting": "not_connected",

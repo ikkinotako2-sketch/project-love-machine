@@ -10,7 +10,7 @@
 | PLM Content Engine | テーマ、台本、字幕、投稿文の生成 | n8n/Geminiで稼働中 |
 | PLM Render Cloud | VOICEVOX + FFmpeg + Quality Gateで動画生成 | GitHub Actionsで初回成功 |
 | PLM Social Hub | 各SNSへの投稿Adapterをまとめる層 | 共通Interface・再試行・重複防止を実装済み |
-| PLM YouTube Adapter | YouTube投稿・状態取得 | V1/V2で一部稼働 |
+| PLM YouTube Adapter | YouTube投稿・予約・状態・分析 | v1実装済み・OAuth接続待ち |
 | PLM Bluesky Adapter | Bluesky投稿・反応取得 | 既存n8n基盤あり |
 | PLM Live Engine | Twitch / ツイキャス等のLIVE配信共通基盤 | Planned |
 | PLM Note Adapter | note記事生成・下書き・公開支援 | Planned |
@@ -132,6 +132,20 @@ SNS固有処理:
 詳細は `docs/SOCIAL_ADAPTER_SPEC.md` を正式規格とする。実API Adapterは、
 現行の公式仕様・費用・利用条件を検証するまで有効化しない。
 
+## YouTube Adapter v1
+
+- `videos.insert` のresumable upload
+- `status.publishAt` によるprivate動画の未来時刻予約
+- `videos.list` によるupload / processing / privacy状態取得
+- YouTube Analytics `reports.query` による動画単位の共通指標取得
+- HTTP 429 / 500 / 502 / 503 / 504と通信障害だけを一時エラーとして再試行
+- quota・認証・入力・ポリシーエラーは恒久エラーとして即時停止
+- n8nから `youtube-adapter.yml` をworkflow dispatchして呼び出し
+- 同一Adapterを全YouTubeアカウントで共有し、認証Secretだけを切り替え
+
+公式仕様と運用境界は `docs/YOUTUBE_ADAPTER_V1.md` を参照する。実投稿はGoogle
+OAuth完了後にのみ有効になる。既存YouTube V1とPLM Render Cloudには変更を加えない。
+
 ## 命名ルール
 
 - 全体: `PLM`
@@ -157,8 +171,8 @@ SNS固有処理:
 
 ## 次の優先実装
 
-1. durable idempotency / job state store（SQLiteまたは既存DB。無料構成を優先）
-2. 公式仕様を確認したYouTube Adapter
+1. Google OAuthを手動接続し、private動画1本でYouTube Adapterを実証
+2. durable idempotency / job state store（無料構成を優先）
 3. 既存n8n資産を移植するBluesky Adapter
 4. Adapter contract test suiteを各実Adapterへ適用
 5. Command Centerへaccount/job/error状態を公開
