@@ -105,6 +105,16 @@ secret-tainted reusable-workflow output.
 
 See [docs/YOUTUBE_PIPELINE_V1.md](docs/YOUTUBE_PIPELINE_V1.md) for the n8n JSON contract.
 
+### PLM Pipeline Result Fetcher v1
+
+The Pipeline writes a sanitized result to
+`plm-results/pipeline-results/<job_id>.json`: `processing` at startup and the
+final `succeeded` or `failed` result at completion. n8n can fetch it with one
+HTTP GET using only `job_id`; no Actions Run ID or Artifact ID lookup is needed.
+The existing `pipeline-result-<job_id>` artifact remains available.
+
+See [docs/PIPELINE_RESULT_FETCHER_V1.md](docs/PIPELINE_RESULT_FETCHER_V1.md).
+
 ## Tests
 
 ```bash

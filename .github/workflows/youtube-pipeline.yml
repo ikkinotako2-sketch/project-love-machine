@@ -94,7 +94,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  initialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: write
+    env:
+      PLM_JOB_ID: ${{ inputs.job_id }}
+      PLM_RESULTS_BRANCH: plm-results
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Publish processing result
+        run: python -m plm.entrypoints.publish_pipeline_result
+
   render:
+    needs: initialize
     uses: ./.github/workflows/render-short.yml
     with:
       render_id: ${{ inputs.job_id }}
@@ -132,6 +154,9 @@ jobs:
     needs: [render, youtube]
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
     env:
       PLM_JOB_ID: ${{ inputs.job_id }}
       PLM_RENDER_JOB_STATUS: ${{ needs.render.result }}
@@ -139,6 +164,8 @@ jobs:
       PLM_RENDER_RESULT_JSON: ${{ needs.render.outputs.result_json }}
       PLM_YOUTUBE_RESULT_PATH: adapter-result/youtube-result.json
       PLM_PIPELINE_RESULT_PATH: pipeline-result.json
+      PLM_RESULTS_BRANCH: plm-results
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -167,6 +194,11 @@ jobs:
           name: pipeline-result-${{ inputs.job_id }}
           path: pipeline-result.json
           retention-days: 30
+
+      - name: Publish fetchable pipeline result
+        env:
+          PLM_RESULT_SOURCE: pipeline-result.json
+        run: python -m plm.entrypoints.publish_pipeline_result
 
       - name: Write job summary
         run: |
