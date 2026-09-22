@@ -17,7 +17,7 @@
 | PLM Live Engine | Twitch / ツイキャス等のLIVE配信共通基盤 | Planned |
 | PLM Note Adapter | note記事生成・下書き・公開支援 | Planned |
 | PLM Account Manager | 複数アカウントの設定・認証・実行順管理 | 設定Registry・100件検証を実装済み |
-| PLM Improvement Engine | 投稿結果から次回改善を決める | Planned |
+| PLM Improvement Engine | 投稿結果から次回改善を決める | YouTube v1 実装。Geminiレビューは任意キー設定後 |
 | PLM Trend Radar | YouTube等の編集・コンテンツ傾向監視 | Planned |
 | PLM Tool Radar | GitHub OSS / MOGEの新技術を監視 | Planned |
 | PLM Quality Gate | 動画・音声・字幕・出力品質の検査 | 初期版稼働 |
@@ -179,6 +179,16 @@ Render CloudとAdapterには単独実行を保ったまま再利用用入口と�
 - `.github/workflows/command-center.yml` が毎時更新し、手動更新にも対応
 - n8nのExecution、Render、YouTube投稿を追加実行しない
 - private動画の閲覧権限は変更しない。全SNS・収益集約は次段階
+
+## YouTube Improvement Engine v1
+
+- 別のGitHub Actionsが毎時、成功結果の確定時刻から約1h/24h後に指標を観測する
+- `videos.list` のviews/likes/commentsを保存し、Analytics権限・反映状況に応じて視聴維持と登録者指標を補う
+- 指標が未反映ならnull、収集し損ねた過去の時点は`missed`。最大3回の一時エラー再試行
+- 結果は`plm-results/improvement-results/<job_id>.json`に分離。投稿Pipelineは非依存
+- 一般化された7項目の改善JSONと最新フィードバック`latest.json`を生成する
+- Gemini APIキーがない場合は`analysis_method=rules`。無料枠キー設定後はGeminiレビュー可能
+- 詳細: `docs/YOUTUBE_IMPROVEMENT_V1.md`
 
 ## 命名ルール
 

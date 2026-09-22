@@ -124,6 +124,18 @@ it hourly and supports a manual refresh. It requires no n8n executions or new
 paid service and never invokes rendering or posting. The public result JSONs
 remain the source of truth; this page can lag until its next refresh.
 
+### PLM YouTube Improvement Engine v1
+
+The independent hourly `youtube-improvement.yml` Action collects owner-authorized
+YouTube snapshots around 1h and 24h after a successful Pipeline result. It
+stores bounded-retry metric states and seven generalized editing actions in the
+`plm-results` branch. The Command Center displays those observations. A validated
+optional Gemini review needs a separate free-tier repository key; otherwise the
+analysis is clearly labeled as rule-based. The latest 24h guidance is made
+available for the next V2 Gemini generation without a 24-hour n8n execution.
+
+See [docs/YOUTUBE_IMPROVEMENT_V1.md](docs/YOUTUBE_IMPROVEMENT_V1.md).
+
 ## Tests
 
 ```bash

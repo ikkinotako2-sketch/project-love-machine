@@ -1,0 +1,53 @@
+name: PLM YouTube Improvement Engine
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '43 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plm-youtube-improvement
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    env:
+      PLM_YOUTUBE_OAUTH_JSON: ${{ secrets.PLM_YOUTUBE_GAME_001 }}
+      PLM_GEMINI_API_KEY: ${{ secrets.PLM_GEMINI_API_KEY }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Checkout sanitized results with history
+        uses: actions/checkout@v4
+        with:
+          ref: plm-results
+          path: .plm-results
+          fetch-depth: 0
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        run: python -m unittest discover -s tests -p 'test_improvement.py' -v
+      - name: Collect due snapshots and improvement guidance
+        run: python scripts/collect_youtube_metrics.py .plm-results
+      - name: Publish sanitized improvement state only
+        run: |
+          git -C .plm-results config user.name 'github-actions[bot]'
+          git -C .plm-results config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C .plm-results add improvement-results
+          if git -C .plm-results diff --cached --quiet; then exit 0; fi
+          git -C .plm-results commit -m 'Update YouTube improvement snapshots'
+          for attempt in 1 2 3; do
+            git -C .plm-results pull --rebase origin plm-results
+            if git -C .plm-results push origin HEAD:plm-results; then exit 0; fi
+            sleep "$attempt"
+          done
+          exit 1
