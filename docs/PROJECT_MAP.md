@@ -21,7 +21,7 @@
 | PLM Trend Radar | YouTube等の編集・コンテンツ傾向監視 | Planned |
 | PLM Tool Radar | GitHub OSS / MOGEの新技術を監視 | Planned |
 | PLM Quality Gate | 動画・音声・字幕・出力品質の検査 | 初期版稼働 |
-| PLM Command Center | 全SNS・エラー・収益・実行状態の監視画面 | Planned |
+| PLM Command Center | 結果・エラー・日時の閲覧画面 | YouTube V2最小版実装、全SNS・収益は未実装 |
 
 ## 既存n8nワークフローの整理
 
@@ -171,6 +171,14 @@ Render CloudとAdapterには単独実行を保ったまま再利用用入口と�
   errorの許可項目だけに限定
 - 従来の30日間保持artifactは互換性のため継続
 - 詳細: `docs/PIPELINE_RESULT_FETCHER_V1.md`
+
+## PLM Command Center 最小版
+
+- `docs/COMMAND_CENTER.md` は公開済み `plm-results` 結果JSONから生成する読み取り専用一覧
+- job_id / status / video_id / youtube_url / failed_stage / error / 実行日時を最大200件表示
+- `.github/workflows/command-center.yml` が毎時更新し、手動更新にも対応
+- n8nのExecution、Render、YouTube投稿を追加実行しない
+- private動画の閲覧権限は変更しない。全SNS・収益集約は次段階
 
 ## 命名ルール
 
