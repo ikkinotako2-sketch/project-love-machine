@@ -115,6 +115,15 @@ The existing `pipeline-result-<job_id>` artifact remains available.
 
 See [docs/PIPELINE_RESULT_FETCHER_V1.md](docs/PIPELINE_RESULT_FETCHER_V1.md).
 
+### PLM Command Center minimal version
+
+[Open the YouTube V2 job overview](docs/COMMAND_CENTER.md). It lists the latest
+200 sanitized Pipeline Result files with job time, status, video ID, URL, failed
+stage, and error. The independent `Update PLM Command Center` workflow refreshes
+it hourly and supports a manual refresh. It requires no n8n executions or new
+paid service and never invokes rendering or posting. The public result JSONs
+remain the source of truth; this page can lag until its next refresh.
+
 ## Tests
 
 ```bash
