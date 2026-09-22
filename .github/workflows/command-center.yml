@@ -1,0 +1,38 @@
+name: Update PLM Command Center
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: plm-command-center
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dashboard source
+        uses: actions/checkout@v4
+      - name: Checkout sanitized results
+        uses: actions/checkout@v4
+        with:
+          ref: plm-results
+          path: .plm-results
+          persist-credentials: false
+      - name: Test dashboard renderer
+        run: python -m unittest discover -s tests -p 'test_command_center.py' -v
+      - name: Build dashboard
+        run: python scripts/build_command_center.py .plm-results/pipeline-results docs/COMMAND_CENTER.md
+      - name: Commit changed dashboard only
+        run: |
+          if git diff --quiet -- docs/COMMAND_CENTER.md; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/COMMAND_CENTER.md
+          git commit -m 'Update PLM Command Center results'
+          git push
