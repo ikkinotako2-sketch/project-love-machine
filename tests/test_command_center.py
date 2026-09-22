@@ -54,6 +54,34 @@ class CommandCenterTests(unittest.TestCase):
             self.assertEqual(cell("[click](https://evil.example)"),
                              "\\[click\\]\\(https://evil.example\\)")
 
+    def test_improvement_snapshots_and_analysis_are_rendered_safely(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "pipeline-results"
+            root.mkdir()
+            progress = root.parent / "improvement-results"
+            progress.mkdir()
+            job = "yt-5-1790060279952"
+            (root / f"{job}.json").write_text(json.dumps({
+                "job_id": job, "status": "succeeded",
+                "video_id": "aYSDmTcQUF0",
+                "youtube_url": "https://www.youtube.com/watch?v=aYSDmTcQUF0",
+            }), encoding="utf-8")
+            (progress / f"{job}.json").write_text(json.dumps({
+                "job_id": job,
+                "1h": {"status": "collected", "metrics": {"views": 4, "likes": 1, "comments": 0}},
+                "24h": {"status": "missed"},
+                "analysis": "<script>test</script>",
+                "improvement_actions": {x: "試す" for x in (
+                    "hook", "duration", "caption_density", "scene_changes",
+                    "narration", "cta", "topic_selection")},
+            }), encoding="utf-8")
+            page = render(root, datetime(2026, 9, 22, tzinfo=timezone.utc))
+            self.assertIn("視聴:4 / 高評価:1 / コメント:0", page)
+            self.assertIn("missed", page)
+            self.assertIn("&lt;script&gt;test&lt;/script&gt;", page)
+            self.assertNotIn("<script>", page)
+            self.assertIn("improvement-results/" + job + ".json", page)
+
 
 if __name__ == "__main__":
     unittest.main()
