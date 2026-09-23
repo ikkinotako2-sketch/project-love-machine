@@ -1,33 +1,6 @@
 {
-  "1h": {
-    "reason": "schedule_arrived_too_late",
-    "status": "missed"
-  },
-  "24h": {
-    "analytics_status": "not_yet_available",
-    "attempts": 1,
-    "metrics": {
-      "analytics_available": false,
-      "averageViewDuration": null,
-      "averageViewPercentage": null,
-      "captured_at": "2026-09-23T03:21:24.242998+00:00",
-      "comments": 0,
-      "likes": 0,
-      "source": "YouTube Data API videos.list; optional YouTube Analytics reports.query",
-      "subscribersGained": null,
-      "subscribersLost": null,
-      "views": 0
-    },
-    "status": "collected"
-  },
   "analysis": "データが少ないため、以下は検証用の編集仮説。効果は未確認。",
-  "analysis_evidence": {
-    "sample_sufficient": false,
-    "views_1h": null,
-    "views_24h": 0
-  },
   "analysis_method": "rules",
-  "completed_at": "2026-09-22T02:10:30+00:00",
   "improvement_actions": {
     "caption_density": "字幕を短い意味単位に区切り、画面を読み切れる量にする。",
     "cta": "最後に内容に沿った簡潔な問いを1つ置く。",
@@ -37,8 +10,7 @@
     "scene_changes": "話題の切れ目で画面を切り替え、変化の頻度を段階的に試す。",
     "topic_selection": "元動画の表現を再利用せず、視聴者の課題を別の切り口で選ぶ。"
   },
-  "job_id": "yt-991-1790042910456",
   "schema_version": 1,
-  "video_id": "YpI1clyheJE",
-  "youtube_url": "https://www.youtube.com/watch?v=YpI1clyheJE"
+  "source_job_id": "yt-997-1790046114230",
+  "status": "ready"
 }
