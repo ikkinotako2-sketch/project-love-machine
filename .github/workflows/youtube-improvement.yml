@@ -3,7 +3,7 @@ name: PLM YouTube Improvement Engine
 on:
   workflow_dispatch:
   schedule:
-    - cron: '43 * * * *'
+    - cron: '17,43 * * * *'
 
 permissions:
   contents: read
