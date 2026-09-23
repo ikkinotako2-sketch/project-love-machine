@@ -3,13 +3,13 @@
 Pipeline Result Fetcher の公開済み結果を表示します。YouTube の動画は private が既定です。
 この一覧にはTokenやOAuth情報を含めません。表示時刻は job_id の生成時刻です。
 
-最終更新: 2026-09-23 15:04 JST / 表示: 最新 5 件（最大 200 件）
+最終更新: 2026-09-23 20:45 JST / 表示: 最新 5 件（最大 200 件）
 
 | 実行日時 (JST) | job_id | status | video_id | youtube_url | 1h metrics | 24h metrics | analysis | improvement_actions | failed_stage | error |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-09-23 12:16:19 | [`yt-1128-1790133379845`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-1128-1790133379845.json) | succeeded | YI6soYjEINs | [動画](https://www.youtube.com/watch?v=YI6soYjEINs) | 未取得 | 未取得 | — | — | — | — |
-| 2026-09-22 16:48:49 | [`yt-1024-1790063329826`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-1024-1790063329826.json) | succeeded | rwbrvHllunw | [動画](https://www.youtube.com/watch?v=rwbrvHllunw) | missed | 未取得 | — | — | — | — |
-| 2026-09-22 15:57:59 | [`yt-1018-1790060279952`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-1018-1790060279952.json) | succeeded | aYSDmTcQUF0 | [動画](https://www.youtube.com/watch?v=aYSDmTcQUF0) | missed | 未取得 | — | — | — | — |
+| 2026-09-23 12:16:19 | [`yt-1128-1790133379845`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-1128-1790133379845.json) | succeeded | YI6soYjEINs | [動画](https://www.youtube.com/watch?v=YI6soYjEINs) | missed | 未取得 | — | — | — | — |
+| 2026-09-22 16:48:49 | [`yt-1024-1790063329826`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-1024-1790063329826.json) | succeeded | rwbrvHllunw | [動画](https://www.youtube.com/watch?v=rwbrvHllunw) | missed | 視聴:2 / 高評価:0 / コメント:0 | データが少ないため、以下は検証用の編集仮説。効果は未確認。 | [7項目](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/improvement-results/yt-1024-1790063329826.json) | — | — |
+| 2026-09-22 15:57:59 | [`yt-1018-1790060279952`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-1018-1790060279952.json) | succeeded | aYSDmTcQUF0 | [動画](https://www.youtube.com/watch?v=aYSDmTcQUF0) | missed | 視聴:0 / 高評価:0 / コメント:0 | データが少ないため、以下は検証用の編集仮説。効果は未確認。 | [7項目](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/improvement-results/yt-1018-1790060279952.json) | — | — |
 | 2026-09-22 12:01:54 | [`yt-997-1790046114230`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-997-1790046114230.json) | succeeded | SpvII94CXHA | [動画](https://www.youtube.com/watch?v=SpvII94CXHA) | missed | 視聴:0 / 高評価:0 / コメント:0 | データが少ないため、以下は検証用の編集仮説。効果は未確認。 | [7項目](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/improvement-results/yt-997-1790046114230.json) | — | — |
 | 2026-09-22 11:08:30 | [`yt-991-1790042910456`](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/pipeline-results/yt-991-1790042910456.json) | succeeded | YpI1clyheJE | [動画](https://www.youtube.com/watch?v=YpI1clyheJE) | missed | 視聴:0 / 高評価:0 / コメント:0 | データが少ないため、以下は検証用の編集仮説。効果は未確認。 | [7項目](https://github.com/ikkinotako2-sketch/project-love-machine/blob/plm-results/improvement-results/yt-991-1790042910456.json) | — | — |
 
