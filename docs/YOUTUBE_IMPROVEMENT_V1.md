@@ -2,7 +2,7 @@
 
 ## Scope and timing
 
-The independent `PLM YouTube Improvement Engine` Action runs hourly at minute 43
+The independent `PLM YouTube Improvement Engine` Action is scheduled at minutes 17 and 43 of each hour
 UTC. It scans up to 500 successful sanitized `plm-results/pipeline-results/yt-*.json`
 files. The last commit time of each successful result file is the reference for
 approximately 1-hour and 24-hour snapshots. GitHub schedule delays mean snapshots
