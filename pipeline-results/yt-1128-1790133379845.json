@@ -2,10 +2,10 @@
   "schema_version": 1,
   "job_id": "yt-1128-1790133379845",
   "render_id": "yt-1128-1790133379845",
-  "status": "processing",
-  "video_id": null,
-  "youtube_status": null,
-  "youtube_url": null,
+  "status": "succeeded",
+  "video_id": "YI6soYjEINs",
+  "youtube_status": "queued",
+  "youtube_url": "https://www.youtube.com/watch?v=YI6soYjEINs",
   "failed_stage": null,
   "error": null
 }
