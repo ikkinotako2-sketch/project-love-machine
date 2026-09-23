@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '17,43 * * * *'
+  workflow_run:
+    workflows: ['Update PLM Command Center']
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
