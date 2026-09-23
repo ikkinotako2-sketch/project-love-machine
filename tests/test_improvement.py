@@ -50,6 +50,24 @@ class MetricTests(unittest.TestCase):
         self.assertEqual(state["1h"]["status"], "missed")
         self.assertEqual(api.calls, 1)
 
+    def test_collection_window_boundaries(self):
+        completed = NOW - timedelta(hours=3)
+        self.assertEqual(due_slots(completed, NOW, {}), [("1h", "collect")])
+        self.assertEqual(due_slots(completed, NOW + timedelta(seconds=1), {}), [("1h", "missed")])
+        self.assertEqual(due_slots(NOW - timedelta(hours=24), NOW, {}), [("1h", "missed"), ("24h", "collect")])
+        self.assertEqual(due_slots(NOW - timedelta(hours=36), NOW, {}), [("1h", "missed"), ("24h", "collect")])
+
+    def test_analytics_permission_denied_preserves_data_api_counts(self):
+        class NoAnalyticsApi(FakeApi):
+            def _request_json(self, url):
+                raise PermissionError("analytics scope missing")
+
+        state = collect_one(RESULT, {}, NOW - timedelta(hours=1), NOW, NoAnalyticsApi())
+        self.assertEqual(state["1h"]["status"], "collected")
+        self.assertEqual(state["1h"]["analytics_status"], "unavailable_or_not_authorized")
+        self.assertEqual(state["1h"]["metrics"]["views"], 18)
+        self.assertIsNone(state["1h"]["metrics"]["averageViewDuration"])
+
     def test_failure_retries_are_bounded_and_do_not_touch_pipeline_result(self):
         class TransientAdapterError(Exception):
             code = "youtube_http_503"
