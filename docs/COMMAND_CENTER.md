@@ -3,7 +3,7 @@
 Pipeline Result Fetcher の公開済み結果を表示します。YouTube の動画は private が既定です。
 この一覧にはTokenやOAuth情報を含めません。表示時刻は job_id の生成時刻です。
 
-最終更新: 2026-09-25 04:17 JST / 表示: 最新 9 件（最大 200 件）
+最終更新: 2026-09-25 08:14 JST / 表示: 最新 9 件（最大 200 件）
 
 | 実行日時 (JST) | job_id | status | video_id | youtube_url | 1h metrics | 24h metrics | analysis | improvement_actions | failed_stage | error |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
