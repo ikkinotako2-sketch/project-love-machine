@@ -28,4 +28,5 @@ jobs:
       - name: Dispatch targeted 1h collector
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          PYTHONPATH: ${{ github.workspace }}
         run: python scripts/dispatch_delayed_1h.py
