@@ -66,6 +66,7 @@ def ai_guidance(api_key: str, base: Mapping[str, Any], metrics: Mapping[str, Any
 def collect_one(
     result: Mapping[str, Any], state: dict[str, Any], completed_at: datetime,
     now: datetime, api: Any, *, gemini_key: str = "", ai=ai_guidance,
+    target_slot: str | None = None,
 ) -> dict[str, Any]:
     if not valid_result(result):
         raise ValueError("invalid successful pipeline result")
@@ -76,7 +77,11 @@ def collect_one(
         "video_id": result["video_id"], "youtube_url": result["youtube_url"],
         "completed_at": completed_at.astimezone(timezone.utc).isoformat(),
     }
+    if target_slot not in (None, "1h"):
+        raise ValueError("unsupported target slot")
     for slot, action in due_slots(completed_at, now, state):
+        if target_slot is not None and slot != target_slot:
+            continue
         if action == "missed":
             state[slot] = {"status": "missed", "reason": "schedule_arrived_too_late"}
             continue

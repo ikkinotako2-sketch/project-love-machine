@@ -1,8 +1,14 @@
 import unittest
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+import json
 
 from plm.improvement.collector import collect_one
 from plm.improvement.core import CATEGORIES, due_slots, guidance, snapshot, valid_result, validate_ai
+from scripts.collect_youtube_metrics import run
+from scripts.dispatch_delayed_1h import dispatch, selected_job
 
 
 NOW = datetime(2026, 9, 22, 16, 0, tzinfo=timezone.utc)
@@ -27,6 +33,30 @@ class FakeApi:
 
 
 class MetricTests(unittest.TestCase):
+    def test_targeted_dispatch_does_not_collect_24h_and_cron_still_does(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            path = root / "pipeline-results" / f"{RESULT['job_id']}.json"
+            path.parent.mkdir()
+            path.write_text(json.dumps(RESULT), encoding="utf-8")
+            api = FakeApi()
+            completed = NOW - timedelta(hours=1, minutes=10)
+            with (patch("scripts.collect_youtube_metrics.YouTubeRestApi", return_value=api),
+                  patch("scripts.collect_youtube_metrics.completed_at", return_value=completed)):
+                self.assertEqual(run(root, now=NOW, job_id=RESULT["job_id"], target_slot="1h"), (1, 1))
+                target = root / "improvement-results" / path.name
+                state = json.loads(target.read_text(encoding="utf-8"))
+                self.assertEqual(state["1h"]["status"], "collected")
+                self.assertNotIn("24h", state)
+                self.assertEqual(run(root, now=NOW, job_id=RESULT["job_id"], target_slot="1h"), (0, 1))
+                self.assertEqual(api.calls, 1)
+                self.assertEqual(run(root, now=completed + timedelta(hours=24, minutes=10)), (2, 1))
+                state = json.loads(target.read_text(encoding="utf-8"))
+                self.assertEqual(state["24h"]["status"], "collected")
+                self.assertEqual(api.calls, 2)
+            with self.assertRaises(ValueError):
+                run(root, job_id="../../bad", target_slot="1h")
+
     def test_deduped_one_and_24_hour_snapshots(self):
         api = FakeApi()
         completed = NOW - timedelta(hours=1, minutes=15)
@@ -110,6 +140,54 @@ class MetricTests(unittest.TestCase):
         self.assertEqual(upgraded["analysis_method"], "gemini")
         self.assertEqual(api.calls, calls)
         self.assertEqual(upgraded["ai_attempts"], 1)
+
+
+class DelayedDispatchTests(unittest.TestCase):
+    def event(self):
+        return {
+            "repository": {"full_name": "owner/project"},
+            "workflow_run": {
+                "path": ".github/workflows/youtube-pipeline.yml",
+                "conclusion": "success", "head_branch": "main",
+                "event": "workflow_dispatch", "display_title": f"Pipeline {RESULT['job_id']}",
+                "updated_at": "2026-09-22T14:50:00Z",
+                "head_repository": {"full_name": "owner/project"},
+            },
+        }
+
+    def test_dispatch_only_valid_successful_local_pipeline(self):
+        event = self.event()
+        sent = []
+
+        class Response:
+            status = 204
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+
+        def opener(request, timeout):
+            sent.append((request.full_url, json.loads(request.data)))
+            return Response()
+
+        self.assertTrue(dispatch(event, "fake-token", opener, now=NOW))
+        self.assertEqual(sent[0][1], {"ref": "main", "inputs": {"job_id": RESULT["job_id"], "slot": "1h"}})
+        for key, value in (("conclusion", "failure"), ("head_branch", "feature"),
+                           ("path", ".github/workflows/other.yml"),
+                           ("display_title", "Pipeline yt-1194-1790206647599; echo unsafe")):
+            invalid = json.loads(json.dumps(event))
+            invalid["workflow_run"][key] = value
+            self.assertIsNone(selected_job(invalid))
+            self.assertFalse(dispatch(invalid, "fake-token", opener, now=NOW))
+        fork = self.event()
+        fork["workflow_run"]["head_repository"]["full_name"] = "elsewhere/project"
+        self.assertFalse(dispatch(fork, "fake-token", opener, now=NOW))
+        self.assertEqual(len(sent), 1)
+
+    def test_unconfigured_environment_cannot_dispatch_early(self):
+        event = self.event()
+        with self.assertRaisesRegex(RuntimeError, "timer missing"):
+            dispatch(event, "fake-token", now=NOW - timedelta(minutes=10))
 
 
 if __name__ == "__main__":
