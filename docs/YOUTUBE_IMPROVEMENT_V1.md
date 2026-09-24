@@ -11,6 +11,29 @@ interpreted honestly. If the schedule missed the 1h window (after 3h) or 24h
 window (after 36h), it records `missed` rather than pretending a later snapshot
 was historical data.
 
+## Per-video 1h trigger
+
+`PLM Delayed YouTube 1h Metrics` starts on a successful YouTube Pipeline
+`workflow_run`. Its `metrics-1h-delay` GitHub Environment must have a **70-minute
+wait timer**, with no required reviewers. The job waits without occupying a
+runner, then checks the pipeline's trusted job ID and completion timestamp and
+dispatches the existing Improvement Engine with `job_id` and `slot=1h`.
+The Improvement Engine reads only that video's sanitized result and writes only
+its 1h state. It retains its existing repository-wide concurrency group, so
+its cron and delayed dispatch cannot collect the same slot at the same time.
+An already collected slot is skipped, including on duplicate dispatches. At
+24 hours the existing cron still scans all videos and produces the 24h result
+and optional improvement guidance.
+
+**Before merging the workflow PR:** create the repository Environment named
+`metrics-1h-delay` in Settings → Environments and set its wait timer to 70
+minutes. Do not put secrets or required reviewers in that Environment. GitHub
+may create an undefined Environment automatically without a wait timer; the
+dispatch script refuses to run before 65 minutes have elapsed, so a missing
+timer fails closed. Check the configured timer before merging. A GitHub outage
+or delayed event can still miss the 3-hour 1h window; the cron remains a backup.
+This does not backfill an already missed historical snapshot.
+
 It never dispatches the posting Pipeline or invokes n8n. The existing Pipeline
 result JSON remains unchanged and metrics errors cannot fail an uploaded video.
 Each slot has at most three attempts across scheduled runs; only transient

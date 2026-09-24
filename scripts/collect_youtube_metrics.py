@@ -33,32 +33,50 @@ def write_if_changed(path: Path, payload: dict) -> bool:
     return True
 
 
-def run(results: Path, *, now: datetime | None = None) -> tuple[int, int]:
+def run(results: Path, *, now: datetime | None = None,
+        job_id: str | None = None, target_slot: str | None = None) -> tuple[int, int]:
+    if job_id is not None and not JOB_ID.fullmatch(job_id):
+        raise ValueError("invalid job ID")
+    if target_slot is not None and (target_slot != "1h" or job_id is None):
+        raise ValueError("target slot requires a job ID and must be 1h")
     now = now or datetime.now(timezone.utc)
     root = results / "pipeline-results"
     out = results / "improvement-results"
     api = YouTubeRestApi(EnvironmentOAuthTokenProvider())
     changed = 0
     states = []
-    for path in sorted(root.glob("yt-*.json"), reverse=True)[:500]:
+    paths = [root / f"{job_id}.json"] if job_id else sorted(root.glob("yt-*.json"), reverse=True)[:500]
+    if job_id and not paths[0].is_file():
+        raise FileNotFoundError("target pipeline result is missing")
+    for path in paths:
+        if not path.is_file():
+            continue
         if not JOB_ID.fullmatch(path.stem) or path.stat().st_size > 64_000:
             continue
         try:
             result = json.loads(path.read_text(encoding="utf-8"))
             if not valid_result(result) or result["job_id"] != path.stem:
+                if job_id:
+                    raise ValueError("target pipeline result is invalid")
                 continue
             started = completed_at(results, str(path.relative_to(results)))
             if started is None:
+                if job_id:
+                    raise ValueError("target pipeline completion time is missing")
                 continue
             target = out / path.name
             state = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
-            updated = collect_one(result, state, started, now, api, gemini_key=os.environ.get("PLM_GEMINI_API_KEY", ""))
+            updated = collect_one(result, state, started, now, api,
+                                  gemini_key=os.environ.get("PLM_GEMINI_API_KEY", ""),
+                                  target_slot=target_slot)
             changed += write_if_changed(target, updated)
             states.append(updated)
         except (ValueError, OSError, json.JSONDecodeError):
+            if job_id:
+                raise
             continue  # Corrupt public files never stop the next job.
     eligible = [s for s in states if s.get("analysis") and (s.get("24h") or {}).get("status") == "collected"]
-    if eligible:
+    if eligible and target_slot is None:
         newest = max(eligible, key=lambda s: s["completed_at"])
         latest = {
             "schema_version": 1, "status": "ready", "source_job_id": newest["job_id"],
@@ -73,8 +91,11 @@ def run(results: Path, *, now: datetime | None = None) -> tuple[int, int]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("results_checkout", type=Path)
+    parser.add_argument("--job-id")
+    parser.add_argument("--slot", choices=["1h"])
     args = parser.parse_args()
-    changed, total = run(args.results_checkout)
+    changed, total = run(args.results_checkout, job_id=args.job_id or None,
+                         target_slot=args.slot or None)
     print(f"Improvement state files changed: {changed}; eligible jobs scanned: {total}")
 
 

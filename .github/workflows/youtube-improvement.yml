@@ -2,6 +2,16 @@ name: PLM YouTube Improvement Engine
 
 on:
   workflow_dispatch:
+    inputs:
+      job_id:
+        description: Optional single successful pipeline job for delayed 1h collection
+        required: false
+        type: string
+      slot:
+        description: Optional 1h slot for the selected job
+        required: false
+        type: choice
+        options: ['1h']
   schedule:
     - cron: '17,43 * * * *'
   workflow_run:
@@ -43,7 +53,9 @@ jobs:
       - name: Collect due snapshots and improvement guidance
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python scripts/collect_youtube_metrics.py .plm-results
+          PLM_TARGET_JOB_ID: ${{ inputs.job_id || '' }}
+          PLM_TARGET_SLOT: ${{ inputs.job_id && inputs.slot || '' }}
+        run: python scripts/collect_youtube_metrics.py .plm-results --job-id "$PLM_TARGET_JOB_ID" ${PLM_TARGET_SLOT:+--slot "$PLM_TARGET_SLOT"}
       - name: Publish sanitized improvement state only
         run: |
           git -C .plm-results config user.name 'github-actions[bot]'
