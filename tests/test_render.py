@@ -68,3 +68,47 @@ class RenderResultTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RenderQualityTests(unittest.TestCase):
+    def test_keyword_palette_is_stable_and_missing_audio_asset_falls_back(self):
+        import ffmpeg_builder
+        first = ffmpeg_builder.PALETTES[
+            int.from_bytes(__import__('hashlib').sha256(b'study').digest()[:2], 'big') % len(ffmpeg_builder.PALETTES)
+        ]
+        self.assertEqual(len(first), 3)
+        self.assertIsNone(ffmpeg_builder._asset_path({'asset': '../unlicensed.mp3'}))
+        self.assertIsNone(ffmpeg_builder._asset_path({'asset': 'missing.mp3'}))
+
+    def test_caption_emphasis_escapes_untrusted_ass_text(self):
+        import ffmpeg_builder
+        text = ffmpeg_builder._caption_text({'text': '勉強{\\bad}を続ける', 'emphasis_words': ['勉強']})
+        self.assertIn('\\c&H6ACBFF&', text)
+        self.assertIn(r'\{\\bad\}', text)
+
+    @unittest.skipUnless(__import__('shutil').which('ffmpeg') and __import__('shutil').which('ffprobe'), 'FFmpeg unavailable')
+    def test_real_render_and_quality_gate(self):
+        import subprocess
+        import ffmpeg_builder
+        import quality_gate
+        with tempfile.TemporaryDirectory() as directory:
+            previous = os.getcwd()
+            os.chdir(directory)
+            try:
+                subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                                'sine=frequency=440:duration=2', 'audio.wav'], check=True)
+                payload = {'scenes': [
+                    {'start': 0, 'end': 1, 'visual_keyword': 'study', 'caption': '一つ目'},
+                    {'start': 1, 'end': 2, 'visual_keyword': 'rain', 'caption': '二つ目'}],
+                    'bgm': {'asset': 'missing.mp3'}, 'output': {'width': 1080, 'height': 1920, 'fps': 30}}
+                ffmpeg_builder.build_video(payload, 'audio.wav', 'short.mp4')
+                report = quality_gate.validate_video('short.mp4')
+                self.assertEqual((report['width'], report['height'], report['fps']), (1080, 1920, 30))
+                self.assertTrue(report['subtitles'])
+                self.assertGreater(report['max_sample_luma'], 25)
+                self.assertGreater(report['mean_audio_db'], -38)
+                os.remove('captions.ass')
+                with self.assertRaisesRegex(ValueError, 'subtitles missing'):
+                    quality_gate.validate_video('short.mp4')
+            finally:
+                os.chdir(previous)
