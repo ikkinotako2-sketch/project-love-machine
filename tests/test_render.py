@@ -112,6 +112,28 @@ class RenderQualityTests(unittest.TestCase):
         self.assertNotIn('emphasis_words', merged[0])
         self.assertEqual(merged[1]['emphasis_words'], ['見よう'])
 
+    def test_captions_follow_longer_narration_without_adding_words(self):
+        import ffmpeg_builder
+        scenes = [{'start': 0, 'end': 2, 'caption': '雲を見よう'},
+                  {'start': 2, 'end': 31, 'caption': 'コメントで教えて'}]
+        captions = [{'start_seconds': 0, 'end_seconds': 2, 'text': '雲を見よう',
+                     'emphasis_words': ['雲']},
+                    {'start_seconds': 2, 'end_seconds': 31, 'text': 'コメントで教えて',
+                     'emphasis_words': ['コメント']}]
+        fitted = ffmpeg_builder._fit_captions_to_audio(captions, scenes, 48.6)
+        self.assertAlmostEqual(fitted[-1]['end_seconds'], 48.6)
+        self.assertAlmostEqual(fitted[0]['end_seconds'], fitted[1]['start_seconds'])
+        self.assertEqual([(c['text'], c['emphasis_words']) for c in fitted],
+                         [(c['text'], c['emphasis_words']) for c in captions])
+        self.assertEqual(captions[-1]['end_seconds'], 31)
+
+    def test_independently_timed_captions_are_not_scaled(self):
+        import ffmpeg_builder
+        scenes = [{'start': 0, 'end': 2, 'caption': '一つ目'}]
+        captions = [{'start_seconds': 0, 'end_seconds': 3, 'text': '別のタイミング'}]
+        self.assertIs(ffmpeg_builder._fit_captions_to_audio(captions, scenes, 4), captions)
+        self.assertIs(ffmpeg_builder._fit_captions_to_audio(captions, [], 4), captions)
+
     def test_semantic_motifs_and_unknown_palette_fallback(self):
         import ffmpeg_builder
         palette = ('0x253D70', '0x597BAD', '0xA8D3DF')
@@ -139,7 +161,7 @@ class RenderQualityTests(unittest.TestCase):
             os.chdir(directory)
             try:
                 subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
-                                'sine=frequency=440:duration=2', 'audio.wav'], check=True)
+                                'sine=frequency=440:duration=3.2', 'audio.wav'], check=True)
                 payload = {'scenes': [
                     {'start': 0, 'end': 1, 'visual_keyword': 'study', 'caption': '勉強の本',
                      'emphasis_words': ['勉強']},
@@ -153,7 +175,9 @@ class RenderQualityTests(unittest.TestCase):
                 report = quality_gate.validate_video('short.mp4')
                 self.assertIn(r'{\c&H00D7FF&\fs78}勉強', Path('captions.ass').read_text())
                 self.assertIn(r'{\c&H00D7FF&\fs78}雨', Path('captions.ass').read_text())
+                self.assertIn('0:00:03.20,Shorts', Path('captions.ass').read_text())
                 self.assertEqual((report['width'], report['height'], report['fps']), (1080, 1920, 30))
+                self.assertAlmostEqual(report['duration'], 3.2, delta=0.05)
                 self.assertTrue(report['subtitles'])
                 self.assertGreater(report['max_sample_luma'], 25)
                 self.assertGreater(report['mean_audio_db'], -38)

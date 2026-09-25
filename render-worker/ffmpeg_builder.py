@@ -126,6 +126,28 @@ def _captions_with_scene_emphasis(captions, scenes):
     return result
 
 
+def _fit_captions_to_audio(captions, scenes, audio_duration):
+    """Stretch generated scene captions when the narration outlasts their timeline."""
+    if not captions or not any(isinstance(s, dict) for s in scenes):
+        return captions
+    first = min(float(c.get("start_seconds", c.get("start", 0))) for c in captions)
+    last = max(float(c.get("end_seconds", c.get("end", 0))) for c in captions)
+    scene_last = max(float(s.get("end", 0)) for s in scenes if isinstance(s, dict))
+    # Only normalize a complete scene/caption timeline starting at zero. Leave
+    # independently timed subtitles alone and preserve the original wording.
+    if (first > 0.05 or last <= 0 or abs(scene_last - last) > 0.05
+            or audio_duration <= last + 0.1):
+        return captions
+    factor = audio_duration / last
+    fitted = []
+    for caption in captions:
+        updated = dict(caption)
+        updated["start_seconds"] = float(caption.get("start_seconds", caption.get("start", 0))) * factor
+        updated["end_seconds"] = float(caption.get("end_seconds", caption.get("end", 0))) * factor
+        fitted.append(updated)
+    return fitted
+
+
 def _visual_filters(keyword, base, accent, highlight):
     """Draw simple, local pixel-art motifs; unknown keywords retain v1 backgrounds."""
     key = keyword.lower()
@@ -199,11 +221,13 @@ def build_video(payload, audio_path="audio.wav", output_path="short.mp4"):
         for s in scenes if isinstance(s, dict)
     ]
     captions = _captions_with_scene_emphasis(captions, scenes)
-    duration = max([_probe_duration(audio_path), 1.0] +
+    audio_duration = _probe_duration(audio_path)
+    duration = max([audio_duration, 1.0] +
                    [float(s.get("end", 0)) for s in (payload.get("scenes") or []) if isinstance(s, dict)] +
                    [float(c.get("end_seconds", c.get("end", 0))) for c in captions if isinstance(c, dict)])
     if duration > 180:
         raise ValueError("render duration exceeds 180 seconds")
+    captions = _fit_captions_to_audio(captions, scenes, audio_duration)
     if not _write_ass(captions, "captions.ass", 1080, 1920):
         raise ValueError("no timed subtitles")
     subtitle_filter = "subtitles=captions.ass"
