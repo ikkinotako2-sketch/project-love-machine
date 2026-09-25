@@ -83,8 +83,51 @@ class RenderQualityTests(unittest.TestCase):
     def test_caption_emphasis_escapes_untrusted_ass_text(self):
         import ffmpeg_builder
         text = ffmpeg_builder._caption_text({'text': '勉強{\\bad}を続ける', 'emphasis_words': ['勉強']})
-        self.assertIn('\\c&H6ACBFF&', text)
+        self.assertIn('\\c&H00D7FF&\\fs78', text)
         self.assertIn(r'\{\\bad\}', text)
+
+    def test_japanese_scene_emphasis_reaches_ass_when_captions_are_separate(self):
+        import ffmpeg_builder
+        scenes = [{'start': 0, 'end': 2, 'caption': 'あの雲、雨のサイン？',
+                   'emphasis_words': ['雨のサイン']}]
+        captions = [{'start_seconds': 0, 'end_seconds': 2, 'text': 'あの雲、雨のサイン？'}]
+        merged = ffmpeg_builder._captions_with_scene_emphasis(captions, scenes)
+        self.assertEqual(merged[0]['emphasis_words'], ['雨のサイン'])
+        self.assertNotIn('emphasis_words', captions[0])
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'captions.ass'
+            ffmpeg_builder._write_ass(merged, path, 1080, 1920)
+            ass = path.read_text()
+        self.assertIn(r'{\c&H00D7FF&\fs78}雨のサイン{\c&HFFFFFF&\fs68}', ass)
+        self.assertIn('Alignment, MarginL, MarginR, MarginV', ass)
+        self.assertIn('}雨のサイン{', ass)
+
+    def test_emphasis_requires_matching_time_and_text_and_preserves_explicit_value(self):
+        import ffmpeg_builder
+        scenes = [{'start': 0, 'end': 2, 'caption': '雲を見よう', 'emphasis_words': ['雲']}]
+        captions = [{'start_seconds': 3, 'end_seconds': 5, 'text': '雲を見よう'},
+                    {'start_seconds': 0, 'end_seconds': 2, 'text': '雲を見よう',
+                     'emphasis_words': ['見よう']}]
+        merged = ffmpeg_builder._captions_with_scene_emphasis(captions, scenes)
+        self.assertNotIn('emphasis_words', merged[0])
+        self.assertEqual(merged[1]['emphasis_words'], ['見よう'])
+
+    def test_semantic_motifs_and_unknown_palette_fallback(self):
+        import ffmpeg_builder
+        palette = ('0x253D70', '0x597BAD', '0xA8D3DF')
+        cloud = ffmpeg_builder._visual_filters('cirrus clouds', *palette)
+        rain = ffmpeg_builder._visual_filters('dark rainy clouds sky', *palette)
+        study = ffmpeg_builder._visual_filters('study notebook', *palette)
+        sun = ffmpeg_builder._visual_filters('sunset', *palette)
+        night = ffmpeg_builder._visual_filters('night stars', *palette)
+        unknown = ffmpeg_builder._visual_filters('unrecognized subject', *palette)
+        self.assertIn('0xF2F6F7', cloud)
+        self.assertIn('0x83CDF2', rain)
+        self.assertIn('0xF2F0E7', study)
+        self.assertIn('0xFFD166', sun)
+        self.assertIn('0xFBE9A6', night)
+        self.assertNotIn('0xF2F6F7', unknown)
+        self.assertIn('w=980:h=460', unknown)
 
     @unittest.skipUnless(__import__('shutil').which('ffmpeg') and __import__('shutil').which('ffprobe'), 'FFmpeg unavailable')
     def test_real_render_and_quality_gate(self):
@@ -98,11 +141,18 @@ class RenderQualityTests(unittest.TestCase):
                 subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
                                 'sine=frequency=440:duration=2', 'audio.wav'], check=True)
                 payload = {'scenes': [
-                    {'start': 0, 'end': 1, 'visual_keyword': 'study', 'caption': '一つ目'},
-                    {'start': 1, 'end': 2, 'visual_keyword': 'rain', 'caption': '二つ目'}],
+                    {'start': 0, 'end': 1, 'visual_keyword': 'study', 'caption': '勉強の本',
+                     'emphasis_words': ['勉強']},
+                    {'start': 1, 'end': 2, 'visual_keyword': 'rain', 'caption': '雨の雲',
+                     'emphasis_words': ['雨']}],
+                    'captions': [
+                        {'start_seconds': 0, 'end_seconds': 1, 'text': '勉強の本'},
+                        {'start_seconds': 1, 'end_seconds': 2, 'text': '雨の雲'}],
                     'bgm': {'asset': 'missing.mp3'}, 'output': {'width': 1080, 'height': 1920, 'fps': 30}}
                 ffmpeg_builder.build_video(payload, 'audio.wav', 'short.mp4')
                 report = quality_gate.validate_video('short.mp4')
+                self.assertIn(r'{\c&H00D7FF&\fs78}勉強', Path('captions.ass').read_text())
+                self.assertIn(r'{\c&H00D7FF&\fs78}雨', Path('captions.ass').read_text())
                 self.assertEqual((report['width'], report['height'], report['fps']), (1080, 1920, 30))
                 self.assertTrue(report['subtitles'])
                 self.assertGreater(report['max_sample_luma'], 25)

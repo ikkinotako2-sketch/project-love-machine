@@ -54,7 +54,7 @@ def _caption_text(caption):
     while position < len(raw):
         match = next((w for w in sorted(words, key=len, reverse=True) if raw.startswith(w, position)), None)
         if match:
-            parts.append(r"{\c&H6ACBFF&}" + _escape_ass(match) + r"{\c&HFFFFFF&}")
+            parts.append(r"{\c&H00D7FF&\fs78}" + _escape_ass(match) + r"{\c&HFFFFFF&\fs68}")
             position += len(match)
         else:
             parts.append(_escape_ass(raw[position]))
@@ -105,6 +105,71 @@ def _asset_path(config):
     return None
 
 
+def _captions_with_scene_emphasis(captions, scenes):
+    """Copy emphasis only from the scene that supplied this timed caption."""
+    result = []
+    for caption in captions:
+        if not isinstance(caption, dict):
+            continue
+        merged = dict(caption)
+        if not merged.get("emphasis_words") and not merged.get("emphasis"):
+            text = str(merged.get("text", merged.get("caption", "")))
+            start = float(merged.get("start_seconds", merged.get("start", 0)))
+            end = float(merged.get("end_seconds", merged.get("end", start + 1.5)))
+            for scene in scenes:
+                if (isinstance(scene, dict) and text == str(scene.get("caption", ""))
+                        and abs(start - float(scene.get("start", -1))) < 0.05
+                        and abs(end - float(scene.get("end", -1))) < 0.05):
+                    merged["emphasis_words"] = scene.get("emphasis_words", scene.get("emphasis", []))
+                    break
+        result.append(merged)
+    return result
+
+
+def _visual_filters(keyword, base, accent, highlight):
+    """Draw simple, local pixel-art motifs; unknown keywords retain v1 backgrounds."""
+    key = keyword.lower()
+    rain = any(word in key for word in ("rain", "storm", "shower", "雨", "嵐"))
+    cloud = rain or any(word in key for word in ("cloud", "sky", "雲", "空"))
+    sun = any(word in key for word in ("sun", "solar", "sunset", "太陽", "晴れ", "夕日"))
+    night = any(word in key for word in ("night", "moon", "star", "夜", "月", "星"))
+    study = any(word in key for word in ("study", "book", "desk", "note", "勉強", "本", "ノート"))
+    if not (cloud or sun or night or study):
+        return (f"drawbox=x=80:y=110:w=980:h=460:color={accent}@0.75:t=fill,"
+                f"drawbox=x=260:y=630:w=780:h=700:color={highlight}@0.24:t=fill,"
+                f"drawbox=x=100:y=1450:w=760:h=310:color={accent}@0.55:t=fill,")
+    shapes = []
+    def box(x, y, w, h, color):
+        shapes.append(f"drawbox=x={x}:y={y}:w={w}:h={h}:color={color}:t=fill")
+    if night:
+        for x, y in ((180, 260), (860, 280), (680, 720), (230, 850), (945, 630)):
+            box(x, y, 24, 24, "0xFBE9A6")
+        box(710, 330, 170, 170, "0xFBE9A6")
+        box(760, 290, 160, 160, base)  # Stepped crescent.
+    if sun:
+        box(720, 200, 170, 170, "0xFFD166")
+        for x, y, w, h in ((790, 155, 25, 35), (790, 380, 25, 35),
+                            (670, 275, 35, 25), (905, 275, 35, 25)):
+            box(x, y, w, h, "0xFFD166")
+    if cloud:
+        for x, y, w, h in ((390, 430, 350, 160), (305, 515, 520, 145),
+                            (250, 600, 640, 140)):
+            box(x, y, w, h, "0xF2F6F7")
+        if rain:
+            for x in (330, 445, 560, 675, 790):
+                box(x, 780 + (x % 3) * 40, 22, 160, "0x83CDF2")
+    if study:
+        box(230, 840, 700, 36, "0xC69A72")  # Desk.
+        box(315, 450, 245, 340, "0xF2F0E7")  # Two open book pages.
+        box(575, 450, 245, 340, "0xF2F0E7")
+        box(560, 445, 14, 350, "0xA88A78")
+        for y in (525, 585, 645, 705):
+            box(355, y, 165, 9, "0xA5BAC4")
+            box(615, y, 165, 9, "0xA5BAC4")
+    box(100, 1450, 760, 310, f"{accent}@0.55")
+    return ",".join(shapes) + ","
+
+
 def _segments(scenes, duration):
     ordered = sorted((s for s in scenes if isinstance(s, dict)), key=lambda s: float(s.get("start", 0)))[:24]
     segments = []
@@ -127,10 +192,13 @@ def build_video(payload, audio_path="audio.wav", output_path="short.mp4"):
     output = payload.get("output") or {}
     if (int(output.get("width", DEFAULT_WIDTH)), int(output.get("height", DEFAULT_HEIGHT)), int(output.get("fps", DEFAULT_FPS))) != (1080, 1920, 30):
         raise ValueError("Shorts output must be 1080x1920 at 30fps")
+    scenes = payload.get("scenes") or []
     captions = payload.get("captions") or [
-        {"start_seconds": s.get("start", 0), "end_seconds": s.get("end", 1.5), "text": s.get("caption", "")}
-        for s in (payload.get("scenes") or []) if isinstance(s, dict)
+        {"start_seconds": s.get("start", 0), "end_seconds": s.get("end", 1.5),
+         "text": s.get("caption", ""), "emphasis_words": s.get("emphasis_words", s.get("emphasis", []))}
+        for s in scenes if isinstance(s, dict)
     ]
+    captions = _captions_with_scene_emphasis(captions, scenes)
     duration = max([_probe_duration(audio_path), 1.0] +
                    [float(s.get("end", 0)) for s in (payload.get("scenes") or []) if isinstance(s, dict)] +
                    [float(c.get("end_seconds", c.get("end", 0))) for c in captions if isinstance(c, dict)])
@@ -162,12 +230,10 @@ def build_video(payload, audio_path="audio.wav", output_path="short.mp4"):
         base, accent, highlight = [c.replace("#", "0x") for c in palette]
         frames = max(1, round((end - start) * 30))
         span = frames / 30
-        # Abstract shapes are generated locally; keyword only chooses a palette.
+        # Keep the existing crop motion and fades after drawing the keyword motif.
         filters.append(
             f"color=c={base}:s=1152x2048:r=30:d={span},"
-            f"drawbox=x=80:y=110:w=980:h=460:color={accent}@0.75:t=fill,"
-            f"drawbox=x=260:y=630:w=780:h=700:color={highlight}@0.24:t=fill,"
-            f"drawbox=x=100:y=1450:w=760:h=310:color={accent}@0.55:t=fill,"
+            f"{_visual_filters(key, base, accent, highlight)}"
             "crop=1080:1920:x='36+24*sin(t/2)':y='64+32*sin(t/3)',"
             f"fade=t=in:st=0:d={min(0.12, span/4)},"
             f"fade=t=out:st={max(0, span-0.12)}:d={min(0.12, span/4)},"
