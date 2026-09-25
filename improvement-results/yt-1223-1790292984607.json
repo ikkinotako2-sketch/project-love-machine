@@ -16,7 +16,40 @@
     },
     "status": "collected"
   },
+  "24h": {
+    "analytics_status": "not_yet_available",
+    "attempts": 1,
+    "metrics": {
+      "analytics_available": false,
+      "averageViewDuration": null,
+      "averageViewPercentage": null,
+      "captured_at": "2026-09-25T23:57:41.080381+00:00",
+      "comments": 0,
+      "likes": 0,
+      "source": "YouTube Data API videos.list; optional YouTube Analytics reports.query",
+      "subscribersGained": null,
+      "subscribersLost": null,
+      "views": 0
+    },
+    "status": "collected"
+  },
+  "analysis": "データが少ないため、以下は検証用の編集仮説。効果は未確認。",
+  "analysis_evidence": {
+    "sample_sufficient": false,
+    "views_1h": 0,
+    "views_24h": 0
+  },
+  "analysis_method": "rules",
   "completed_at": "2026-09-24T23:39:02+00:00",
+  "improvement_actions": {
+    "caption_density": "字幕を短い意味単位に区切り、画面を読み切れる量にする。",
+    "cta": "最後に内容に沿った簡潔な問いを1つ置く。",
+    "duration": "主題を1つに絞り、不要な間を削る。尺の変更は比較実験として扱う。",
+    "hook": "冒頭で視聴者への具体的な問いを1つ示す。次回は異なる表現を比較する。",
+    "narration": "短文と自然な間で要点を伝え、字幕との同期を確認する。",
+    "scene_changes": "話題の切れ目で画面を切り替え、変化の頻度を段階的に試す。",
+    "topic_selection": "元動画の表現を再利用せず、視聴者の課題を別の切り口で選ぶ。"
+  },
   "job_id": "yt-1223-1790292984607",
   "schema_version": 1,
   "video_id": "D4VxMUpIdlI",
