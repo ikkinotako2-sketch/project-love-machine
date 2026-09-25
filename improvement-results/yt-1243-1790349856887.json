@@ -1,0 +1,24 @@
+{
+  "1h": {
+    "analytics_status": "not_yet_available",
+    "attempts": 1,
+    "metrics": {
+      "analytics_available": false,
+      "averageViewDuration": null,
+      "averageViewPercentage": null,
+      "captured_at": "2026-09-25T16:36:50.155053+00:00",
+      "comments": 0,
+      "likes": 0,
+      "source": "YouTube Data API videos.list; optional YouTube Analytics reports.query",
+      "subscribersGained": null,
+      "subscribersLost": null,
+      "views": 0
+    },
+    "status": "collected"
+  },
+  "completed_at": "2026-09-25T15:26:25+00:00",
+  "job_id": "yt-1243-1790349856887",
+  "schema_version": 1,
+  "video_id": "VMWi1IegYSI",
+  "youtube_url": "https://www.youtube.com/watch?v=VMWi1IegYSI"
+}
