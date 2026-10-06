@@ -4,6 +4,11 @@ run-name: Pipeline ${{ inputs.job_id }}
 on:
   workflow_dispatch:
     inputs:
+      serverless_context:
+        description: Exact serverless reservation metadata; empty preserves legacy path
+        required: false
+        default: ""
+        type: string
       job_id:
         description: Unique n8n job ID; also used as render_id and idempotency key
         required: true
@@ -115,6 +120,21 @@ jobs:
       - name: Publish processing result
         run: python -m plm.entrypoints.publish_pipeline_result
 
+      - name: Serverless bind checkpoint (explicit approval only)
+        if: inputs.serverless_context != ''
+        env:
+          TEST_ONLY: ${{ vars.PLM_SERVERLESS_TEST_ONLY || 'true' }}
+          DRY_RUN: ${{ vars.PLM_SERVERLESS_DRY_RUN || 'true' }}
+          NO_PUBLISH: ${{ vars.PLM_SERVERLESS_NO_PUBLISH || 'true' }}
+          EMERGENCY_STOP: ${{ vars.PLM_SERVERLESS_EMERGENCY_STOP || 'true' }}
+          PLM_SERVERLESS_OPERATION_APPROVED: ${{ vars.PLM_SERVERLESS_APPROVED_JOB }}
+          PLM_SERVERLESS_ORIGIN: ${{ vars.PLM_SERVERLESS_ORIGIN }}
+          PLM_CHECKPOINT_KEY_ID: ${{ vars.PLM_CHECKPOINT_KEY_ID }}
+          PLM_CALLBACK_KEY_ID: ${{ vars.PLM_CALLBACK_KEY_ID }}
+          PLM_YOUTUBE_CHECKPOINT_KEY: ${{ secrets.PLM_YOUTUBE_CHECKPOINT_KEY }}
+          PLM_YOUTUBE_RESULT_CALLBACK_KEY: ${{ secrets.PLM_YOUTUBE_RESULT_CALLBACK_KEY }}
+        run: python -m plm.entrypoints.yt_serverless_candidate bind
+
   render:
     needs: initialize
     uses: ./.github/workflows/render-short.yml
@@ -129,12 +149,53 @@ jobs:
       bgm_json: ${{ inputs.bgm_json }}
       output_json: ${{ inputs.output_json }}
 
-  youtube:
+  checkpoint_render:
+    if: inputs.serverless_context != ''
     needs: render
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+    env:
+      PLM_RENDER_RESULT_JSON: ${{ needs.render.outputs.result_json }}
+    steps:
+      - name: Checkout fixed candidate source
+        uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Download exact reusable render artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.render.outputs.artifact_name }}
+          path: render-output
+          run-id: ${{ github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Serverless render checkpoint (explicit approval only)
+        if: inputs.serverless_context != ''
+        env:
+          TEST_ONLY: ${{ vars.PLM_SERVERLESS_TEST_ONLY || 'true' }}
+          DRY_RUN: ${{ vars.PLM_SERVERLESS_DRY_RUN || 'true' }}
+          NO_PUBLISH: ${{ vars.PLM_SERVERLESS_NO_PUBLISH || 'true' }}
+          EMERGENCY_STOP: ${{ vars.PLM_SERVERLESS_EMERGENCY_STOP || 'true' }}
+          PLM_SERVERLESS_OPERATION_APPROVED: ${{ vars.PLM_SERVERLESS_APPROVED_JOB }}
+          PLM_SERVERLESS_ORIGIN: ${{ vars.PLM_SERVERLESS_ORIGIN }}
+          PLM_CHECKPOINT_KEY_ID: ${{ vars.PLM_CHECKPOINT_KEY_ID }}
+          PLM_CALLBACK_KEY_ID: ${{ vars.PLM_CALLBACK_KEY_ID }}
+          PLM_YOUTUBE_CHECKPOINT_KEY: ${{ secrets.PLM_YOUTUBE_CHECKPOINT_KEY }}
+          PLM_YOUTUBE_RESULT_CALLBACK_KEY: ${{ secrets.PLM_YOUTUBE_RESULT_CALLBACK_KEY }}
+        run: python -m plm.entrypoints.yt_serverless_candidate render
+
+  youtube:
+    if: ${{ !cancelled() && needs.render.result == 'success' && (inputs.serverless_context == '' || needs.checkpoint_render.result == 'success') }}
+    needs: [render, checkpoint_render]
     uses: ./.github/workflows/youtube-adapter.yml
     secrets: inherit
     with:
       operation: upload
+      serverless_guard: ${{ inputs.serverless_context != '' }}
       account_id: ${{ inputs.account_id }}
       oauth_secret_name: ${{ inputs.oauth_secret_name }}
       render_run_id: ${{ format('{0}', github.run_id) }}
@@ -206,3 +267,27 @@ jobs:
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat pipeline-result.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Download render artifact for independent media readback
+        if: inputs.serverless_context != '' && needs.render.result == 'success' && needs.youtube.result == 'success'
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.render.outputs.artifact_name }}
+          path: render-output
+          run-id: ${{ github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Serverless result checkpoint (explicit approval only)
+        if: inputs.serverless_context != '' && needs.render.result == 'success' && needs.youtube.result == 'success'
+        env:
+          TEST_ONLY: ${{ vars.PLM_SERVERLESS_TEST_ONLY || 'true' }}
+          DRY_RUN: ${{ vars.PLM_SERVERLESS_DRY_RUN || 'true' }}
+          NO_PUBLISH: ${{ vars.PLM_SERVERLESS_NO_PUBLISH || 'true' }}
+          EMERGENCY_STOP: ${{ vars.PLM_SERVERLESS_EMERGENCY_STOP || 'true' }}
+          PLM_SERVERLESS_OPERATION_APPROVED: ${{ vars.PLM_SERVERLESS_APPROVED_JOB }}
+          PLM_SERVERLESS_ORIGIN: ${{ vars.PLM_SERVERLESS_ORIGIN }}
+          PLM_CHECKPOINT_KEY_ID: ${{ vars.PLM_CHECKPOINT_KEY_ID }}
+          PLM_CALLBACK_KEY_ID: ${{ vars.PLM_CALLBACK_KEY_ID }}
+          PLM_YOUTUBE_OAUTH_JSON: ${{ secrets[inputs.oauth_secret_name] }}
+          PLM_YOUTUBE_CHECKPOINT_KEY: ${{ secrets.PLM_YOUTUBE_CHECKPOINT_KEY }}
+          PLM_YOUTUBE_RESULT_CALLBACK_KEY: ${{ secrets.PLM_YOUTUBE_RESULT_CALLBACK_KEY }}
+        run: python -m plm.entrypoints.yt_serverless_candidate result
