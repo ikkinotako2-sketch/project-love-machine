@@ -4,6 +4,11 @@ run-name: YouTube ${{ inputs.operation }} / ${{ inputs.account_id }}
 on:
   workflow_dispatch:
     inputs:
+      serverless_guard:
+        description: Hardened candidate one-attempt boundary
+        required: false
+        default: false
+        type: boolean
       operation:
         description: upload, status, or analytics
         required: true
@@ -71,6 +76,10 @@ on:
         type: string
   workflow_call:
     inputs:
+      serverless_guard:
+        required: false
+        default: false
+        type: boolean
       operation:
         required: true
         type: string
@@ -132,6 +141,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      PLM_MAX_ATTEMPTS: ${{ inputs.serverless_guard && '1' || '3' }}
+      PLM_UPLOAD_RESUME_ATTEMPTS: ${{ inputs.serverless_guard && '1' || '3' }}
       PLM_OPERATION: ${{ inputs.operation }}
       PLM_ACCOUNT_ID: ${{ inputs.account_id }}
       PLM_VIDEO_ID: ${{ inputs.video_id }}
