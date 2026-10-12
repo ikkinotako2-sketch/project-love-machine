@@ -1,0 +1,48 @@
+{
+  "status": "OFFLINE_FOUR_CONNECTIONS_PREPARED_PARKED",
+  "parent": "62018663fc33ab05d001d44c088e49128f1b1b42",
+  "branch": "plm-youtube-four-connections-20261012-r1",
+  "A": "PER_JOB_TOMBSTONE_SHARED_CAS_WITH_INDEPENDENT_COMPLETION_AUTHORITY",
+  "B": "SUCCESSOR_SPEAKER_3_LEGACY_UNCHANGED",
+  "C": "BOUNDED_INDEPENDENT_GITHUB_AND_PROCESSED_READERS",
+  "D": "FACTORY_TWO_PHASE_COORDINATOR_DURABLE_RECEIPT",
+  "live_enabled": false,
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "oauth_read_scope": false,
+  "oauth_upload_scope": true,
+  "channel_match": "UNVERIFIED",
+  "channel_identity_consumed": false,
+  "execution_markers_created": false,
+  "state_branch_created": false,
+  "state_max_jobs": 64,
+  "state_max_bytes": 32768,
+  "state_future_transport_budget": {
+    "GET": 2,
+    "PUT": 6,
+    "retry": 0
+  },
+  "github_proof_gets_per_phase_max": 6,
+  "youtube_future_gets": {
+    "mine": 1,
+    "processed_readback": 1
+  },
+  "oauth_future_posts_max": 1,
+  "dispatch_future_posts_max": 1,
+  "media_reused": true,
+  "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
+  "new_render_performed": false,
+  "migration": "0011_automation_budget_notification_successor.sql_UNAPPLIED",
+  "old_0011_candidate_unchanged": true,
+  "migration_and_postcheck_separate": true,
+  "quota_actual_remaining": "UNKNOWN_STOP",
+  "immutable_dispatch_acceptance": "UNVERIFIED",
+  "cloudflare": "PARKED_INHERITED_NOT_FRESH",
+  "production_entry": "UNCONDITIONAL_PARKED",
+  "source_manifest": "readiness/four-connections-source-hashes.json",
+  "simulation": "48h_4_distinct_jobs_fixture_only"
+}

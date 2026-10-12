@@ -1,0 +1,59 @@
+name: PLM Four Connections OFFLINE
+on:
+  push:
+    branches: [plm-youtube-four-connections-20261012-r1]
+    paths: [plm/automation/**, integration/**, tests/test_four_connections.py, readiness/run_four_connections.py, .github/workflows/plm-youtube-four-connections-offline.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: plm-four-offline-only
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+      PLM_OFFLINE_MEDIA: '${{ github.workspace }}/reused-artifact/short.mp4'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Source hash gate before artifact read
+        run: python -m readiness.verify_four_sources
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ikkinotako2-sketch/project-love-machine
+          run-id: 38250671983
+          artifact-ids: 11746833809
+          path: reused-artifact
+          merge-multiple: true
+      - name: Unchanged original MP4
+        run: echo '4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110  reused-artifact/short.mp4' | sha256sum --check
+      - name: Four connection tests; all networking denied
+        run: python -m readiness.run_four_connections
+      - name: Produce bounded old fixture exchange only; no renderer invocation
+        run: python -m readiness.run_final_candidate --media reused-artifact/short.mp4 --output final-evidence
+      - name: Speaker3 / successor D1 / Worker boundary deltas; all networking denied
+        run: node --import ./readiness/offline_node_guard.mjs --test integration/test-four-connections.mjs
+      - name: Production entry stays parked
+        run: python -m readiness.final_candidate_entrypoint
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-four-connections-offline-${{ github.sha }}
+          path: four-evidence/
+          retention-days: 7
+          if-no-files-found: error

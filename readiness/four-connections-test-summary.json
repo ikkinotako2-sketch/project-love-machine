@@ -1,0 +1,14 @@
+{
+  "mode": "OFFLINE_DELTA",
+  "tests": 47,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "virtual_hours": 48,
+  "real_oauth_posts": 0,
+  "real_youtube_gets": 0,
+  "real_uploads": 0,
+  "cloudflare_requests": 0,
+  "live_entry": "PARKED",
+  "simulation_media_mode": "REUSE_EXISTING_MP4_NO_NEW_RENDER"
+}
