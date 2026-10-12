@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workflow_sha256",
+    "executor_sha256",
+    "engine_sha256",
+    "plan_sha256",
+    "schema_sha256",
+    "wrapper_sha256",
+    "provider_sha256",
+    "historical_evidence_sha256",
+    "identity",
+    "state",
+    "prepared_commit_sha",
+    "secret_reference",
+    "scope_execution_approved"
+  ],
+  "properties": {
+    "workflow_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "executor_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "engine_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "plan_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "schema_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "wrapper_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "provider_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "historical_evidence_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "identity": {
+      "const": "provider-neutral-youtube-oauth-scope-diagnostic-20261012-r1"
+    },
+    "state": {
+      "const": "CONSUMED_BEFORE_REMOTE"
+    },
+    "prepared_commit_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "secret_reference": {
+      "const": "PLM_YOUTUBE_GAME_001"
+    },
+    "scope_execution_approved": {
+      "const": true
+    }
+  }
+}

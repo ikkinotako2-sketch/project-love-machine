@@ -1,0 +1,21 @@
+{
+  "r2_run": 38225716925,
+  "attempt": 1,
+  "conclusion": "SUCCESS",
+  "http_status": 200,
+  "scope_logged": false,
+  "artifact_count": 0,
+  "channel_identity_consumed": false,
+  "historical_markers": [
+    {
+      "path": "audit-evidence/consumed/provider-neutral-youtube-oauth-verify-20261012-r1.json",
+      "blob": "d7b7a8617143302845519cac949b6b365613afd3",
+      "sha256": "db6f46d821d9fc8f1bfd601f08deeaafa6ab7152e8e2c550ce9d3ee0219092ba"
+    },
+    {
+      "path": "audit-evidence/consumed/provider-neutral-youtube-oauth-verify-20261012-r2.json",
+      "blob": "5ff9ac01810e3687e098900d4948093dcc900de2",
+      "sha256": "85be7ba392b9711a0502f0cf632b8a6c9c7a1d0de461f20eabb419a4d8ed910e"
+    }
+  ]
+}

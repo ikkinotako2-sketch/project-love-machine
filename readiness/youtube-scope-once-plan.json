@@ -1,0 +1,50 @@
+{
+  "identity": "provider-neutral-youtube-oauth-scope-diagnostic-20261012-r1",
+  "parent": "0b2ae2b5e1031eb7336e57abf0a632141b2d44b6",
+  "preparation_files": [
+    ".github/workflows/plm-youtube-scope-once.yml",
+    "readiness/youtube_scope_once.py",
+    "readiness/youtube_scope_diagnostic.py",
+    "readiness/youtube_oauth_verify.py",
+    "readiness/youtube-scope-historical-evidence.json",
+    "readiness/youtube-scope-once-plan.json",
+    "readiness/youtube-scope-once-marker.schema.json",
+    "readiness/youtube-scope-audit.md",
+    "tests/test_youtube_scope.py"
+  ],
+  "secret_reference": "PLM_YOUTUBE_GAME_001",
+  "maximum_refresh_posts": 1,
+  "endpoint": "https://oauth2.googleapis.com/token",
+  "tokeninfo_requests": 0,
+  "youtube_requests": 0,
+  "retry": 0,
+  "rerun": 0,
+  "resume": 0,
+  "redirect": 0,
+  "fallback": 0,
+  "timeout_seconds": 30,
+  "response_max_bytes": 32768,
+  "raw_retention": 0,
+  "token_in_url": false,
+  "marker_state": "NOT_CREATED",
+  "execution_approved": false,
+  "scope_missing_policy": "UNKNOWN_SCOPE_NOT_REPORTED_STOP",
+  "scope_insufficient_policy": "SCOPE_MISSING_REAUTH_REQUIRED_STOP",
+  "tokeninfo_contract": {
+    "http_method": "POST",
+    "path": "oauth2/v2/tokeninfo",
+    "access_token_location": "query",
+    "decision": "NOT_USED_TOKEN_URL_FORBIDDEN_BODY_ONLY_NOT_DOCUMENTED"
+  },
+  "output": [
+    "classification",
+    "fixed reason code",
+    "scope_present",
+    "channels_read",
+    "youtube_upload",
+    "analytics_read",
+    "HTTP status",
+    "request counters"
+  ],
+  "channel_identity_consumed": false
+}
