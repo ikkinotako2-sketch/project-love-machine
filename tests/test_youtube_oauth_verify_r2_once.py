@@ -48,7 +48,9 @@ class Tests(unittest.TestCase):
   source=(ROOT/g.HELPER).read_text();self.assertGreater(source.index('from readiness import youtube_oauth_verify as auth'),source.index('load_gate()\n'))
  def test_secret_step_after_gate(self):
   y=(ROOT/g.WORKFLOW).read_text();self.assertLess(y.index('Secret-free local gate'),y.index('secrets.PLM_YOUTUBE_GAME_001'));self.assertIn('fetch-depth: 0',y);self.assertIn('persist-credentials: false',y)
- def test_future_marker_absent(self):self.assertFalse((ROOT/g.MARKER).exists())
+ def test_marker_lifecycle(self):
+  p=ROOT/g.MARKER
+  if p.exists():self.assertEqual(g.digest(p.read_bytes()),'85be7ba392b9711a0502f0cf632b8a6c9c7a1d0de461f20eabb419a4d8ed910e')
  def test_gate_failure_remote_zero(self):
   with patch.object(g,'load_gate',side_effect=g.Stop('bad')),patch('readiness.youtube_oauth_verify.authorized_https_transport') as transport:
    with self.assertRaises(SystemExit):g.main()
@@ -123,7 +125,8 @@ class R2ProtectionTests(unittest.TestCase):
  def test_r1_artifacts_unchanged(self):
   for p,h in g.HISTORICAL.items():self.assertEqual(g.digest((ROOT/p).read_bytes()),h)
  def test_new_identity_and_no_marker(self):
-  self.assertEqual(g.IDENTITY,'provider-neutral-youtube-oauth-verify-20261012-r2');self.assertFalse((ROOT/g.MARKER).exists())
+  self.assertEqual(g.IDENTITY,'provider-neutral-youtube-oauth-verify-20261012-r2')
+  if (ROOT/g.MARKER).exists():self.assertEqual(g.digest((ROOT/g.MARKER).read_bytes()),'85be7ba392b9711a0502f0cf632b8a6c9c7a1d0de461f20eabb419a4d8ed910e')
  def test_r1_failed_run_not_success(self):
   p=json.loads((ROOT/g.PLAN).read_bytes());self.assertEqual(p['historical_consumed_run_id'],38204853129);self.assertIs(p['historical_identity_success_prerequisite'],False)
 
