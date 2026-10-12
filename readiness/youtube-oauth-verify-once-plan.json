@@ -1,0 +1,25 @@
+{
+  "identity": "provider-neutral-youtube-oauth-verify-20261012-r1",
+  "preparation_parent": "367f92a2510e616054dcf6106c3e724b1f6c4091",
+  "preparation_files": [
+    ".github/workflows/plm-youtube-oauth-verify-once.yml",
+    "readiness/youtube_oauth_verify_once.py",
+    "readiness/youtube-oauth-verify-once-plan.json",
+    "readiness/youtube-oauth-verify-once-marker.schema.json",
+    "tests/test_youtube_oauth_verify_once.py"
+  ],
+  "secret_reference": "PLM_YOUTUBE_GAME_001",
+  "selector_evidence": ".github/workflows/youtube-improvement.yml@6ed3b3d284d23f66f96030282add75aec16377ac",
+  "selector_scope": "HISTORICALLY_CODE_REFERENCED_CURRENT_CHANNEL_UNVERIFIED",
+  "maximum_refresh_posts": 1,
+  "retry": 0,
+  "redirect": 0,
+  "fallback": 0,
+  "maximum_uploads": 0,
+  "maximum_publishes": 0,
+  "execution_approved": false,
+  "marker_state": "NOT_CREATED",
+  "channel_identity_verified": false,
+  "wrapper_sha256": "9531fa5871700ef90f89bdbc190981a95963cfe36e6d0c28b08b20d9cac6ea7e",
+  "provider_sha256": "9fbce205a267ee3a880eb3d34b6e02d410e9aa249d78b16a686a0f559639a8e9"
+}

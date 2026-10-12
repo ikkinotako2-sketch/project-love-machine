@@ -1,0 +1,31 @@
+name: PLM YouTube OAuth Verify Once
+on:
+  push:
+    branches: [plm-youtube-oauth-readiness-20261012-r1]
+    paths: [audit-evidence/consumed/provider-neutral-youtube-oauth-verify-20261012-r1.json]
+permissions:
+  contents: read
+concurrency:
+  group: provider-neutral-youtube-oauth-verify-20261012-r1
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.run_attempt == 1 && github.event.head_commit.message == 'PLM YouTube OAuth verify once provider-neutral-youtube-oauth-verify-20261012-r1'
+    runs-on: ubuntu-latest
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Secret-free local gate
+        run: python -m readiness.youtube_oauth_verify_once --gate
+      - name: Exactly one approved refresh POST
+        env:
+          PLM_YOUTUBE_OAUTH_JSON: ${{ secrets.PLM_YOUTUBE_GAME_001 }}
+        run: python -m readiness.youtube_oauth_verify_once
