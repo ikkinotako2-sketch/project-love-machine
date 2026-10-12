@@ -1,0 +1,24 @@
+name: PLM Production Candidate PARKED
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: plm-private-channel-recovery-20261012-r1
+  cancel-in-progress: false
+jobs:
+  parked:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python -m readiness.final_candidate_entrypoint

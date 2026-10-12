@@ -1,0 +1,56 @@
+{
+  "status": "PREPARED_OFFLINE_NOT_ACTIVE",
+  "parent": "0b2ae2b5e1031eb7336e57abf0a632141b2d44b6",
+  "branch": "plm-youtube-final-candidate-20261012-r1",
+  "scope_diagnostic_run": 38258935081,
+  "scope_read": false,
+  "scope_upload": true,
+  "channel_verified": false,
+  "channel_identity_consumed": false,
+  "all_execution_markers_created": false,
+  "cloudflare_state": "PARKED_INHERITED",
+  "live_factory_supported": false,
+  "virtual_hours": 48,
+  "max_simulated_jobs_per_day": 2,
+  "actual_quota_remaining": "UNKNOWN_STOP",
+  "state_branch_created": false,
+  "future_state_request_max": 6,
+  "future_upload_request_max": {
+    "POST": 1,
+    "PUT": 1,
+    "retry": 0,
+    "resume": 0
+  },
+  "state_lock_lifecycle": "ONE_PRIVATE_TEST_NO_AUTOMATIC_RELEASE",
+  "long_running_shared_state": "BLOCKED_NOT_LIVE_CONNECTED",
+  "artifact": {
+    "id": 11746833809,
+    "run": 38250671983,
+    "expired": false,
+    "expires_at": "2026-11-11T12:43:33Z",
+    "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110"
+  },
+  "secret_names_only": [
+    "PLM_YOUTUBE_GAME_001",
+    "PLM_GITHUB_STATE_TOKEN",
+    "PLM_GITHUB_DISPATCH_TOKEN",
+    "PLM_YOUTUBE_CHECKPOINT_KEY",
+    "PLM_YOUTUBE_RESULT_CALLBACK_KEY"
+  ],
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "migrations": {
+    "0008": "FULL_APPLIED_INHERITED",
+    "0009": "FULL_APPLIED_INHERITED",
+    "0010": "FULL_APPLIED_INHERITED",
+    "0011": "NOT_APPLIED"
+  },
+  "post_upload_readback": "SEPARATE_APPROVAL_REQUIRED",
+  "notification_delivery": "OUTBOX_UNDELIVERED_ONLY",
+  "immutable_dispatch_acceptance": "UNVERIFIED",
+  "production_workflow": "UNCONDITIONAL_PARKED"
+}

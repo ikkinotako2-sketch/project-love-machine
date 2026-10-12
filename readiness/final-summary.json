@@ -1,0 +1,66 @@
+{
+  "mode": "OFFLINE_SIMULATION",
+  "flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "counts": {
+    "Pending": 0,
+    "Processing": 0,
+    "Done": 4,
+    "Failed": 0,
+    "UNKNOWN": 0
+  },
+  "last_success": "plm-loop-0e98959a887dc90975079f1e",
+  "last_failure": null,
+  "error_reason": null,
+  "updated_at": 1791936000,
+  "real_uploads": 0,
+  "mock_uploads": 4,
+  "stopped": false,
+  "render_success_rate": 1.0,
+  "durations_seconds": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "budgets": [
+    {
+      "day": "2026-10-12",
+      "jobs": 2,
+      "minutes": 20,
+      "units": 400,
+      "bytes": 619930
+    },
+    {
+      "day": "2026-10-13",
+      "jobs": 2,
+      "minutes": 20,
+      "units": 400,
+      "bytes": 619930
+    }
+  ],
+  "undelivered_notifications": 0,
+  "oauth": "READ_SCOPE_MISSING_REAUTH_REQUIRED",
+  "channel": "UNVERIFIED",
+  "cloudflare": "PARKED_INHERITED_NOT_FRESH",
+  "live_enabled": false,
+  "remaining_gates": [
+    "OWNER_REAUTH",
+    "FRESH_CHANNEL_MATCH",
+    "SHARED_DURABLE_STATE",
+    "ACCOUNT_BUDGET",
+    "0011_APPROVAL",
+    "CANDIDATE_DEPLOY_APPROVAL",
+    "IMMUTABLE_DISPATCH",
+    "INDEPENDENT_READBACK",
+    "SINGLE_UPLOAD_APPROVAL",
+    "24H_LIVE_OBSERVATION"
+  ],
+  "virtual_hours": 48,
+  "fixture_real_network_calls": 0,
+  "render_reused": true
+}

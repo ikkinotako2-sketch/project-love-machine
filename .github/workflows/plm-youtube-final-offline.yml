@@ -1,0 +1,68 @@
+name: PLM Final Integrated Candidate OFFLINE
+on:
+  push:
+    branches: [plm-youtube-final-candidate-20261012-r1]
+    paths: [plm/automation/**, integration/**, readiness/run_final_candidate.py, tests/test_final_candidate.py, .github/workflows/plm-youtube-final-offline.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: plm-final-offline-only
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+      PLM_OFFLINE_MEDIA: '${{ github.workspace }}/reused-artifact/short.mp4'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Exact source manifest before any artifact download
+        run: python -m readiness.verify_final_sources
+      - name: Reuse exact artifact; no re-render and no external provider
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ikkinotako2-sketch/project-love-machine
+          run-id: 38250671983
+          artifact-ids: 11746833809
+          path: reused-artifact
+          merge-multiple: true
+      - name: Exact existing MP4 hash before simulation
+        run: echo '4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110  reused-artifact/short.mp4' | sha256sum --check
+      - name: New boundary tests with all Python networking denied
+        run: |
+          python - <<'PY'
+          import sys,unittest
+          from readiness.run_final_candidate import deny
+          sys.addaudithook(deny)
+          suite=unittest.TestSuite([unittest.defaultTestLoader.discover('tests',pattern='test_final_candidate.py'),unittest.defaultTestLoader.discover('tests',pattern='test_connections.py')])
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          if not result.wasSuccessful():raise SystemExit(1)
+          PY
+      - name: Virtual 48-hour E2E with fixed generated MP4
+        run: python -m readiness.run_final_candidate --media reused-artifact/short.mp4 --output final-evidence
+      - name: Node Worker and D1 boundaries, networking denied
+        run: node --import ./readiness/offline_node_guard.mjs --test integration/test-connection.mjs integration/test-final-candidate.mjs
+      - name: Unconditionally parked production entrypoint
+        run: python -m readiness.final_candidate_entrypoint
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-final-offline-evidence-${{ github.sha }}
+          path: final-evidence/
+          retention-days: 7
+          if-no-files-found: error

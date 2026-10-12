@@ -29,8 +29,13 @@ class GitClaimLedger:
         self.uncertain=False;return new_sha
     def path(self,job):require(ID.fullmatch(job),'JOB_STOP');return 'youtube-once/'+job+'.json'
     def claim(self,job,fingerprint,identity,owner,now):
+        require(not self.uncertain,'STATE_WRITE_UNKNOWN_STOP')
         path=self.path(job);require(ID.fullmatch(identity) and ID.fullmatch(owner) and re.fullmatch('[a-f0-9]{64}',fingerprint),'CLAIM_SHAPE_STOP')
-        require(self.backend.read(path) is None,'PERMANENTLY_CONSUMED_STOP')
+        try:existing=self.backend.read(path)
+        except Exception:
+            self.uncertain=True
+            raise Stop('STATE_READ_UNKNOWN_STOP') from None
+        require(existing is None,'PERMANENTLY_CONSUMED_STOP')
         record={'job_id':job,'fingerprint':fingerprint,'identity':identity,'owner':owner,'epoch':1,'fence':1,'state':'Processing','sent':False,'created_at':now,'reason_code':None,'video_id':None}
         # This durable claim consumes the identity even if later gates fail.
         sha=self.write(path,None,record);require(isinstance(sha,str) and re.fullmatch('[a-f0-9]{40}',sha),'CLAIM_WRITE_UNKNOWN_STOP')
@@ -94,10 +99,15 @@ class GitHubContentsBackend:
     """
     def __init__(self,transport):self.transport=transport;self.calls=0
     def request(self,method,path,body=None):
-        require(self.calls<4 and method in ['GET','PUT'] and path.startswith('/repos/ikkinotako2-sketch/project-love-machine/contents/youtube-once/'),'GITHUB_REQUEST_STOP')
+        require(not getattr(self,'uncertain',False),'STATE_IO_UNKNOWN_STOP')
+        pattern=r'/repos/ikkinotako2-sketch/project-love-machine/contents/youtube-once/[A-Za-z0-9][A-Za-z0-9._-]{0,63}\.json'
+        require(self.calls<4 and method in ['GET','PUT'] and re.fullmatch(pattern+(r'\?ref=plm-execution-state' if method=='GET' else ''),path),'GITHUB_REQUEST_STOP')
+        self.uncertain=True
         self.calls+=1;status,payload=self.transport(method,path,body)
-        if method=='GET' and status==404:return None
+        if method=='GET' and status==404:self.uncertain=False;return None
         require(status in [200,201] and isinstance(payload,dict),'GITHUB_HTTP_STOP')
+        if method=='PUT':require(re.fullmatch('[a-f0-9]{40}',str(payload.get('content',{}).get('sha',''))),'STATE_WRITE_UNKNOWN_STOP')
+        self.uncertain=False
         return payload
     def read(self,path):
         require(path.startswith('youtube-once/') and ID.fullmatch(path.removeprefix('youtube-once/').removesuffix('.json')),'STATE_PATH_STOP')
@@ -113,6 +123,31 @@ class GitHubContentsBackend:
         if sha is not None:body['sha']=sha
         data=self.request('PUT','/repos/ikkinotako2-sketch/project-love-machine/contents/'+path,body)
         return data.get('content',{}).get('sha')
+
+class ExclusiveGitClaimLedger(GitClaimLedger):
+    """One private-test operation per durable state initialization.
+
+    Create-if-absent global tombstone BEFORE any job claim. Never released,
+    deleted or retried. A lost create ACK is fenced by the stored tombstone on
+    another runner. Two backend instances share the same repository transport;
+    the guard uses at most 2 requests and the existing job path at most 4.
+    This is not an automatically reusable scheduler lock.
+    """
+    def __init__(self,backend,guard_backend,branch):
+        super().__init__(backend,branch);self.guard=guard_backend;self.guard_acquired=False
+    def claim(self,job,fingerprint,identity,owner,now):
+        require(not self.guard_acquired and not self.uncertain,'EXCLUSIVE_OPERATION_CONSUMED_STOP')
+        self.path(job)
+        require(isinstance(identity,str) and ID.fullmatch(identity) and isinstance(owner,str) and ID.fullmatch(owner) and isinstance(fingerprint,str) and re.fullmatch('[a-f0-9]{64}',fingerprint) and type(now) is int and now>0,'CLAIM_SHAPE_STOP')
+        self.uncertain=True
+        path='youtube-once/exclusive-private-test.json'
+        try:
+            require(self.guard.read(path) is None,'EXCLUSIVE_OPERATION_CONSUMED_STOP')
+            sha=self.guard.write(path,None,{'job_id':'exclusive-private-test','identity':identity,'state':'CONSUMED_BEFORE_JOB_CLAIM','target_job_id':job,'owner':owner,'created_at':now})
+            require(isinstance(sha,str) and re.fullmatch('[a-f0-9]{40}',sha),'EXCLUSIVE_WRITE_UNKNOWN_STOP')
+        except Exception:raise Stop('EXCLUSIVE_OPERATION_STOP_NO_RETRY') from None
+        self.guard_acquired=True;self.uncertain=False
+        return super().claim(job,fingerprint,identity,owner,now)
 
 class BoundedGitHubTransport:
     def __init__(self,token,*,approved=False,connector=None):
