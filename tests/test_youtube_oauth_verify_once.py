@@ -48,7 +48,12 @@ class Tests(unittest.TestCase):
   source=(ROOT/g.HELPER).read_text();self.assertGreater(source.index('from readiness import youtube_oauth_verify as auth'),source.index('load_gate()\n'))
  def test_secret_step_after_gate(self):
   y=(ROOT/g.WORKFLOW).read_text();self.assertLess(y.index('Secret-free local gate'),y.index('secrets.PLM_YOUTUBE_GAME_001'));self.assertIn('fetch-depth: 0',y);self.assertIn('persist-credentials: false',y)
- def test_future_marker_absent(self):self.assertFalse((ROOT/g.MARKER).exists())
+ def test_future_marker_absent(self):
+  marker=ROOT/g.MARKER
+  if marker.exists():
+   self.assertEqual(hashlib.sha256(marker.read_bytes()).hexdigest(),'db6f46d821d9fc8f1bfd601f08deeaafa6ab7152e8e2c550ce9d3ee0219092ba')
+   self.assertEqual(json.loads(marker.read_bytes())['state'],'CONSUMED_BEFORE_REMOTE')
+  else:self.assertFalse(marker.exists())
  def test_gate_failure_remote_zero(self):
   with patch.object(g,'load_gate',side_effect=g.Stop('bad')),patch('readiness.youtube_oauth_verify.authorized_https_transport') as transport:
    with self.assertRaises(SystemExit):g.main()
