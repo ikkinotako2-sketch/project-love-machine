@@ -1,0 +1,13 @@
+{
+  "identity": "provider-neutral-youtube-oauth-verify-20261012-r1",
+  "state": "CONSUMED_BEFORE_REMOTE",
+  "prepared_commit_sha": "fbff9e455cc051c8afab5a5f00340dd1bc3535de",
+  "secret_reference": "PLM_YOUTUBE_GAME_001",
+  "oauth_execution_approved": true,
+  "workflow_sha256": "2a5f8cf3ca68b9aa32767bb1be00fe29673e99547430379b1fba0b256ba62719",
+  "executor_sha256": "ac4cf6b1ce2fdaeaffa015831c841df753d530ac6c938573dc3af8ff70720bb2",
+  "plan_sha256": "84cb075f8643f608a9264806c45e57b765a10442d28aa38db9bd3b060e257f51",
+  "schema_sha256": "1986c96aebc1d2ba87e92a78606191095c8460c37bff8f5a1486c11ead1f6a34",
+  "wrapper_sha256": "9531fa5871700ef90f89bdbc190981a95963cfe36e6d0c28b08b20d9cac6ea7e",
+  "provider_sha256": "9fbce205a267ee3a880eb3d34b6e02d410e9aa249d78b16a686a0f559639a8e9"
+}
