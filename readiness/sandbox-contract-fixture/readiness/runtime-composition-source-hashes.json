@@ -1,0 +1,14 @@
+{
+  "serverless/youtube-connection/bundle.mjs": "e1f0a6e128a4f85ea358cd00f821e87f0146f8dd6e0d73eef3eb7636100a0a1f",
+  "serverless/youtube-connection/checkpoint.mjs": "812526012a8954282451d3331aade6e5aa28395efaf4bbb0bb90e5575e428a63",
+  "serverless/youtube-connection/connection.mjs": "53524c17f8b72321c35b8466ce17d2ae5043d2811ab57dd1e9764e4d15e9a8fe",
+  "serverless/youtube-connection/dispatch.mjs": "1000b43a875f56e777788d27a4522f6375e60a2fb6d189fee35b297553d13631",
+  "serverless/youtube-connection/generation-adapter.mjs": "3a8641b155420cb48ba853ed6fb54edcc06ec0bff913e049adf3a40122a2e51d",
+  "serverless/youtube-connection/mapping.mjs": "c24a962bb69e5ae5badff8469b4c34a7359b594c5be167d3f470a2b724c35c54",
+  "serverless/youtube-connection/operation-gate.mjs": "623cb277ec5f93f4642ebed0225a65a9e54a296873845d124fae6eda1c57e20d",
+  "serverless/youtube-connection/runtime-bundle.mjs": "8a6615fd020ca6590ba8f5e2c73a3844473d9e6ecd3babb19ea836d604d4a8a9",
+  "serverless/youtube-connection/runtime-contract.mjs": "0e1f0d197d8da43718256b4424721786d847c4fc5135f183250887b0d416655a",
+  "serverless/youtube-connection/runtime.mjs": "134c97c36a0a20cc43b35e3dce1a1243a5d9008673ece5fb29f7cb8c3a52f3ea",
+  "serverless/youtube-connection/sender.mjs": "6e1a6058224190616f64000c7935bf34e23f0f22c6181169c216fe4c5605efda",
+  "serverless/youtube-live/worker.mjs": "1fe6d0b87943731c04714015adcecd8678775e1ea1cc201d5eb0ca15edba8124"
+}

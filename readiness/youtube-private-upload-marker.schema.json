@@ -1,0 +1,15 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "type":"object","additionalProperties":false,
+  "required":["identity","state","prepared_commit_sha","job_id","expected_channel_id","media_sha256","source_manifest_sha256","upload_approved"],
+  "properties":{
+    "identity":{"const":"provider-neutral-youtube-private-upload-20261012-r1"},
+    "state":{"const":"CONSUMED_BEFORE_REMOTE"},
+    "prepared_commit_sha":{"type":"string","pattern":"^[a-f0-9]{40}$"},
+    "job_id":{"const":"plm-private-channel-recovery-20261012-r1"},
+    "expected_channel_id":{"const":"UCJdTc1jznWNFlp0qy0SQ6uQ"},
+    "media_sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "source_manifest_sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "upload_approved":{"const":true}
+  }
+}

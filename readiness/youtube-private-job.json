@@ -1,0 +1,21 @@
+{
+ "job_id":"plm-private-channel-recovery-20261012-r1",
+ "upload_identity":"provider-neutral-youtube-private-upload-20261012-r1",
+ "expected_channel_id":"UCJdTc1jznWNFlp0qy0SQ6uQ",
+ "channel_match":"UNVERIFIED",
+ "execution_approved":false,
+ "title":"PLM 非公開映像・音声確認",
+ "sentences":["これは非公開の動作確認動画です。","画面と音声の同期を確認しています。","この動画を公開する予定はありません。"],
+ "speaker":3,"voice_name":"ずんだもん","voice_style":"ノーマル",
+ "description":"自動動画生成の非公開動作確認。オリジナル台本・図形のみ。VOICEVOX:ずんだもん。合成音声を使用しています。",
+ "credit":"VOICEVOX:ずんだもん",
+ "rights_basis":"Original technical narration and FFmpeg procedural backgrounds; licensed VOICEVOX voice with mandatory credit; no external music/footage/character art",
+ "voice_terms":"https://zunko.jp/con_ongen_kiyaku.html",
+ "privacy_status":"private","notify_subscribers":false,"scheduled_for":"",
+ "made_for_kids":false,"contains_synthetic_media":true,
+ "audience_basis":"Technical test for adult operator; no child-directed subject",
+ "output":{"format":"mp4","width":1080,"height":1920,"fps":30},
+ "results_path":"offline-evidence/render-evidence.json",
+ "unknown_policy":"PERMANENT_STOP_NO_RESEND",
+ "retry":0,"resume":0,"max_videos":1
+}

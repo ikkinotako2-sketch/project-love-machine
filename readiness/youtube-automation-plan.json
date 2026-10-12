@@ -1,0 +1,59 @@
+{
+  "identity": "provider-neutral-youtube-offline-automation-20261012-r1",
+  "upload_identity_candidate": "provider-neutral-youtube-private-upload-20261012-r1",
+  "upload_marker_candidate": "audit-evidence/consumed/provider-neutral-youtube-private-upload-20261012-r1.json",
+  "marker_state": "NOT_CREATED",
+  "execution_approved": false,
+  "live_enabled": false,
+  "expected_channel_id": "UCJdTc1jznWNFlp0qy0SQ6uQ",
+  "channel_match": "UNVERIFIED",
+  "secret_reference": "PLM_YOUTUBE_GAME_001",
+  "offline_only": true,
+  "flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "interval_seconds": 3600,
+  "maximum_ticks": 24,
+  "lease_seconds": 300,
+  "daily_limits": {
+    "jobs": 2,
+    "minutes": 40,
+    "units": 1000,
+    "bytes": 67108864
+  },
+  "estimated_cost": {
+    "jobs": 1,
+    "minutes": 20,
+    "units": 200,
+    "bytes": 33554432
+  },
+  "live_budget_verified": false,
+  "budget_policy": "reserve upper bounds atomically before execution; no paid fallback; no release on UNKNOWN",
+  "maximum_upload_init_posts": 1,
+  "maximum_media_puts": 1,
+  "maximum_upload_status_requests": 0,
+  "retry": 0,
+  "resume": 0,
+  "redirect": 0,
+  "fallback": 0,
+  "maximum_videos": 1,
+  "lease_policy": "Only pre-SENT Processing may be reclaimed with higher owner epoch/fence; SENT expiry quarantines UNKNOWN permanently",
+  "results": "SQLite reference ledger durable sanitized result; production adapter remains unwired",
+  "notifications": "durable local notification outbox; no external delivery",
+  "live_requirements": [
+    "explicit new upload approval",
+    "fresh channel proof with same credential",
+    "immutable marker/history/source hash gate",
+    "production durable store atomic semantics",
+    "reviewed media hash and quality",
+    "free budget verified",
+    "postcheck/activation approval separate"
+  ],
+  "no_production_schedule": true,
+  "cron_count": 0,
+  "consumer_count": 0,
+  "cloudflare_requests": 0
+}

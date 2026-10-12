@@ -1,0 +1,60 @@
+name: PLM YouTube Offline Automation
+on:
+  push:
+    branches: [plm-youtube-offline-completion-20261012-r1]
+    paths: [plm/automation/**, readiness/youtube-*, readiness/render_private_fixture.py, tests/test_automation*.py, .github/workflows/plm-youtube-offline-automation.yml]
+permissions:
+  contents: read
+concurrency:
+  group: plm-youtube-offline-completion
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline regression and network-denied simulation
+        run: python -m readiness.run_automation_offline_tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Exact sandbox schema, signature and callback contracts; network denied
+        run: node --import ./readiness/offline_node_guard.mjs --test readiness/sandbox-contract-fixture/serverless/test-runtime-composition.mjs
+      - name: Install existing renderer dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
+      - name: Start local VOICEVOX; no credentials
+        run: |
+          docker pull voicevox/voicevox_engine:cpu-latest
+          docker inspect --format '{{.Id}}' voicevox/voicevox_engine:cpu-latest > voicevox-image-id.txt
+          docker run -d --rm --name plm-offline-voice -e VV_DISABLE_MUTABLE_API=1 -p 127.0.0.1:50021:50021 voicevox/voicevox_engine:cpu-latest
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:50021/version >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - name: Generate one offline private candidate; no upload adapter
+        run: |
+          python -m readiness.render_private_fixture
+          cp voicevox-image-id.txt offline-evidence/
+          python -m readiness.simulate_automation
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-offline-private-candidate-${{ github.sha }}
+          path: offline-evidence/
+          retention-days: 30
+          if-no-files-found: error
