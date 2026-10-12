@@ -9,6 +9,7 @@
 IntegratedCandidate：ThemeAdapter → ScriptAdapter → 保存済みrender/Quality Gate → budget → Ledger claim → fixture channel/session/scope → StrictUploader → durable result → callback ACK → MetricsAdapter → improvement → 次job。
 Scriptは既存の固定テスト動画の台本を使用し、そのbytesを動画証拠と比較する。任意の新台本はこの保存済み動画に載せ替えない。新テーマの実動画には既存rendererでの新renderが必要。
 Pythonの実動画uploadモック結果をJSONでNodeの既存Worker fixtureへ渡し、同じjob/media/video identityでcheckpoint/binding/result、HMAC、独立provenanceを確認。processed/private readbackは明示的MOCK_ONLYであり、実YouTube処理完了証明ではない。
+実動画の台本・字幕区間からWorker形式のscriptを構築し、raw SHA256をPython/Node間で完全一致させる。保存済みasset再利用を検証しており、Worker既存mapCheckpointのspeaker=1で新しく生成した動画とは主張しない。新render時のvoice=3の設定は新successor mappingで明示固定が必要な残接続。
 
 Journalは停止状態・未配送outbox・callback状態をSQLiteへ保持。SENTクラッシュやDone後callback未確認を再起動時に隔離。48時間仮想時計は4件、2件/dayまで。異常fixtureはAPI/render/Actions/Worker/重複/D1・GitHub不明/upload不明/auth/quota/free-budget/callback/signature/SHA/artifact/secret/rights/emergencyを検証。
 外部通知は送信しない。outbox delivered=0を表示。

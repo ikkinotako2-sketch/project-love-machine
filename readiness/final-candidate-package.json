@@ -52,5 +52,7 @@
   "post_upload_readback": "SEPARATE_APPROVAL_REQUIRED",
   "notification_delivery": "OUTBOX_UNDELIVERED_ONLY",
   "immutable_dispatch_acceptance": "UNVERIFIED",
-  "production_workflow": "UNCONDITIONAL_PARKED"
+  "production_workflow": "UNCONDITIONAL_PARKED",
+  "new_render_voice_mapping": "BLOCKED_EXISTING_WORKER_SPEAKER_1_PRIVATE_ASSET_SPEAKER_3",
+  "render_mode": "REUSE_EXACT_APPROVED_ASSET_NO_NEW_RENDER"
 }

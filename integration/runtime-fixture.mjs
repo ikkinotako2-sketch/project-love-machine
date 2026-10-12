@@ -14,11 +14,11 @@ const policy={made_for_kids:false,contains_synthetic_media:true};
 const file=p=>readFileSync(new URL('../readiness/sandbox-contract-fixture/'+p,import.meta.url));
 // Synthetic byte arrays used only under offline factory, never live configuration.
 const keys=()=>Object.fromEntries(['dispatch','checkpoint','callback'].map((r,i)=>[r,{role:r,id:r+'-candidate-v1',required_env:ROLE_ENV[r],material:new Uint8Array(32).fill(17*(i+1)),material_class:'INJECTED_NON_FIXTURE'}]));
-async function fixture({transportStatus=204,complete=true,Implementation=createOfflineComposition,Gate=OperationGate,Ledger=OfflineOperationLedger,jobId='job'}={}){
+async function fixture({transportStatus=204,complete=true,Implementation=createOfflineComposition,Gate=OperationGate,Ledger=OfflineOperationLedger,jobId='job',script:sourceScript=script}={}){
  assert.match(jobId,/^[A-Za-z0-9_-]{1,64}$/);
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
  for(const name of ['0008_provider_neutral_roundtrip_backend.sql','0009_youtube_queue_result_proposal.sql','0010_youtube_pipeline_checkpoint_candidate.sql'])db.exec(file('serverless/migrations/'+name).toString());
- const raw=JSON.stringify(script),sh=await hash(raw),req='a'.repeat(64),exec=(sql,a=[])=>db.prepare(sql.replaceAll("'job'","'"+jobId+"'")).run(...a);
+ const raw=JSON.stringify(sourceScript),sh=await hash(raw),req='a'.repeat(64),exec=(sql,a=[])=>db.prepare(sql.replaceAll("'job'","'"+jobId+"'")).run(...a);
  exec("INSERT INTO plm_rt_v2_job VALUES ('job','youtube','youtube_game_001','intent-job','owner',1,1,1,'ACTIVE',NULL,NULL,100,100)");
  exec("INSERT INTO plm_rt_v2_script VALUES ('cp','job','owner',1,1,1,'STARTED','fixture','fixed',?,NULL,NULL,100,100)",[req]);
  exec("INSERT INTO plm_rt_v2_effect VALUES ('gen','job','GENERATION','owner',1,1,?,'gen-delivery',NULL,1,'RESERVED',100,100)",[req]);

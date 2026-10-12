@@ -105,7 +105,7 @@ class IntegratedCandidate:
         self.evidence=json.loads((root/'readiness/reused-render-evidence.json').read_text())
         self.upload=FixtureUpload(self.l);self.results=[];self.seen=set();self.next_id=None;self.pending_result=None
         self.theme=ThemeAdapter(lambda:{'topic':'非公開の映像・音声確認','source_id':'original-fixture','license':'original','verified':True},rights_policy=['original'])
-        self.script=ScriptAdapter(lambda t:{'narration':' '.join(self.job['sentences']),'rights_verified':True},capability_verified=True)
+        self.script=ScriptAdapter(lambda t:{'narration':''.join(self.job['sentences']),'rights_verified':True},capability_verified=True)
         self.metrics=MetricsAdapter(lambda vid:{'views':0,'likes':0,'comments':0},capability_verified=True)
     def close(self):self.l.close()
     def tick(self,job_id, fault=None):
@@ -131,7 +131,10 @@ class IntegratedCandidate:
             proof={**self.job,'job_id':job_id,'media_sha256':MEDIA,'source_pins_exact':True,'rights_verified':True,'quality_pass':True,'upload_approved':True,'marker_consumed_before_remote':True,'marker_identity':'fixture-'+job_id,'run_attempt':1}
             result=StrictUploader(self.l,self.upload,self.clock).upload(claim,'fixture-'+job_id,session,self.media,proof)
             if result['state']!='Done':self.j.halt('UPLOAD_UNKNOWN');return result
-            self.pending_result={**result,'media_sha256':MEDIA,'channel_id':CHANNEL,'proof_basis':'OFFLINE_FIXTURE','processed_readback':'MOCK_ONLY'}
+            worker_script={'title':self.job['title'],'hook':self.job['sentences'][0],'narration':script['narration'],'scenes':[{'start':t['start_seconds'],'end':t['end_seconds'],'caption':t['text'],'visual_keyword':'study','motion':'none','sfx':'none','emphasis_words':[]} for t in self.evidence['timing']],'bgm':{'mood':'calm','volume':0}}
+            require(worker_script['narration']==''.join(t['caption'] for t in worker_script['scenes']),'SCRIPT_MEDIA_BINDING_STOP')
+            script_raw=json.dumps(worker_script,ensure_ascii=False,separators=(',',':'))
+            self.pending_result={**result,'media_sha256':MEDIA,'channel_id':CHANNEL,'proof_basis':'OFFLINE_FIXTURE','processed_readback':'MOCK_ONLY','script_raw':script_raw,'script_sha256':hashlib.sha256(script_raw.encode()).hexdigest(),'render_mode':'REUSE_EXACT_APPROVED_ASSET_NO_NEW_RENDER'}
             require(fault!='CALLBACK_UNKNOWN','CALLBACK_UNKNOWN')
             self.j.callback(job_id,'ACK',now+1)
             observations=self.metrics.collect(result);improvement=self.metrics.improve(observations)

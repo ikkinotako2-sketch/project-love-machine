@@ -9,12 +9,14 @@ import {signCallback} from '../readiness/sandbox-contract-fixture/serverless/you
 test('Python actual-video Strict Upload → Worker signed result → D1 COMPLETE',async()=>{
  const result=JSON.parse(readFileSync(new URL('../final-evidence/upload-result.json',import.meta.url)));
  assert.equal(result.proof_basis,'OFFLINE_FIXTURE');assert.equal(result.processed_readback,'MOCK_ONLY');assert.equal(result.state,'Done');
- const f=await fixture({jobId:result.job_id});
+ const f=await fixture({jobId:result.job_id,script:JSON.parse(result.script_raw)});
  try{
   const c=await connectOffline({...f.opts,remoteActivationApproved:false,day:'2026-10-12',admission:{reserve:async()=>true,notice:async()=>{}},provenance:async(run,attempt,sha)=>run==='123'&&attempt===1&&sha===f.opts.target.workflow_sha256});
   await c.enqueue(f.desc('ENQUEUE'),{not_before:104});f.setNow(105);await c.dispatch(f.desc('DISPATCH'));
   f.setNow(108);await c.checkpoint(f.desc('BIND'),f.bind);f.setNow(110);await c.checkpoint(f.desc('RENDER'),f.render);
   assert.equal(result.job_id,f.resultBody.job_id);
+  assert.equal(result.script_sha256,f.resultBody.script_sha256);
+  assert.equal(result.render_mode,'REUSE_EXACT_APPROVED_ASSET_NO_NEW_RENDER');
   assert.equal(result.media_sha256,f.resultBody.media_sha256);
   assert.equal(result.video_id,f.resultBody.video_id);
   const packet=await signCallback(f.resultBody,f.keys.callback.material);
