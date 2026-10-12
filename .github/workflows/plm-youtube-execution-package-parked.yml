@@ -1,0 +1,24 @@
+name: PLM Execution Package PARKED
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: plm-production-execution-permanently-parked
+  cancel-in-progress: false
+jobs:
+  parked:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python -m plm.automation.execution_gate

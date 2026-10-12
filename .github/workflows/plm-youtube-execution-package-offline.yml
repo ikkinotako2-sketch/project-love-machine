@@ -1,0 +1,37 @@
+name: PLM Execution Package OFFLINE
+on:
+  push:
+    branches: [plm-youtube-execution-package-20261013-r1]
+permissions:
+  contents: read
+concurrency:
+  group: plm-execution-package-offline
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Frozen source and preparation history; no networking
+        run: python -m readiness.run_execution_package
+      - name: Production remains unreachable
+        run: python -m plm.automation.execution_gate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-execution-package-${{ github.sha }}
+          path: execution-evidence/
+          retention-days: 7
+          if-no-files-found: error

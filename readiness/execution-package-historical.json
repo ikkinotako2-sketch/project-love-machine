@@ -1,0 +1,32 @@
+{
+  "consumed": [
+    {
+      "identity": "provider-neutral-youtube-oauth-verify-20261012-r1",
+      "ref_observed": "plm-youtube-oauth-readiness-20261012-r1",
+      "raw_sha256": "db6f46d821d9fc8f1bfd601f08deeaafa6ab7152e8e2c550ce9d3ee0219092ba",
+      "state": "PERMANENTLY_CONSUMED",
+      "reuse_forbidden": true
+    },
+    {
+      "identity": "provider-neutral-youtube-oauth-verify-20261012-r2",
+      "ref_observed": "plm-youtube-oauth-readiness-20261012-r1",
+      "raw_sha256": "85be7ba392b9711a0502f0cf632b8a6c9c7a1d0de461f20eabb419a4d8ed910e",
+      "state": "PERMANENTLY_CONSUMED",
+      "reuse_forbidden": true
+    },
+    {
+      "identity": "provider-neutral-youtube-oauth-scope-diagnostic-20261012-r1",
+      "ref_observed": "745626b5541a28861139efc6eac1cfa16be652ae",
+      "raw_sha256": "8a423f2a506f5608c81424674e18e5bab8b8841bbe8c90923e9b1379cc7c4aa6",
+      "state": "PERMANENTLY_CONSUMED",
+      "reuse_forbidden": true
+    }
+  ],
+  "unconsumed": {
+    "identity": "provider-neutral-youtube-channel-verify-20261012-r1",
+    "branch": "plm-youtube-channel-readiness-20261012-r1",
+    "commit": "d6733481fffa16fcdc8d53d0fad46fd64301d237",
+    "state": "UNCONSUMED_PROTECTED"
+  },
+  "live_success_not_implied": true
+}

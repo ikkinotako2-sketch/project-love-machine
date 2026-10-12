@@ -1,0 +1,232 @@
+{
+  "version": 1,
+  "repository": "ikkinotako2-sketch/project-love-machine",
+  "branch": "plm-youtube-execution-package-20261013-r1",
+  "preparation_parent": "26da3b48e26d7ee8a75e70798fb00847d8fa8f04",
+  "preparation_commit_count": 1,
+  "preparation_files": [
+    ".github/workflows/plm-youtube-execution-package-offline.yml",
+    ".github/workflows/plm-youtube-execution-package-parked.yml",
+    "plm/automation/execution_gate.py",
+    "readiness/execution-package-historical.json",
+    "readiness/execution-package-marker.schema.json",
+    "readiness/execution-package-operations.md",
+    "readiness/execution-package-plan.json",
+    "readiness/execution-package-source-hashes.json",
+    "readiness/run_execution_package.py",
+    "tests/test_execution_package.py"
+  ],
+  "launchable": false,
+  "execution_approved": false,
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "source_manifest": "readiness/execution-package-source-hashes.json",
+  "executor_path": "plm/automation/execution_gate.py",
+  "workflow_path": ".github/workflows/plm-youtube-execution-package-parked.yml",
+  "schema_path": "readiness/execution-package-marker.schema.json",
+  "operations": {
+    "channel": {
+      "identity": "provider-neutral-youtube-channel-session-20261013-r1",
+      "requires": [],
+      "budget": {
+        "oauth_refresh_POST": 1,
+        "youtube_channels_GET": 1
+      },
+      "credentials": [
+        "PLM_YOUTUBE_GAME_001"
+      ],
+      "adapter": "FreshChannel",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-channel-session-20261013-r1.json"
+    },
+    "state_init": {
+      "identity": "provider-neutral-youtube-state-initialize-20261013-r1",
+      "requires": [],
+      "budget": {
+        "github_state_PUT": 1
+      },
+      "credentials": [
+        "PLM_GITHUB_STATE_TOKEN"
+      ],
+      "adapter": "OFFLINE_INITIAL_DOCUMENT_ONLY",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-state-initialize-20261013-r1.json"
+    },
+    "private_upload": {
+      "identity": "provider-neutral-youtube-private-upload-20261013-r1",
+      "requires": [
+        "channel",
+        "state_init"
+      ],
+      "budget": {
+        "github_provenance_GET": 6,
+        "github_state_GET": 2,
+        "github_state_PUT": 6,
+        "oauth_refresh_POST": 1,
+        "youtube_channels_GET": 1,
+        "youtube_upload_logical_attempt": 1,
+        "youtube_processed_GET": 1,
+        "callback_POST": 1
+      },
+      "credentials": [
+        "PLM_YOUTUBE_GAME_001",
+        "PLM_GITHUB_STATE_TOKEN",
+        "PLM_YOUTUBE_RESULT_CALLBACK_KEY"
+      ],
+      "adapter": "CandidateFactory.run_OFFLINE_ONLY",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-private-upload-20261013-r1.json"
+    },
+    "finalize": {
+      "identity": "provider-neutral-youtube-private-finalize-20261013-r1",
+      "requires": [
+        "private_upload"
+      ],
+      "budget": {
+        "github_provenance_GET": 6,
+        "github_state_GET": 2,
+        "github_state_PUT": 1
+      },
+      "credentials": [
+        "PLM_GITHUB_STATE_TOKEN"
+      ],
+      "adapter": "CandidateFactory.finalize_OFFLINE_ONLY",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-private-finalize-20261013-r1.json"
+    },
+    "migration": {
+      "identity": "provider-neutral-automation-0011-apply-20261013-r1",
+      "requires": [],
+      "budget": {},
+      "credentials": [],
+      "adapter": "NO_REMOTE_EXECUTOR_PREPARED",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-automation-0011-apply-20261013-r1.json"
+    },
+    "migration_postcheck": {
+      "identity": "provider-neutral-automation-0011-postcheck-20261013-r1",
+      "requires": [
+        "migration"
+      ],
+      "budget": {},
+      "credentials": [],
+      "adapter": "NO_REMOTE_EXECUTOR_PREPARED",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-automation-0011-postcheck-20261013-r1.json"
+    },
+    "worker_deploy": {
+      "identity": "provider-neutral-speaker-runtime-deploy-20261013-r1",
+      "requires": [
+        "migration_postcheck"
+      ],
+      "budget": {},
+      "credentials": [
+        "PLM_CF_WORKER_DEPLOY_TOKEN"
+      ],
+      "adapter": "NO_REMOTE_EXECUTOR_PREPARED",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-speaker-runtime-deploy-20261013-r1.json"
+    },
+    "worker_postcheck": {
+      "identity": "provider-neutral-speaker-runtime-postcheck-20261013-r1",
+      "requires": [
+        "worker_deploy"
+      ],
+      "budget": {},
+      "credentials": [
+        "PLM_CF_WORKER_API_TOKEN"
+      ],
+      "adapter": "NO_REMOTE_EXECUTOR_PREPARED",
+      "launchable": false,
+      "execution_approved": false,
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "marker_path": "audit-evidence/consumed/provider-neutral-speaker-runtime-postcheck-20261013-r1.json"
+    }
+  },
+  "target": {
+    "channel_id": "UCJdTc1jznWNFlp0qy0SQ6uQ",
+    "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
+    "artifact_id": 11746833809,
+    "artifact_run": 38250671983,
+    "state_branch": "plm-execution-state-v2",
+    "state_path": "automation-state/lifecycle.json",
+    "worker": "plm-serverless-sandbox-control",
+    "database": "plm-serverless-sandbox-state",
+    "migration": "integration/0011_automation_budget_notification_successor.sql"
+  },
+  "blockers": [
+    "OWNER_GOOGLE_READ_SCOPE_CONSENT",
+    "CHANNEL_MATCH_UNVERIFIED",
+    "LIVE_EXECUTOR_NOT_ENABLED",
+    "ACTUAL_FREE_QUOTA_UNVERIFIED",
+    "IMMUTABLE_REF_DISPATCH_ACCEPTANCE_UNVERIFIED",
+    "STATE_BRANCH_NOT_CREATED",
+    "CF_MIGRATION_DEPLOY_NEED_SEPARATE_EXECUTORS_AND_APPROVAL"
+  ],
+  "scope_evidence": {
+    "upload": true,
+    "readonly": false,
+    "channel_match": "UNVERIFIED",
+    "historical_run": 38258935081
+  },
+  "protected_unconsumed_identity": "provider-neutral-youtube-channel-verify-20261012-r1",
+  "upload_budget_note": "Logical upload attempt is not an HTTP request count. Freeze resumable session/media protocol separately before live approval."
+}
