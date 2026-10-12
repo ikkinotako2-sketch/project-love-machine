@@ -1,0 +1,43 @@
+{
+  "identity": "provider-neutral-youtube-oauth-readiness-20261012-r1",
+  "parent_commit": "6ed3b3d284d23f66f96030282add75aec16377ac",
+  "preparation_branch": "plm-youtube-oauth-readiness-20261012-r1",
+  "repository": "ikkinotako2-sketch/project-love-machine",
+  "provider_path": "plm/social_adapters/youtube/oauth.py",
+  "provider_sha256": "9fbce205a267ee3a880eb3d34b6e02d410e9aa249d78b16a686a0f559639a8e9",
+  "provider_reused": true,
+  "provider_unchanged": true,
+  "future_url": "https://oauth2.googleapis.com/token",
+  "future_method": "POST",
+  "maximum_refresh_posts": 1,
+  "timeout_seconds": 30,
+  "response_max_bytes": 32768,
+  "execution_approved": false,
+  "launchable": false,
+  "secret_selector_status": "OWNER_APPROVAL_REQUIRED",
+  "secret_values_retained": 0,
+  "access_token_retained": 0,
+  "remote_error_body_retained": 0,
+  "retry": 0,
+  "redirect": 0,
+  "fallback": 0,
+  "upload": 0,
+  "publish": 0,
+  "channel_identity_proven": false,
+  "scope_capability_proven": false,
+  "renderer_changes": 0,
+  "future_execution_marker": "NOT_CREATED",
+  "historical_success_run": 36153932146,
+  "historical_success_not_current_oauth_proof": true,
+  "pass_terminal": "OAUTH_REFRESH_AUTH_CONFIRMED_STOP_BEFORE_YOUTUBE",
+  "remaining_gate": [
+    "exact credential secret reference approved",
+    "exact one-shot marker and workflow future approval",
+    "current production HEAD/provider equality before execution"
+  ],
+  "new_files": [
+    "readiness/youtube_oauth_verify.py",
+    "readiness/youtube-oauth-verify-plan.json",
+    "tests/test_youtube_oauth_verify.py"
+  ]
+}
