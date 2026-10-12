@@ -1,0 +1,15 @@
+{
+  "workflow_sha256": "8bfef6705986a269b2188edcc6bdc237415a68d2e1d26105619cc5ee2874faa0",
+  "executor_sha256": "2ded6ad5bf7ef5292a148ff14c19b7ac4b0802c88f45f1a173f4a4daf18ebdf1",
+  "engine_sha256": "4bc46b930de506e64657774cbe991d395bdea2b389816111114b272ad531644a",
+  "plan_sha256": "726148bbf3d1f1b403af988e3460677e6d0193c17628ce050b5e68618b227412",
+  "schema_sha256": "81f24d5defeb62ed738dac5826538d8f95dab9822029235ad7db07b3435a91d4",
+  "wrapper_sha256": "9531fa5871700ef90f89bdbc190981a95963cfe36e6d0c28b08b20d9cac6ea7e",
+  "provider_sha256": "9fbce205a267ee3a880eb3d34b6e02d410e9aa249d78b16a686a0f559639a8e9",
+  "historical_evidence_sha256": "901585fec4ff6f67e5a3eb3ccb46d5648d755a17ac75437d39b05b537cb0a904",
+  "identity": "provider-neutral-youtube-oauth-scope-diagnostic-20261012-r1",
+  "state": "CONSUMED_BEFORE_REMOTE",
+  "prepared_commit_sha": "8c0ec6fc0c5965106b6b94e70fe5819733355579",
+  "secret_reference": "PLM_YOUTUBE_GAME_001",
+  "scope_execution_approved": true
+}
