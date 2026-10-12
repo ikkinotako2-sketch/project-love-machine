@@ -1,0 +1,39 @@
+name: PLM Residual Connections Offline
+on:
+  push:
+    branches: [plm-youtube-residual-connections-20261012-r1]
+    paths: [plm/automation/production_bridge.py, plm/automation/content_adapters.py, integration/**, tests/test_connections.py, readiness/youtube-production-package.json, .github/workflows/plm-youtube-connections-offline.yml]
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: New Python contracts network denied
+        run: |
+          python - <<'PY'
+          import sys,unittest
+          def deny(event,args):
+              if event.startswith('socket.') or event in ('urllib.Request','http.client.connect'):raise RuntimeError('OFFLINE_NETWORK_FORBIDDEN')
+          sys.addaudithook(deny)
+          result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.discover('tests',pattern='test_connections.py'))
+          if not result.wasSuccessful():raise SystemExit(1)
+          PY
+      - name: New Worker Actions composition with provenance gate
+        run: node --import ./readiness/offline_node_guard.mjs --test integration/test-connection.mjs

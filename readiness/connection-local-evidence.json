@@ -1,0 +1,8 @@
+{
+  "media_to_mock": "PASS",
+  "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
+  "new_python_tests": 16,
+  "new_node_tests": 7,
+  "scope": "FIXTURE_ONLY_LIVE_UNKNOWN",
+  "remote_requests": 0
+}

@@ -1,0 +1,20 @@
+{
+  "parent": "4b881ed39a867769f99613327c6c7653b152c7f0",
+  "files": {
+    "integration/0011_automation_budget_notification_candidate.sql": "2e8dada7f2413696493b48d0e712cfec7595b8d59861eeef73573a700ae9f088",
+    "integration/test-connection.mjs": "17fa28729282624da8ac347f0b82535ff288b86dbfd6bf150829b9599d77753d",
+    "integration/runtime-fixture.mjs": "08d3b822083a1af54cc9c257483ff25b8bf01c6603ad0aa29abfa7a923f1a009",
+    "integration/connection.mjs": "146fd91104919d2280a92f7ed5ca8a9711812d49e73faf8d2864d4bdffc459cc",
+    "tests/test_connections.py": "37a8c58c350411f2632c0eb863dc4893bd5a2675a134757a7af205d1d26af269",
+    "readiness/connection-local-evidence.json": "86d917ab0a108fe45a5e540afd973432d677db8f88a44be2d49fd09e907f045b",
+    "readiness/reused-render-evidence.json": "c416db69ce5f08dfa3a8fd2c42e7ddbb5ad46d0e2710b6df8e6b0fcc55b7343f",
+    "readiness/youtube-residual-report.md": "191e23b0d5e0f0af2d1d50441967f53e99810a075c067050866ccf9d84bde5be",
+    "readiness/youtube-production-package.json": "0923801cb2a0cd198a24f14113373d2a282a0b8bd4562d77a6187ef4923b3b97",
+    "plm/automation/production_bridge.py": "2d88d1c50c7c8956439ebb0d0e4b66b9c67e0d7562deb449359a564f08e12b63",
+    "plm/automation/content_adapters.py": "8819d7584ff890bfff1c0cec63a4a038f91809afef3ca4908e9a9eff944e07af",
+    ".github/workflows/plm-youtube-connections-offline.yml": "58737e9f640cc4922eb55a45e30b5ed0d85bdc144c2a0fc045cc65c8f92b9eab"
+  },
+  "reused_media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
+  "scope_revision": "20261001",
+  "scope_discovery_blob": "19f8ac1304cb095521f751c5c13ca0fad070af4d"
+}

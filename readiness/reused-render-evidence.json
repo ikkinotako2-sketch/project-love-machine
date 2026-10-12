@@ -1,0 +1,44 @@
+{
+  "mode": "OFFLINE_RENDER",
+  "quality": {
+    "ok": true,
+    "path": "short.mp4",
+    "bytes": 309965,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30.0,
+    "duration": 8.666667,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "subtitles": true,
+    "max_sample_luma": 95.1205,
+    "mean_audio_db": -16.2
+  },
+  "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
+  "audio_sha256": "9bd4d549308a055080a2df679224d0bc01191149320d186bcd706d5a0547cc01",
+  "caption_sha256": "31d7c724214ff66266b841835783567beca8264ed36ec637102cd9619db4d3db",
+  "timing": [
+    {
+      "start_seconds": 0,
+      "end_seconds": 2.816,
+      "text": "これは非公開の動作確認動画です。"
+    },
+    {
+      "start_seconds": 2.816,
+      "end_seconds": 5.770666666666667,
+      "text": "画面と音声の同期を確認しています。"
+    },
+    {
+      "start_seconds": 5.770666666666667,
+      "end_seconds": 8.661333333333333,
+      "text": "この動画を公開する予定はありません。"
+    }
+  ],
+  "timing_basis": "Per-sentence PCM frame counts, concatenated without gaps; visual frame quantization <=1/30s",
+  "voice": "VOICEVOX:ずんだもん",
+  "voice_style_verified": true,
+  "channel_match": "UNVERIFIED",
+  "upload_approved": false,
+  "youtube_requests": 0,
+  "oauth_posts": 0
+}
