@@ -387,7 +387,10 @@ class PreflightHistoryTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.root=Path(self.tmp.name)/'repo';self.root.mkdir();self.plan=copy.deepcopy(PLAN)
         self.git('init','-q');self.git('config','user.name','Fixture');self.git('config','user.email','fixture@example.invalid')
-        self.write('base.txt',b'base');self.commit('base');self.base=self.head();self.plan['preparation_parent']=self.base
+        self.write('base.txt',b'base')
+        dependencies={o[k] for o in self.plan['operations'].values() for k in ('workflow_path','executor_path')}|{self.plan['schema_path']}
+        for dep in dependencies-set(self.plan['preparation_files']):self.write(dep,b'fixture\n')
+        self.commit('base');self.base=self.head();self.plan['preparation_parent']=self.base
         for p in self.plan['preparation_files']:self.write(p,b'fixture\n')
         self.write('readiness/executor-final-plan.json',(json.dumps(self.plan)+'\n').encode())
         self.write(self.plan['source_manifest'],json.dumps({'source_sha256':{self.plan['operations']['channel']['executor_path']:digest(b'fixture\n')}}).encode())
@@ -481,5 +484,13 @@ class ExtraBoundaryTests(unittest.TestCase):
         e,_,_=expected_proof('private_upload');reader=RunProofAdapter(FixtureFunction(get),lambda:NOW)
         with self.assertRaises(Stop) as cm:reader.verify(e,phase='before_upload',permit=p)
         self.assertNotIn('FIXTURE_SECRET_DO_NOT_LOG',str(cm.exception))
+
+class RunnerMetadataTests(unittest.TestCase):
+    def test_nested_unittest_discovery_scenarios_recordable(self):
+        from readiness.run_executor_final import scenario_ids
+        first=AuthorityTests('test_no_approval_or_marker')
+        second=ChannelTests('test_wrong_channel_stops')
+        nested=unittest.TestSuite([unittest.TestSuite([first]),unittest.TestSuite([unittest.TestSuite([second])])])
+        self.assertEqual(list(scenario_ids(nested)),[first.id(),second.id()])
 
 if __name__=='__main__':unittest.main()

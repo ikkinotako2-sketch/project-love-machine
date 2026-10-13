@@ -13,13 +13,18 @@ def gate():
     proof=GitAudit(ROOT).preparation(plan,head)
     return plan,manifest,head,proof
 
+def scenario_ids(suite):
+    for entry in suite:
+        if isinstance(entry,unittest.TestSuite):yield from scenario_ids(entry)
+        else:yield entry.id()
+
 def main():
     sys.addaudithook(deny)
     plan,manifest,head,proof=gate()
     if '--verify-only' in sys.argv:
         print(json.dumps({'source_files':len(manifest['source_sha256']),'history':proof,'marker_changes':0}));return
     suite=unittest.defaultTestLoader.discover('tests',pattern='test_executor_final.py')
-    scenarios=[t.id() for s in suite for t in s]
+    scenarios=list(scenario_ids(suite))
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     report={'status':'FOUR_EXECUTOR_OFFLINE_PASS_PARKED','prepared_commit':head,
         'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),
