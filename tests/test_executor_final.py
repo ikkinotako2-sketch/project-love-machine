@@ -116,7 +116,7 @@ class AuthorityTests(unittest.TestCase):
         for o in PLAN['operations'].values():
             w=(ROOT/o['workflow_path']).read_text()
             for t in ['if: ${{ false }}','fetch-depth: 0','persist-credentials: false']:self.assertIn(t,w)
-            self.assertNotIn('secrets.',w);self.assertNotIn('schedule:',w)
+            self.assertIn("steps.local.outputs.ready == 'true'",w);self.assertLess(w.index('Local gate before any Secret injection'),w.index('secrets.'));self.assertNotIn('schedule:',w)
     def test_plan_initial_source_exact(self):
         self.assertEqual((ROOT/'readiness/executor-initial-state.json').read_bytes(),initial_bytes())
         self.assertEqual(initial_sha(),PLAN['operations']['state_init']['initial_state_sha256'])
@@ -462,18 +462,18 @@ class ExtraBoundaryTests(unittest.TestCase):
         self.assertEqual(len(t.calls),3)
     def test_native_transport_rejects_main_and_method_before_connection(self):
         # Exercise native policy using a fixture-injected object, not live issuance.
-        x=object.__new__(StateInitHTTP);x._token='FIXTURE_TOKEN';x.connector=Mock();x.calls={'GET':0,'POST':0,'PUT':0};x.poisoned=False
+        x=object.__new__(StateInitHTTP);x._token='FIXTURE_TOKEN';x.connector=Mock();x.calls={'GET':0,'POST':0,'PUT':0};x.poisoned=False;x.statuses=[]
         for method,path,body in [('DELETE',STATE,{}),('PUT',STATE,{'branch':'main','message':'x','content':'x'}),('GET',STATE+'?ref=main',None),('POST',REFS,{'ref':'refs/heads/main','sha':'a'*40})]:
             with self.assertRaises(Stop):x(method,path,body)
         x.connector.assert_not_called()
     def test_native_state_response_error_body_never_read(self):
-        x=object.__new__(StateInitHTTP);x._token='FIXTURE_TOKEN';x.calls={'GET':0,'POST':0,'PUT':0};x.poisoned=False
+        x=object.__new__(StateInitHTTP);x._token='FIXTURE_TOKEN';x.calls={'GET':0,'POST':0,'PUT':0};x.poisoned=False;x.statuses=[]
         response=Mock();response.status=403;c=Mock();c.getresponse.return_value=response;x.connector=Mock(return_value=c)
         self.assertEqual(x('GET',REF),(403,{}));response.read.assert_not_called()
         with self.assertRaises(Stop):x('GET',REF)
         self.assertEqual(x.connector.call_count,1)
     def test_native_init_maximum_two_gets_no_redirect(self):
-        x=object.__new__(StateInitHTTP);x._token='FIXTURE_TOKEN';x.calls={'GET':0,'POST':0,'PUT':0};x.poisoned=False
+        x=object.__new__(StateInitHTTP);x._token='FIXTURE_TOKEN';x.calls={'GET':0,'POST':0,'PUT':0};x.poisoned=False;x.statuses=[]
         response=Mock();response.status=200;response.read.return_value=b'{}';c=Mock();c.getresponse.return_value=response;x.connector=Mock(return_value=c)
         x('GET',REF);x('GET',STATE+'?ref='+GitContentsCAS.BRANCH)
         with self.assertRaises(Stop):x('GET',REF)

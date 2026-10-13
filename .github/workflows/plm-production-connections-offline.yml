@@ -1,0 +1,35 @@
+name: PLM Production Connections OFFLINE
+on:
+  push:
+    branches: [plm-youtube-production-connections-20261013-r1]
+permissions:
+  contents: read
+concurrency:
+  group: plm-production-connections-offline
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact source/history and changed boundaries; network denied
+        run: python -m readiness.run_production_connections
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-production-connections-${{ github.sha }}
+          path: connection-evidence/
+          retention-days: 7
+          if-no-files-found: error

@@ -18,9 +18,9 @@ STATE=GitContentsCAS.PATH
 class StateInitHTTP:
     offline_mock=False
     def __init__(self,token,permit,*,connector=http.client.HTTPSConnection):
-        live_authority(permit)
+        live_authority(permit);require(permit.operation=='state_init','STATE_INIT_ROLE_STOP')
         require(isinstance(token,str) and 0<len(token)<=16384 and all(32<ord(c)<127 for c in token),'TOKEN_SHAPE_STOP')
-        self._token=token;self.connector=connector;self.calls={'GET':0,'POST':0,'PUT':0};self.poisoned=False
+        self._token=token;self.connector=connector;self.calls={'GET':0,'POST':0,'PUT':0};self.poisoned=False;self.statuses=[]
     def __repr__(self):return '<StateInitHTTP REDACTED>'
     def clear(self):self._token=None
     def __call__(self,method,path,body=None):
@@ -40,7 +40,7 @@ class StateInitHTTP:
         c=self.connector('api.github.com',timeout=15)
         try:
             c.request(method,path,body=None if body is None else json.dumps(body).encode(),headers={'Authorization':'Bearer '+self._token,'Accept':'application/vnd.github+json','Content-Type':'application/json','User-Agent':'plm-state-init-once'})
-            r=c.getresponse()
+            r=c.getresponse();self.statuses.append(r.status)
             if r.status not in (200,201):
                 if method=='GET' and r.status==404:self.poisoned=False
                 return r.status,{}
@@ -51,15 +51,31 @@ class StateInitHTTP:
         finally:c.close()
 
 
-def channel_transports(permit,bundle,clock):
-    live_authority(permit)
+def channel_transports(permit,bundle,clock,observer=None):
+    live_authority(permit);require(permit.operation in ('channel','private_upload','finalize'),'CHANNEL_ROLE_STOP')
     from ..evidence_adapters import MemoryOAuthRefresh,FreshChannel
-    refresh=MemoryOAuthRefresh(bundle,OAuthPostTransport(approved=True),clock,approved=True)
-    return FreshChannel(refresh,lambda token:HTTPSReader('www.googleapis.com',token,approved=True,maximum=1),clock)
+    post=OAuthPostTransport(approved=True)
+    def send(form):
+        if observer:observer('OAuth','POST',None)
+        status,payload=post(form)
+        if observer:observer('OAuth',None,status)
+        return status,payload
+    def reader(token):
+        native=HTTPSReader('www.googleapis.com',token,approved=True,maximum=1)
+        def get(path):
+            if observer:observer('YouTube','GET',None)
+            try:
+                status,payload=native(path)
+                if observer:observer('YouTube',None,status)
+                return status,payload
+            finally:native.clear()
+        return get
+    refresh=MemoryOAuthRefresh(bundle,send,clock,approved=True)
+    return FreshChannel(refresh,reader,clock)
 
 
 def strict_upload_transport(permit):
-    live_authority(permit)
+    live_authority(permit);require(permit.operation=='private_upload','UPLOAD_ROLE_STOP')
     return HttpsSingleSend(operation_approved=True)
 
 
@@ -69,18 +85,18 @@ def proof_transport(permit,token,*,maximum=6):
 
 
 def readback_transport(permit,token):
-    live_authority(permit)
+    live_authority(permit);require(permit.operation=='finalize','READBACK_ROLE_STOP')
     return HTTPSReader('www.googleapis.com',token,approved=True,maximum=1)
 
 
 def lifecycle_backend(permit,token):
-    live_authority(permit)
+    live_authority(permit);require(permit.operation in ('private_upload','finalize'),'STATE_ROLE_STOP')
     from ..state_transport import StateHTTPTransport
     return GitContentsCAS(StateHTTPTransport(token,approved=True,max_gets=1,max_puts=6))
 
 
 def callback_transport(permit,send,context,checkpoint,key,key_id,*,origin,clock,dispatch_key):
-    live_authority(permit)
+    live_authority(permit);require(permit.operation=='finalize','CALLBACK_ROLE_STOP')
     from ..live_factory import CallbackOnce
     return CallbackOnce(send,context,checkpoint,key,key_id,origin=origin,approved=True,clock=clock,dispatch_key=dispatch_key)
 

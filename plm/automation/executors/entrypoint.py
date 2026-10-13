@@ -1,25 +1,29 @@
-"""Parked CLI. Optional preflight reads Git only; never reads Secrets."""
+"""Two-stage CLI. Preflight has no Secret references, execution repeats the gate."""
 import argparse,json,os
-from .authority import ExecutorAudit,production_entry
-from ..ledger import Stop
+from pathlib import Path
+from .runner import ProductionRunner,read_event
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--operation',choices=['channel','state_init','private_upload','finalize'],required=True)
-    p.add_argument('--audit',action='store_true')
+    p=argparse.ArgumentParser();p.add_argument('--operation',required=True)
+    p.add_argument('--prepare',action='store_true');p.add_argument('--execute',action='store_true')
+    p.add_argument('--output');p.add_argument('--inputs')
     for key in ('prepared','head','plan_sha','manifest_sha','marker_sha'):p.add_argument('--'+key.replace('_','-'))
-    args=p.parse_args()
-    if args.audit:
-        if not all(getattr(args,k) for k in ('prepared','head','plan_sha','manifest_sha','marker_sha')):
-            print(json.dumps({'status':'BLOCKED','reason_code':'AUDIT_PINS_REQUIRED','credentials_read':0,'requests':0}));return 1
-        try:
-            # Explicit event data would come from the trusted GitHub runner. Here
-            # no live workflow invokes this mode and it never mints authority.
-            attempt=os.environ.get('GITHUB_RUN_ATTEMPT','')
-            event={'repository':os.environ.get('GITHUB_REPOSITORY',''),'branch':os.environ.get('GITHUB_REF','').removeprefix('refs/heads/'),'event':os.environ.get('GITHUB_EVENT_NAME',''),'attempt':int(attempt) if attempt.isdecimal() else None,'sha':os.environ.get('GITHUB_SHA',''),'run_id':os.environ.get('GITHUB_RUN_ID','')}
-            facts=ExecutorAudit('.').before_credentials(event=event,prepared=args.prepared,head=args.head,plan_sha=args.plan_sha,manifest_sha=args.manifest_sha,marker_sha=args.marker_sha,operation=args.operation)
-        except Exception:
-            print(json.dumps({'status':'BLOCKED','reason_code':'LOCAL_AUDIT_STOP','credentials_read':0,'requests':0}));return 1
-        print(json.dumps({'local_gate':facts}))
-    print(json.dumps(production_entry(args.operation)))
-    return 0
+    x=p.parse_args();runner=ProductionRunner();event=read_event(os.environ)
+    pins={k:getattr(x,k) for k in ('prepared','head','plan_sha','manifest_sha','marker_sha')}
+    # Missing release metadata returns PARKED before auditing or reading a Secret.
+    try:
+        checked=runner.preflight(x.operation,event=event,**pins)
+        if checked is None:result={'status':'PARKED','operation':x.operation,'credentials_read':0,'real_requests':0};ready=False
+        elif x.prepare:result={'status':'LOCAL_GATE_PASS','credentials_read':0,'real_requests':0};ready=True
+        elif x.execute:
+            result=runner.execute(x.operation,event=event,pins=pins,secret_loader=lambda name:os.environ.get(name),input_dir=x.inputs);ready=False
+        else:result={'status':'PARKED_EXPLICIT_EXECUTE_REQUIRED','credentials_read':0,'real_requests':0};ready=False
+    except Exception:result={'status':'BLOCKED','reason_code':'RUNNER_GATE_OR_EXECUTION_STOP_NO_RETRY'};ready=False
+    if x.prepare and os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('ready='+('true' if ready else 'false')+'\n')
+    if x.output:
+        out=Path(x.output);out.parent.mkdir(parents=True,exist_ok=True)
+        with out.open('x') as f:json.dump(result,f,sort_keys=True);f.write('\n')
+    print(json.dumps(result,sort_keys=True))
+    return 1 if result['status']=='BLOCKED' else 0
 if __name__=='__main__':raise SystemExit(main())

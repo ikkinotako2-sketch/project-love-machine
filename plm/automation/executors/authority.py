@@ -1,7 +1,7 @@
-"""Offline-issued operation capabilities; no live issuer in this build.
+"""Separate simulation and reviewed production operation capabilities.
 
 A dictionary, flag or mock receipt cannot grant production I/O. Real transports
-require LIVE_VERIFIED authority, which the current source never creates.
+require registered LIVE_VERIFIED authority. All current release records are disabled.
 """
 import copy,json,re
 from dataclasses import dataclass
@@ -10,6 +10,7 @@ from ..execution_gate import GitAudit,load_pinned_plan,local_event_gate,digest,M
 from ..ledger import require,Stop
 
 _SEAL=object()
+_LIVE_REGISTRY={}
 @dataclass(frozen=True)
 class Receipt:
     operation:str
@@ -46,7 +47,7 @@ class OfflineAuthority:
         require(spec['identity'] not in self.issued,'IDENTITY_ALREADY_CONSUMED')
         require(len(prerequisites)==len(spec['requires']),'PREREQUISITE_STOP')
         for required,receipt in zip(spec['requires'],prerequisites):
-            require(type(receipt) is Receipt and receipt._seal is _SEAL and receipt.basis=='OFFLINE_CONTRACT' and receipt.status==('ACKNOWLEDGED' if required=='private_upload' else 'VERIFIED') and receipt.operation==required and receipt.identity==self.plan['operations'][required]['identity'],'PREREQUISITE_STOP')
+            require(type(receipt) is Receipt and receipt._seal is _SEAL and receipt.basis=='OFFLINE_CONTRACT' and receipt.status==spec.get('required_statuses',{}).get(required,'ACKNOWLEDGED' if required=='private_upload' else 'VERIFIED') and receipt.operation==required and receipt.identity==self.plan['operations'][required]['identity'],'PREREQUISITE_STOP')
         self.issued.add(spec['identity'])
         return Permit(operation,self.plan,prerequisites,_SEAL)
 
@@ -69,14 +70,16 @@ def adapter_for(permit,adapter):
 
 def live_authority(permit):
     require(type(permit) is Permit and permit._seal is _SEAL and permit.mode=='LIVE_VERIFIED','PARKED_REAL_IO_FORBIDDEN')
-    # No mode-changing API or live issuer exists. Keep this fixed even with false flags.
-    raise Stop('PARKED_REAL_IO_FORBIDDEN')
+    entry=_LIVE_REGISTRY.get(id(permit))
+    require(entry is not None and entry[0] is permit,'PARKED_REAL_IO_FORBIDDEN')
+    return True
 
 class ExecutorAudit(GitAudit):
     """Credential-free real local history/source checks for a future marker commit."""
     def before_credentials(self,*,event,prepared,head,plan_sha,manifest_sha,marker_sha,operation):
         require(SHA.fullmatch(prepared) and SHA.fullmatch(head),'COMMIT_STOP')
-        raw=self.raw(prepared,'readiness/executor-final-plan.json')
+        plan_path=getattr(self,'plan_path','readiness/executor-final-plan.json')
+        raw=self.raw(prepared,plan_path)
         plan=load_pinned_plan(raw,plan_sha);local_event_gate(event,plan)
         require(event.get('sha')==head and re.fullmatch('[1-9][0-9]{0,19}',str(event.get('run_id',''))),'EXECUTION_RUN_SHA_STOP')
         facts=self.preparation(plan,prepared)
@@ -94,7 +97,7 @@ class ExecutorAudit(GitAudit):
         except Exception:raise Stop('MARKER_SHAPE_STOP') from None
         require(set(m)==MARKER_KEYS|{'job_id','media_sha256','upload_approved','finalize_approved'} and m['identity']==op['identity'] and m['operation']==operation and m['state']=='CONSUMED_BEFORE_REMOTE' and m['approved'] is True and m['prepared_commit_sha']==prepared,'MARKER_CONTRACT_STOP')
         require(m['job_id']==plan['job_id'] and m['media_sha256']==plan['media_sha256'] and m['upload_approved'] is (operation=='private_upload') and m['finalize_approved'] is (operation=='finalize'),'MARKER_OPERATION_APPROVAL_STOP')
-        paths={'plan_sha256':'readiness/executor-final-plan.json','source_manifest_sha256':plan['source_manifest'],'workflow_sha256':op['workflow_path'],'executor_sha256':op['executor_path'],'schema_sha256':plan['schema_path']}
+        paths={'plan_sha256':plan_path,'source_manifest_sha256':plan['source_manifest'],'workflow_sha256':op['workflow_path'],'executor_sha256':op['executor_path'],'schema_sha256':plan['schema_path']}
         for key,p in paths.items():require(m[key]==digest(self.raw(prepared,p)),'MARKER_PIN_STOP')
         manifest_raw=self.raw(prepared,plan['source_manifest']);require(digest(manifest_raw)==manifest_sha,'SOURCE_MANIFEST_PIN_STOP')
         for p,h in json.loads(manifest_raw)['source_sha256'].items():

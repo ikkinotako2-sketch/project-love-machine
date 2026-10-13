@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "repository": "ikkinotako2-sketch/project-love-machine",
+  "branch": "plm-youtube-production-connections-20261013-r1",
+  "preparation_parent": "37eaf6495d62f53657d71eba987611b7eb765f56",
+  "preparation_commit_count": 1,
+  "preparation_files": [
+    ".github/workflows/plm-executor-channel-parked.yml",
+    ".github/workflows/plm-executor-finalize-parked.yml",
+    ".github/workflows/plm-executor-migration-parked.yml",
+    ".github/workflows/plm-executor-migration-postcheck-parked.yml",
+    ".github/workflows/plm-executor-private-upload-parked.yml",
+    ".github/workflows/plm-executor-state-init-parked.yml",
+    ".github/workflows/plm-executor-worker-deploy-parked.yml",
+    ".github/workflows/plm-executor-worker-postcheck-parked.yml",
+    ".github/workflows/plm-production-connections-offline.yml",
+    "plm/automation/executors/artifact_input.py",
+    "plm/automation/executors/authority.py",
+    "plm/automation/executors/callback_http.py",
+    "plm/automation/executors/cloudflare.py",
+    "plm/automation/executors/entrypoint.py",
+    "plm/automation/executors/posting.py",
+    "plm/automation/executors/release.py",
+    "plm/automation/executors/run_reader.py",
+    "plm/automation/executors/runner.py",
+    "plm/automation/executors/transports.py",
+    "readiness/cloudflare-transfer-contract.json",
+    "readiness/cloudflare-transfer-marker.schema.json",
+    "readiness/cloudflare-transfer-plan.json",
+    "readiness/execution-release-policy.json",
+    "readiness/executor-final-operations.md",
+    "readiness/executor-final-plan.json",
+    "readiness/executor-final-source-hashes.json",
+    "readiness/run_production_connections.py",
+    "tests/test_executor_final.py",
+    "tests/test_production_connections.py"
+  ],
+  "launchable": false,
+  "execution_approved": false,
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "source_manifest": "readiness/executor-final-source-hashes.json",
+  "schema_path": "readiness/cloudflare-transfer-marker.schema.json",
+  "operations": {
+    "migration": {
+      "identity": "provider-neutral-runtime-migration-20261013-r1",
+      "marker_path": "audit-evidence/consumed/provider-neutral-runtime-migration-20261013-r1.json",
+      "requires": [],
+      "required_statuses": {
+        "migration": "ACKNOWLEDGED",
+        "worker_deploy": "ACKNOWLEDGED"
+      },
+      "workflow_path": ".github/workflows/plm-executor-migration-parked.yml",
+      "executor_path": "plm/automation/executors/cloudflare.py",
+      "job_name": "execute",
+      "launchable": false,
+      "execution_approved": false,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "budget": {
+        "CF_GET": 1,
+        "D1_READ_POST": 1,
+        "D1_DDL_POST": 1
+      }
+    },
+    "migration_postcheck": {
+      "identity": "provider-neutral-runtime-migration-postcheck-20261013-r1",
+      "marker_path": "audit-evidence/consumed/provider-neutral-runtime-migration-postcheck-20261013-r1.json",
+      "requires": [
+        "migration"
+      ],
+      "required_statuses": {
+        "migration": "ACKNOWLEDGED",
+        "worker_deploy": "ACKNOWLEDGED"
+      },
+      "workflow_path": ".github/workflows/plm-executor-migration-postcheck-parked.yml",
+      "executor_path": "plm/automation/executors/cloudflare.py",
+      "job_name": "execute",
+      "launchable": false,
+      "execution_approved": false,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "budget": {
+        "CF_GET": 1,
+        "D1_READ_POST": 1
+      }
+    },
+    "worker_deploy": {
+      "identity": "provider-neutral-runtime-worker-deploy-20261013-r1",
+      "marker_path": "audit-evidence/consumed/provider-neutral-runtime-worker-deploy-20261013-r1.json",
+      "requires": [
+        "migration_postcheck"
+      ],
+      "required_statuses": {
+        "migration": "ACKNOWLEDGED",
+        "worker_deploy": "ACKNOWLEDGED"
+      },
+      "workflow_path": ".github/workflows/plm-executor-worker-deploy-parked.yml",
+      "executor_path": "plm/automation/executors/cloudflare.py",
+      "job_name": "execute",
+      "launchable": false,
+      "execution_approved": false,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "budget": {
+        "CF_GET": 8,
+        "CF_PUT": 1
+      }
+    },
+    "worker_postcheck": {
+      "identity": "provider-neutral-runtime-worker-postcheck-20261013-r1",
+      "marker_path": "audit-evidence/consumed/provider-neutral-runtime-worker-postcheck-20261013-r1.json",
+      "requires": [
+        "worker_deploy"
+      ],
+      "required_statuses": {
+        "migration": "ACKNOWLEDGED",
+        "worker_deploy": "ACKNOWLEDGED"
+      },
+      "workflow_path": ".github/workflows/plm-executor-worker-postcheck-parked.yml",
+      "executor_path": "plm/automation/executors/cloudflare.py",
+      "job_name": "execute",
+      "launchable": false,
+      "execution_approved": false,
+      "marker_state": "NOT_CREATED_NOT_CONSUMED",
+      "retry": 0,
+      "rerun": 0,
+      "resume": 0,
+      "redirect": 0,
+      "fallback": 0,
+      "budget": {
+        "CF_GET": 7
+      }
+    }
+  },
+  "protected_unconsumed_identity": "provider-neutral-youtube-channel-verify-20261012-r1",
+  "scope_readonly_current": false,
+  "scope_upload_current": true,
+  "channel_current": "UNVERIFIED",
+  "credentials": {},
+  "real_io_authority_issuers": 1,
+  "state_branch": "plm-execution-state-v2",
+  "state_file": "automation-state/lifecycle.json",
+  "job_id": "plm-private-channel-recovery-20261012-r1",
+  "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
+  "artifact_id": 11746833809,
+  "video_recreated": false,
+  "cloudflare_optional_executors": "NOT_IMPLEMENTED_THIS_CHANGE",
+  "callback_origin": "UNPINNED_RELEASE_BLOCKER",
+  "successor_0011": "UNAPPLIED_OFFLINE_ONLY",
+  "currently_enabled_releases": 0
+}

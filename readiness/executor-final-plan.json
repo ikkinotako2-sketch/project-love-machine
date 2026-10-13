@@ -1,14 +1,39 @@
 {
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
-  "branch": "plm-youtube-executors-final-20261013-r1",
-  "preparation_parent": "46bdd21f4af1c9cb86a0f945020b0acf43250367",
+  "branch": "plm-youtube-production-connections-20261013-r1",
+  "preparation_parent": "37eaf6495d62f53657d71eba987611b7eb765f56",
   "preparation_commit_count": 1,
   "preparation_files": [
+    ".github/workflows/plm-executor-channel-parked.yml",
+    ".github/workflows/plm-executor-finalize-parked.yml",
+    ".github/workflows/plm-executor-migration-parked.yml",
+    ".github/workflows/plm-executor-migration-postcheck-parked.yml",
+    ".github/workflows/plm-executor-private-upload-parked.yml",
+    ".github/workflows/plm-executor-state-init-parked.yml",
+    ".github/workflows/plm-executor-worker-deploy-parked.yml",
+    ".github/workflows/plm-executor-worker-postcheck-parked.yml",
+    ".github/workflows/plm-production-connections-offline.yml",
+    "plm/automation/executors/artifact_input.py",
+    "plm/automation/executors/authority.py",
+    "plm/automation/executors/callback_http.py",
+    "plm/automation/executors/cloudflare.py",
+    "plm/automation/executors/entrypoint.py",
+    "plm/automation/executors/posting.py",
+    "plm/automation/executors/release.py",
+    "plm/automation/executors/run_reader.py",
+    "plm/automation/executors/runner.py",
+    "plm/automation/executors/transports.py",
+    "readiness/cloudflare-transfer-contract.json",
+    "readiness/cloudflare-transfer-marker.schema.json",
+    "readiness/cloudflare-transfer-plan.json",
+    "readiness/execution-release-policy.json",
+    "readiness/executor-final-operations.md",
     "readiness/executor-final-plan.json",
     "readiness/executor-final-source-hashes.json",
-    "readiness/run_executor_final.py",
-    "tests/test_executor_final.py"
+    "readiness/run_production_connections.py",
+    "tests/test_executor_final.py",
+    "tests/test_production_connections.py"
   ],
   "launchable": false,
   "execution_approved": false,
@@ -22,8 +47,8 @@
   "schema_path": "readiness/executor-final-marker.schema.json",
   "operations": {
     "channel": {
-      "identity": "provider-neutral-youtube-channel-session-20261013-r2",
-      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-channel-session-20261013-r2.json",
+      "identity": "provider-neutral-youtube-channel-session-20261013-r3",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-channel-session-20261013-r3.json",
       "requires": [],
       "workflow_path": ".github/workflows/plm-executor-channel-parked.yml",
       "executor_path": "plm/automation/executors/channel_state.py",
@@ -38,11 +63,12 @@
       "budget": {
         "oauth_refresh_POST": 1,
         "channels_GET": 1
-      }
+      },
+      "job_name": "execute"
     },
     "state_init": {
-      "identity": "provider-neutral-youtube-state-initialize-20261013-r2",
-      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-state-initialize-20261013-r2.json",
+      "identity": "provider-neutral-youtube-state-initialize-20261013-r3",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-state-initialize-20261013-r3.json",
       "requires": [
         "channel"
       ],
@@ -63,11 +89,12 @@
       },
       "initial_state_sha256": "4c5e5dcecc779a446910c1e1f149b2a19fe5f876b3a30a5a9afc30ebbd2f1ee7",
       "state_base_commit": "e6ceb5658c41ce4300cf78957e898813ec874584",
-      "create_branch_if_absent": true
+      "create_branch_if_absent": true,
+      "job_name": "execute"
     },
     "private_upload": {
-      "identity": "provider-neutral-youtube-private-upload-20261013-r2",
-      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-private-upload-20261013-r2.json",
+      "identity": "provider-neutral-youtube-private-upload-20261013-r3",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-private-upload-20261013-r3.json",
       "requires": [
         "channel",
         "state_init"
@@ -90,11 +117,12 @@
         "channels_GET": 1,
         "youtube_init_POST": 1,
         "youtube_media_PUT": 1
-      }
+      },
+      "job_name": "execute"
     },
     "finalize": {
-      "identity": "provider-neutral-youtube-private-finalize-20261013-r2",
-      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-private-finalize-20261013-r2.json",
+      "identity": "provider-neutral-youtube-private-finalize-20261013-r3",
+      "marker_path": "audit-evidence/consumed/provider-neutral-youtube-private-finalize-20261013-r3.json",
       "requires": [
         "private_upload"
       ],
@@ -116,7 +144,8 @@
         "channels_GET": 1,
         "processed_GET": 1,
         "callback_POST": 1
-      }
+      },
+      "job_name": "execute"
     }
   },
   "protected_unconsumed_identity": "provider-neutral-youtube-channel-verify-20261012-r1",
@@ -138,18 +167,20 @@
     "finalize": [
       "PLM_YOUTUBE_GAME_001",
       "PLM_GITHUB_STATE_TOKEN",
-      "GITHUB_TOKEN_READ_ONLY_PROVENANCE",
-      "PLM_YOUTUBE_RESULT_CALLBACK_KEY"
+      "GITHUB_TOKEN",
+      "PLM_YOUTUBE_RESULT_CALLBACK_KEY",
+      "PLM_GITHUB_DISPATCH_TOKEN"
     ]
   },
-  "real_io_authority_issuers": 0,
+  "real_io_authority_issuers": 1,
   "state_branch": "plm-execution-state-v2",
   "state_file": "automation-state/lifecycle.json",
   "job_id": "plm-private-channel-recovery-20261012-r1",
   "media_sha256": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110",
   "artifact_id": 11746833809,
   "video_recreated": false,
-  "cloudflare_optional_executors": "NOT_IMPLEMENTED_THIS_CHANGE",
-  "callback_origin": "UNPINNED_LIVE_BLOCKER",
-  "successor_0011": "UNAPPLIED_OFFLINE_ONLY"
+  "cloudflare_optional_executors": "FOUR_INDEPENDENT_PARKED_NATIVE_CONNECTIONS",
+  "callback_origin": "UNPINNED_RELEASE_BLOCKER",
+  "successor_0011": "UNAPPLIED_OFFLINE_ONLY",
+  "currently_enabled_releases": 0
 }

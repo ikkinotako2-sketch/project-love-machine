@@ -72,7 +72,7 @@ class UploadExecutor:
         media_path=Path(assets['media_path']);require(media_path.is_file() and not media_path.is_symlink() and 10000<=media_path.stat().st_size<=16*1024*1024,'MEDIA_BOUND_STOP');media_gate(media_path,assets['quality_evidence'],job)
         media=media_path.read_bytes()
         render_gate(assets['render_contract'],script_raw=assets['script_raw'],voice_inventory=assets['voice_inventory'],media=media,audio=assets['audio'],captions=assets['captions'],evidence=assets['render_evidence'])
-        budget_gate(budget_observation,budget_cost,self.clock(),offline_only=True)
+        budget_gate(budget_observation,budget_cost,self.clock(),offline_only=permit.mode=='OFFLINE_CONTRACT')
         proof=self.provenance.verify(expected,phase='before_upload',permit=permit)
         require(proof['identity']==permit.identity and proof['job_id']==JOB_ID and proof['media_sha256']==MEDIA,'PROVENANCE_BINDING_STOP')
         claim=self.state.claim(JOB_ID,digest(job),permit.identity,'actions-'+str(proof['run_id']),self.clock(),day=datetime.fromtimestamp(self.clock(),timezone.utc).strftime('%Y-%m-%d'))

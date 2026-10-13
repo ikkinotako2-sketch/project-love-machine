@@ -1,0 +1,298 @@
+{
+  "version": 1,
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "releases": {
+    "channel": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "state_init": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "private_upload": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "finalize": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "migration": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "migration_postcheck": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "worker_deploy": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    },
+    "worker_postcheck": {
+      "enabled": false,
+      "owner_approved": false,
+      "environment_reviewed": false,
+      "owner_exclusion_attested": false,
+      "reviewed_target_exact": false,
+      "google_additional_consent_attested": false,
+      "read_scope_verified": false,
+      "channel_match_verified": false,
+      "budget_actual_verified": false,
+      "callback_route_verified": false,
+      "rest_batch_contract_verified": false,
+      "rollback_evidence_verified": false,
+      "artifact_handoff_reviewed": false,
+      "prepared_commit": null,
+      "approved_marker_sha256": null,
+      "prerequisites": [],
+      "budget_observation": null,
+      "budget_cost": null,
+      "coordinator_terminal_expected": null,
+      "callback_context": null,
+      "callback_checkpoint": null,
+      "script_sha256": null,
+      "required_flags": {
+        "TEST_ONLY": true,
+        "DRY_RUN": true,
+        "NO_PUBLISH": true,
+        "EMERGENCY_STOP": true
+      }
+    }
+  },
+  "secret_roles": {
+    "channel": [
+      "PLM_YOUTUBE_GAME_001"
+    ],
+    "state_init": [
+      "PLM_GITHUB_STATE_TOKEN"
+    ],
+    "private_upload": [
+      "PLM_YOUTUBE_GAME_001",
+      "PLM_GITHUB_STATE_TOKEN"
+    ],
+    "finalize": [
+      "PLM_YOUTUBE_GAME_001",
+      "PLM_GITHUB_STATE_TOKEN",
+      "PLM_YOUTUBE_RESULT_CALLBACK_KEY",
+      "PLM_GITHUB_DISPATCH_TOKEN"
+    ],
+    "migration": [
+      "PLM_CF_D1_READ_TOKEN",
+      "PLM_CF_D1_MIGRATION_TOKEN"
+    ],
+    "migration_postcheck": [
+      "PLM_CF_D1_READ_TOKEN"
+    ],
+    "worker_deploy": [
+      "PLM_CF_WORKER_API_TOKEN",
+      "PLM_CF_WORKER_DEPLOY_TOKEN"
+    ],
+    "worker_postcheck": [
+      "PLM_CF_WORKER_API_TOKEN"
+    ]
+  },
+  "callback": {
+    "origin": null,
+    "key_id": null,
+    "verified": false
+  },
+  "frozen_knowledge": {
+    "youtube_upload": true,
+    "youtube_readonly": false,
+    "channel_match": "UNVERIFIED"
+  },
+  "environment_configuration": "UNVERIFIED_OWNER_ACTION",
+  "credential_values_inspected": false,
+  "CF_execution_repository": "ikkinotako2-sketch/project-love-machine",
+  "sandbox_repository_changed": false,
+  "CF_credentials_in_execution_repository": "UNVERIFIED_CONFIGURATION_REQUIREMENT"
+}

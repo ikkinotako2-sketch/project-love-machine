@@ -1,25 +1,50 @@
 name: PLM Executor private_upload PARKED
 on:
+  push:
+    branches: [plm-youtube-production-connections-20261013-r1]
+    paths: [audit-evidence/consumed/provider-neutral-youtube-private-upload-20261013-r3.json]
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: plm-executor-private_upload
   cancel-in-progress: false
 jobs:
-  parked:
+  execute:
     if: ${{ false }}
+    environment: plm-private_upload-once
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     env:
       TEST_ONLY: 'true'
       DRY_RUN: 'true'
       NO_PUBLISH: 'true'
       EMERGENCY_STOP: 'true'
+      PLM_PREPARED: ${{ vars.PLM_PREPARED_COMMIT }}
+      PLM_PLAN_SHA: ${{ vars.PLM_APPROVED_PLAN_SHA256 }}
+      PLM_MANIFEST_SHA: ${{ vars.PLM_APPROVED_MANIFEST_SHA256 }}
+      PLM_MARKER_SHA: ${{ vars.PLM_APPROVED_MARKER_SHA256 }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - run: python -m plm.automation.executors.entrypoint --operation private_upload
+      - name: Local gate before any Secret injection
+        id: local
+        run: python -m plm.automation.executors.entrypoint --operation private_upload --prepare --prepared "$PLM_PREPARED" --head "$GITHUB_SHA" --plan-sha "$PLM_PLAN_SHA" --manifest-sha "$PLM_MANIFEST_SHA" --marker-sha "$PLM_MARKER_SHA"
+      - name: Bounded separately approved execution
+        if: ${{ steps.local.outputs.ready == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PLM_YOUTUBE_GAME_001: ${{ secrets.PLM_YOUTUBE_GAME_001 }}
+          PLM_GITHUB_STATE_TOKEN: ${{ secrets.PLM_GITHUB_STATE_TOKEN }}
+        run: python -m plm.automation.executors.entrypoint --operation private_upload --execute --prepared "$PLM_PREPARED" --head "$GITHUB_SHA" --plan-sha "$PLM_PLAN_SHA" --manifest-sha "$PLM_MANIFEST_SHA" --marker-sha "$PLM_MARKER_SHA" --inputs "$RUNNER_TEMP/plm-private_upload-inputs" --output "$RUNNER_TEMP/runtime-receipt.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && steps.local.outputs.ready == 'true' }}
+        with:
+          name: plm-private_upload-receipt-${{ github.sha }}
+          path: ${{ runner.temp }}/runtime-receipt.json
+          retention-days: 7
+          if-no-files-found: error

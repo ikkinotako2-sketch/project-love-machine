@@ -79,3 +79,88 @@ Cloudflare is untouched. 0008/0009/0010 and both 0011 candidate files are unchan
 Optional Cloudflare migration/deploy/postcheck executors were not added in this
 change; their separate approvals, fresh drift/exposure gates and rollback review
 remain mandatory. Never apply both old and successor 0011.
+
+## Production connection revision — all eight releases still PARKED
+
+This revision supersedes the earlier CLI/no-issuer statements above. Preparation
+root is 37eaf6495d62f53657d71eba987611b7eb765f56. The authoritative preparation
+file list is in each hash-pinned plan, not a second hardcoded allowlist.
+The proposed A/B/C/D identities are independent r3 identities; no old marker changes.
+
+`entrypoint.py` now connects two-stage local preflight to `ProductionRunner`.
+`release.py` checks a source-hash-frozen review record before any Secret lookup;
+`run_reader.py` independently binds the current run and prerequisite receipt
+artifacts to run/attempt/repository/ref/workflow/marker-only commit and exact hashes.
+Only actual API proof, actual local Git audit and separately reviewed enabled
+release records can register a live capability. Offline fixtures cannot promote
+receipts to LIVE_VERIFIED. Every current release is disabled, and every operation
+job is `if: false`. The safe flags remain true. No native request is reachable here.
+
+Future activation requires an independently reviewed change for that operation:
+protected environment/owner approval and operational exclusion, prepared/marker
+pins, correct purpose-specific flags, actual budget evidence, role-specific Secrets,
+prerequisite artifact/receipt hashes and separately fixed callback configuration.
+An approval input or Secret presence alone cannot enable this revision. Google
+additional consent is currently absent; upload scope is true, readonly false and
+channel UNVERIFIED. A successful authenticated response must freshly prove both
+scopes and the exact channel, not owner input claiming a match.
+
+### Native evidence and inputs
+
+Current/prerequisite GitHub proof uses at most 32 distinct GETs, with cache reuse
+for subsequent provenance checks. Safe receipt diagnostics contain numeric statuses
+and counters only. Inputs are fixed prerequisite JSON artifacts, and C reuses the
+original MP4/audio/captions, never rerenders them. Artifact retrieval adds at most
+six GETs: each uses one GitHub API GET and one signed Azure storage handoff.
+This special protocol requires `artifact_handoff_reviewed`; storage receives no
+Authorization header and its signed URL is never retained. OAuth, YouTube and
+callback transports do not follow redirects. This handoff is an unverified native
+service contract until independently reviewed; local test success is not remote proof.
+
+Callback uses the existing `/youtube/result`, X-PLM-Signature and canonical HMAC
+contract. Its origin/key id/context/checkpoint remain unpinned, so D is blocked.
+The Worker is still PARKED and has no live callback route. Callback signing key
+must differ from the existing dispatch key; no generated dummy key is accepted.
+GitHub State Token requires only this repository's Contents write and State branch
+access; GitHub does not offer branch-scoped token permissions. Branch protections
+and exact transport path/CAS checks provide the separate restriction. Provenance
+uses generated read-only GITHUB_TOKEN. No State branch or claim is created here.
+
+### Separate Cloudflare operations
+
+`cloudflare.py` supplies four native bounded kernels, never an automatic chain:
+
+| Operation | Fixed future budget | Successful meaning |
+|---|---|---|
+| migration | GET 1, fixed read-query POST 1, DDL POST 1 | ACK only |
+| migration_postcheck | GET 1, fixed read-query POST 1 | independent schema + immutable choice ledger verified |
+| worker_deploy | GET 8, PUT 1 | new PARKED module package ACK only |
+| worker_postcheck | GET 7 | independent module/source/exposure/DB/flags verification |
+
+D1 REST query uses POST even for SELECT; read-query authorization must be separately
+explicit. Successor 0011 is the only selected SQL. Baseline 0008/9/10 hashes, empty
+runtime queue and absence of old 0011 schema are checked. The immutable choice
+ledger records selected SQL hash and identity. Local transaction tests do not prove
+REST multi-statement DDL atomicity: that remains a release blocker. Never apply both
+0011 variants or automatically retry/rollback after an uncertain response.
+
+The Worker package retains all 11 exact module hashes, DB binding, four safe flags,
+zero routes/cron/consumers and disabled live composition; it is not activation.
+Fresh source/exposure/token-window gates precede the sole PUT. Rollback evidence
+pins the old source; actual rollback requires a different approval and identity.
+No other account, Worker, D1, queue, route, Discord or SNS project is addressable.
+Execution is prepared in this repository; CF role-specific credential registration
+here is UNVERIFIED. Existing sandbox Secrets are not read or copied. Moving the
+executor to the sandbox repository would itself require a separately reviewed
+pinned preparation. The sandbox repository and its successful identities remain untouched.
+
+### Remaining boundary
+
+Native code is connected, but native service outcomes are NOT_TESTED. Outstanding
+review/configuration includes owner Google consent, secure Secret registration,
+channel match, State ACLs, real remaining free quotas, artifact handoff contract,
+callback route/keys/checkpoint, D1 REST atomicity and Cloudflare credentials.
+Each execution, migration and postcheck needs its own approval. After a successful
+private upload, independent finalize is required; only then may a different job be
+proposed. Continuous live dispatch/cron activation is a separate release, not a
+result of these parked executors or the reused 48-hour simulation.
