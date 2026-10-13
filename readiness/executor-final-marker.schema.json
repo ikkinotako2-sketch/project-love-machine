@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identity",
+    "operation",
+    "state",
+    "prepared_commit_sha",
+    "approved",
+    "plan_sha256",
+    "source_manifest_sha256",
+    "workflow_sha256",
+    "executor_sha256",
+    "schema_sha256",
+    "job_id",
+    "media_sha256",
+    "upload_approved",
+    "finalize_approved"
+  ],
+  "properties": {
+    "identity": {
+      "type": "string"
+    },
+    "operation": {
+      "enum": [
+        "channel",
+        "state_init",
+        "private_upload",
+        "finalize"
+      ]
+    },
+    "state": {
+      "const": "CONSUMED_BEFORE_REMOTE"
+    },
+    "prepared_commit_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "approved": {
+      "const": true
+    },
+    "plan_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "workflow_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "executor_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "schema_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "job_id": {
+      "const": "plm-private-channel-recovery-20261012-r1"
+    },
+    "media_sha256": {
+      "const": "4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110"
+    },
+    "upload_approved": {
+      "type": "boolean"
+    },
+    "finalize_approved": {
+      "type": "boolean"
+    }
+  }
+}

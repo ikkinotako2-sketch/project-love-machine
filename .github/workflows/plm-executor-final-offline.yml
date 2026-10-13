@@ -1,0 +1,55 @@
+name: PLM Four Executor OFFLINE
+on:
+  push:
+    branches: [plm-youtube-executors-final-20261013-r1]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: plm-four-executors-offline
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+      PLM_OFFLINE_MEDIA: '${{ github.workspace }}/reused-artifact/short.mp4'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Source and exact preparation diff before artifact read
+        run: python -m readiness.run_executor_final --verify-only
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ikkinotako2-sketch/project-love-machine
+          run-id: 38250671983
+          artifact-ids: 11746833809
+          path: reused-artifact
+          merge-multiple: true
+      - name: Same saved movie; no renderer
+        run: echo '4157384237670fb10ffd83de891d2d207003367601bc5970b0c6a37b13ff2110  reused-artifact/short.mp4' | sha256sum --check
+      - name: New executor boundaries with all provider network denied
+        run: python -m readiness.run_executor_final
+      - name: All real entrypoints remain parked
+        run: |
+          python -m plm.automation.executors.entrypoint --operation channel
+          python -m plm.automation.executors.entrypoint --operation state_init
+          python -m plm.automation.executors.entrypoint --operation private_upload
+          python -m plm.automation.executors.entrypoint --operation finalize
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-four-executors-${{ github.sha }}
+          path: executor-evidence/
+          retention-days: 7
+          if-no-files-found: error
