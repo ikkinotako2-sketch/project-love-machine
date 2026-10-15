@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "repository": "ikkinotako2-sketch/project-love-machine",
+  "branch": "plm-youtube-oauth-recovery-20261015-r1",
+  "preparation_parent": "5eaa0debe46aa394d8d6c509d02022f13eec7a6a",
+  "preparation_files": [
+    ".github/workflows/plm-youtube-client-reuse-exchange-once.yml",
+    ".github/workflows/plm-youtube-client-reuse-offline.yml",
+    "plm/automation/executors/oauth_exchange.py",
+    "plm/automation/executors/oauth_reuse.py",
+    "readiness/oauth-client-reuse-exchange-hashes.json",
+    "readiness/oauth-client-reuse-exchange-marker.schema.json",
+    "readiness/oauth-client-reuse-exchange-plan.json",
+    "readiness/oauth-client-reuse.md",
+    "readiness/run_oauth_client_reuse.py",
+    "tests/test_oauth_client_reuse.py",
+    "tests/test_oauth_exchange.py"
+  ],
+  "identity": "provider-neutral-youtube-client-reuse-exchange-20261015-r1",
+  "marker_path": "audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261015-r1.json",
+  "marker_message": "PLM OAuth client reuse exchange once provider-neutral-youtube-client-reuse-exchange-20261015-r1",
+  "workflow_path": ".github/workflows/plm-youtube-client-reuse-exchange-once.yml",
+  "executor_path": "plm/automation/executors/oauth_exchange.py",
+  "schema_path": "readiness/oauth-client-reuse-exchange-marker.schema.json",
+  "enabled": false,
+  "owner_approved": false,
+  "operational_exclusion_attested": false,
+  "writer_permissions_reviewed": false,
+  "handoff_approved": false,
+  "client_id": null,
+  "redirect_uri": "https://developers.google.com/oauthplayground",
+  "scopes": [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.readonly"
+  ],
+  "consent_state": null,
+  "existing_secret": "PLM_YOUTUBE_GAME_001",
+  "candidate_secret": "PLM_YOUTUBE_GAME_001_REFRESH_V2",
+  "handoff_secret": "PLM_YOUTUBE_REAUTH_HANDOFF_ONCE",
+  "writer_secret": "PLM_GITHUB_OAUTH_SECRET_WRITER",
+  "environment": "plm-oauth-client-reuse-once",
+  "limits": {
+    "authorization_code_POST": 1,
+    "refresh_POST": 0,
+    "candidate_metadata_GET": 1,
+    "repository_public_key_GET": 1,
+    "candidate_Secret_PUT": 1,
+    "YouTube": 0,
+    "Cloudflare": 0,
+    "retry": 0,
+    "rerun": 0,
+    "resume": 0,
+    "redirect": 0,
+    "fallback": 0,
+    "raw_retention": 0
+  },
+  "handoff_window_seconds": 300,
+  "candidate_current_validity": "NOT_TESTED",
+  "candidate_adoption": "EXPLICIT_V2_PROVIDER_ONLY",
+  "google_client_secrets": {
+    "owner_reported_count": 2,
+    "modify": false
+  },
+  "historical_success_run": 38225716925,
+  "historical_success_fresh": false,
+  "protected_identity": "provider-neutral-youtube-channel-verify-20261012-r1",
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  }
+}

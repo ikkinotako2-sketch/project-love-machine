@@ -1,0 +1,35 @@
+name: PLM OAuth Client Reuse OFFLINE
+on:
+  push:
+    branches: [plm-youtube-oauth-recovery-20261015-r1]
+permissions:
+  contents: read
+concurrency:
+  group: plm-oauth-client-reuse-offline
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Source/history gate and reuse/exchange/encryption tests; provider network denied
+        run: python -m readiness.run_oauth_client_reuse
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-oauth-reuse-offline-${{ github.sha }}
+          path: oauth-reuse-evidence/
+          retention-days: 7
+          if-no-files-found: error
