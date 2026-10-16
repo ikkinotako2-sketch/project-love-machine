@@ -47,6 +47,32 @@ class ExchangeTests(unittest.TestCase):
   e,w,p=self.setup_engine();e.clock=lambda:1300
   with self.assertRaises(Stop):e.run(self.load)
   self.assertEqual(p.calls,[])
+ def test_preflight_expiry_blocks_post_and_put(self):
+  for after in (1300,1301,999):
+   with self.subTest(after=after):
+    e,w,p=self.setup_engine();clock=[1100];e.clock=lambda:clock[0]
+    original=e.writer.preflight
+    def delayed_preflight():
+     original();clock[0]=after
+    e.writer.preflight=delayed_preflight
+    with self.assertRaises(Stop) as cm:e.run(self.load)
+    self.assertEqual(str(cm.exception),'HANDOFF_LOCAL_WINDOW_STOP')
+    self.assertEqual(e.posts,0);self.assertFalse(e.write_attempted)
+    self.assertEqual(p.calls,[]);self.assertEqual([a[0] for a in w.calls],['GET','GET'])
+    with self.assertRaises(Stop):e.run(self.load)
+    self.assertEqual(len(w.calls),2);self.assertEqual(p.calls,[])
+ def test_post_immediately_before_deadline_allowed_once(self):
+  e,w,p=self.setup_engine();times=iter((1100,1100,1299,1299));e.clock=lambda:next(times)
+  self.assertTrue(e.run(self.load)['candidate_saved'])
+  self.assertEqual(e.posts,1);self.assertEqual(len(p.calls),1)
+ def test_expiry_during_form_construction_blocks_post(self):
+  e,w,p=self.setup_engine();clock=[1100];e.clock=lambda:clock[0]
+  original=x.urlencode
+  def slow_form(data):
+   result=original(data);clock[0]=1300;return result
+  with patch.object(x,'urlencode',side_effect=slow_form):
+   with self.assertRaises(Stop):e.run(self.load)
+  self.assertEqual(e.posts,0);self.assertEqual(p.calls,[]);self.assertEqual(len(w.calls),2)
  def test_candidate_exists_prevents_oauth(self):
   e,w,p=self.setup_engine();w.fn=lambda *args:(200,{'name':x.CANDIDATE})
   with self.assertRaises(Stop):e.run(self.load)

@@ -205,3 +205,37 @@ If the writer permission cannot be provisioned, STOP before OAuth: do not exchan
 and then print/download a refresh token for manual saving. A same-client Google
 secret rotation is a separately approved last resort, after consumer impact review;
 with two secrets already present, do not disable either merely to make room.
+
+## 2026-10-16 deadline correction and saved Environment audit
+
+The handoff local 300-second window is checked again immediately before the
+sole Google POST, after writer preflight and form construction. Expiry at the
+exact boundary, elapsed preflight, or a clock earlier than issued_at stops with
+zero OAuth POST / candidate PUT; the permit remains used and cannot be retried.
+This bounds local request admission, not Google's actual code lifetime or network
+arrival time. GitHub queue and reviewer delays are not guaranteed to fit 300s.
+
+Read-only owner UI audit: Environment plm-oauth-client-reuse-once exists, required
+reviewer ikkinotako2-sketch, prevent_self_review=false, administrator bypass=false,
+only branch plm-youtube-oauth-recovery-20261015-r1 (zero tags). No Environment
+secrets or variables were present at the audit. No setting was changed by Work.
+
+Client ID and cryptographic consent state remain unset, all approvals false,
+plan disabled, workflow unconditional PARKED. No consent or handoff starts yet.
+Before consent, freeze the public Client ID/state and release hashes; provision
+the short-lived writer directly into the protected Environment with only this
+repository selected and Secrets read/write, no additional optional permissions.
+Set the three non-secret workflow pin variables only for that final release.
+The original Secret stays repository-scoped and unchanged; the writer/handoff
+are Environment-scoped. Never create a placeholder candidate Secret: it must
+remain absent until the separately approved encrypted creation.
+
+After explicit execution approval: owner consents, directly submits the handoff
+JSON in GitHub, the one marker commit starts attempt 1, owner reviews promptly,
+and the runner stops without exchange if the local window elapsed. No automatic
+retry, new identity, new consent, handoff deletion or writer revocation follows.
+Cleanup and revocation require their separately authorized owner actions.
+Google callback URLs must not be copied to Work or captured in logs/screenshots.
+The existing Playground redirect inherently returns the code in a query; browser
+history retention is not proven absent. If that transient callback is unacceptable,
+STOP and review a separate receiver rather than claiming this route is safe.

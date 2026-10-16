@@ -151,6 +151,9 @@ class ExchangeExecutor:
             require(type(handoff['issued_at']) is int and handoff['issued_at']<=self.clock()<handoff['issued_at']+300,'HANDOFF_LOCAL_WINDOW_STOP')
             self.writer.preflight() # absence/key/crypto dependency admission BEFORE sole token POST
             form=urlencode({'client_id':old['client_id'],'client_secret':old['client_secret'],'code':handoff['code'],'grant_type':'authorization_code','redirect_uri':REDIRECT}).encode()
+            # Recheck after the bounded GitHub preflight and form construction.
+            # Admission before preflight alone can expire while those GETs run.
+            require(handoff['issued_at']<=self.clock()<handoff['issued_at']+300,'HANDOFF_LOCAL_WINDOW_STOP')
             self.posts+=1
             try:status,response=self.google('POST','/token',form)
             except Exception:raise Stop('CODE_EXCHANGE_UNKNOWN_NO_RETRY') from None
