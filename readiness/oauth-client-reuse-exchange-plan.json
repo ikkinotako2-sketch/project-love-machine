@@ -2,7 +2,7 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-recovery-20261015-r1",
-  "preparation_parent": "d3d971add94ba31034cad111a61dc6008baf0b85",
+  "preparation_parent": "5ae4455d339df7622b13014680ace49add4eb0fa",
   "preparation_files": [
     "plm/automation/executors/oauth_exchange.py",
     "readiness/oauth-client-reuse-exchange-hashes.json",
@@ -21,13 +21,13 @@
   "operational_exclusion_attested": false,
   "writer_permissions_reviewed": false,
   "handoff_approved": false,
-  "client_id": null,
+  "client_id": "559247977069-e50008qnmkuath6qbkbmetqsu6lvls84.apps.googleusercontent.com",
   "redirect_uri": "https://developers.google.com/oauthplayground",
   "scopes": [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.readonly"
   ],
-  "consent_state": null,
+  "consent_state": "4c-kgwYTlQAsKpdsy3LqMYYUbQeO93U7XcHMNWFyolM",
   "existing_secret": "PLM_YOUTUBE_GAME_001",
   "candidate_secret": "PLM_YOUTUBE_GAME_001_REFRESH_V2",
   "handoff_secret": "PLM_YOUTUBE_REAUTH_HANDOFF_ONCE",
@@ -63,5 +63,8 @@
     "DRY_RUN": true,
     "NO_PUBLISH": true,
     "EMERGENCY_STOP": true
-  }
+  },
+  "client_id_owner_verified": false,
+  "client_id_evidence": "OWNER_SUPPLIED_SCREENSHOT_TRANSCRIPTION_NOT_INDEPENDENTLY_VERIFIED",
+  "consent_state_entropy_bits": 256
 }

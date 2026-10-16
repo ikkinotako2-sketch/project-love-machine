@@ -41,6 +41,7 @@ class Permit:
 def local_gate(root,env,*,prepared=None,plan_sha=None,manifest_sha=None):
     root=Path(root);p=duplicate_free((root/PLAN).read_bytes())
     if p.get('enabled') is not True:return None
+    require(p.get('client_id_owner_verified') is True,'PUBLIC_CLIENT_ID_UNVERIFIED_STOP')
     require(re.fullmatch('[a-f0-9]{40}',prepared or '') and re.fullmatch('[a-f0-9]{64}',plan_sha or '') and re.fullmatch('[a-f0-9]{64}',manifest_sha or ''),'EXTERNAL_PINS_REQUIRED')
     g=GitAudit(root);head=g.git('rev-parse','HEAD').decode().strip()
     require(env.get('GITHUB_REPOSITORY')==REPO and env.get('GITHUB_REF')=='refs/heads/'+p['branch'] and env.get('GITHUB_EVENT_NAME')=='push' and env.get('GITHUB_RUN_ATTEMPT')=='1' and env.get('GITHUB_SHA')==head and re.fullmatch('[1-9][0-9]{0,19}',env.get('GITHUB_RUN_ID','')),'RUN_CONTEXT_STOP')

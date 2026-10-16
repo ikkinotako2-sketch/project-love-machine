@@ -1,5 +1,5 @@
 {
-  "base_commit": "d3d971add94ba31034cad111a61dc6008baf0b85",
+  "base_commit": "5ae4455d339df7622b13014680ace49add4eb0fa",
   "source_sha256": {
     ".github/workflows/command-center.yml": "1212b5a8571595479de43aef83396c3a508aa7157a33756d48a5db591b994486",
     ".github/workflows/plm-executor-channel-parked.yml": "ecf03cad140aa7e64fda95bce0eb9228910b11e01629eeaefb537417e4e5df7c",
@@ -56,7 +56,7 @@
     "plm/automation/executors/cloudflare.py": "54c1f76ae0fbb5e75dc83d1f3b6ec7ae7afcfeaa0e4eada93e26731e60ab7415",
     "plm/automation/executors/entrypoint.py": "d925cf896a8793b9cad70e8d9941825894a73b6235fd33e8887bad6a15c792b5",
     "plm/automation/executors/lifecycle.py": "c5c147d10a53e812b881119a5660f185204f5af5c4d39e4d6b1fa24b49fffd90",
-    "plm/automation/executors/oauth_exchange.py": "ad0fd3d37a5bf8c2ef44e320b8a6acc15848c7c2bf83460ed8c7aee9a73789d6",
+    "plm/automation/executors/oauth_exchange.py": "17fa9a2a3d717f66cfc51c12a4ecd9a703c2bd7537751c8adb2afdb4161e025d",
     "plm/automation/executors/oauth_reuse.py": "ccf9217b937d43948c9c191a2f85dba72df41c76831b3b40daca75899906c640",
     "plm/automation/executors/posting.py": "0f7e434d66dc5f9e205d6a9b39748fe41990e232407f8e49a9c2069b7ce76710",
     "plm/automation/executors/release.py": "d604ed24a0503d209fa57b0d8743245a738093dd5ca88bd9b4dfd75eb8078ec7",
@@ -120,8 +120,8 @@
     "readiness/four-connections-source-hashes.json": "09ce63ce5b8d93736c38b5f88405e889c7b41367a8a5e50385554faf0cabe0f7",
     "readiness/four-connections-test-summary.json": "eb87caf0c09300ad5438bd5455d318f890a93d706241e47706d8e5568ba0ffe7",
     "readiness/oauth-client-reuse-exchange-marker.schema.json": "2af8673a7681de5f1dac7e93c1bb92efa1d89f2bc3ffbe99b8af5b22ea9dc808",
-    "readiness/oauth-client-reuse-exchange-plan.json": "8f8ec7d0bd13e9a1cf2f5b929d1a856b2a815e206fe97aaf30affcf5de86b265",
-    "readiness/oauth-client-reuse.md": "ef0e75300462233b3475b60994f0a4957fe908f1cafa2d58f756bbd4ffb7fdd5",
+    "readiness/oauth-client-reuse-exchange-plan.json": "b399b70c746ec38a83963c910611bc0f2bfd0035be3b6cde946f42bb4e427594",
+    "readiness/oauth-client-reuse.md": "ae14ca121ce1dfd31c03490b9d022e0b32f764bb1de085aea2358de7a393b0ae",
     "readiness/offline_node_guard.mjs": "25320841c4fcbd5b7fd572c4c45339ee17104f144608e967b7b905175afbbb6e",
     "readiness/render_private_fixture.py": "d0a19991100d38d47e3c86d25a72b994c18b0c9127cfec9f830a6c3bb3861125",
     "readiness/reused-render-evidence.json": "c416db69ce5f08dfa3a8fd2c42e7ddbb5ad46d0e2710b6df8e6b0fcc55b7343f",
@@ -163,7 +163,7 @@
     "tests/test_execution_package.py": "4be27ee425496cbe31ef03c539e199ba426bd41752629dde81ee35499714ca01",
     "tests/test_executor_final.py": "5527b2cb713e40effc7d70456708b9c9c3ebb3d6759f0897c466990fb73bd482",
     "tests/test_oauth_client_reuse.py": "98175f07739a5842b5fdaf477aa5a618c8e78118575953f124d1ddd21dc21154",
-    "tests/test_oauth_exchange.py": "eff7568a344c469e957aeff666f12adfa9d8757641c3b48552b09e01cde91661",
+    "tests/test_oauth_exchange.py": "754aa3fdbd5ca5f3a9124cb66a7822a67285019b90e40e98b25cbabdd4210e78",
     "tests/test_production_connections.py": "bbbab8ab5589980376fe2dbbf7a6a3303f3187ee465c7ee5ef4ac886fd82673e"
   }
 }

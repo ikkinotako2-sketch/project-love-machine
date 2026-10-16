@@ -239,3 +239,41 @@ Google callback URLs must not be copied to Work or captured in logs/screenshots.
 The existing Playground redirect inherently returns the code in a query; browser
 history retention is not proven absent. If that transient callback is unacceptable,
 STOP and review a separate receiver rather than claiming this route is safe.
+
+## 2026-10-16 public consent pin revision
+
+The owner supplied candidate Client ID
+559247977069-e50008qnmkuath6qbkbmetqsu6lvls84.apps.googleusercontent.com
+is pinned as an UNVERIFIED screenshot transcription, not as a verified current
+Google Cloud value. The Cloud Clients page is unavailable in this browser; the
+referenced screenshot was not resolved. Do not start consent on this basis.
+client_id_owner_verified=false is an additional secret-free admission gate, not
+an owner attestation that Work may infer. Obtain a direct copy of the public
+Client ID from the existing PLM YouTube OAuth Web application and its registered
+Playground redirect. Do not ask for either client secret. Actions still compares
+the pinned ID exactly against both the original Secret JSON and handoff JSON.
+
+A single new public consent-state nonce was generated with Python secrets from
+32 random bytes (256 bits) and pinned in the plan. It has not been used in any
+Google request. Reuse this prepared nonce for this identity only; never reuse it
+after execution/consent attempt. No URL containing a returned code is generated,
+opened or saved. The plan and workflow remain PARKED; all approvals remain false.
+
+Owner-only writer provisioning after separate access approval:
+GitHub Settings > Developer settings > Personal access tokens > Fine-grained
+tokens. Resource owner ikkinotako2-sketch; only selected repository
+project-love-machine; Repository permissions Secrets: Read and write only, plus
+GitHub's implicit Metadata read. Use a short available expiration, no Contents,
+Actions, Workflows, Administration, Cloudflare, or other repository grants.
+Token permissions cannot restrict one Secret name; code fixes the V2 name.
+Enter the token directly into Environment plm-oauth-client-reuse-once as
+PLM_GITHUB_OAUTH_SECRET_WRITER. Never put it into chat, a file or a variable.
+Creation/registration is not authorized by this preparation and was not performed.
+Do not create the V2 candidate or handoff yet. The V2 must be absent at execution.
+The writer must be revoked and temporary handoff removed after the terminal
+result under separate cleanup authority, including UNKNOWN; no exchange retry.
+
+Before owner consent, a separately reviewed release must confirm the public ID,
+redirect and writer permissions, freeze exact source/plan/manifest/commit pins
+and populate the three nonsecret Environment pin variables referenced by the
+workflow. Do not enable the runner or consume its marker in this preparation.

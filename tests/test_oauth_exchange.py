@@ -136,6 +136,20 @@ class ExchangeTests(unittest.TestCase):
   with patch.dict(os.environ,{'PLM_YOUTUBE_GAME_001':'PRIVATE_FIXTURE'}):
    out=subprocess.check_output(['python','-m','plm.automation.executors.oauth_exchange','--execute'],cwd=ROOT)
   self.assertEqual(json.loads(out)['status'],'PARKED');self.assertNotIn(b'PRIVATE_FIXTURE',out)
+ def test_candidate_client_and_256_bit_state_are_pinned_without_execution(self):
+  self.assertEqual(PLAN['client_id'],'559247977069-e50008qnmkuath6qbkbmetqsu6lvls84.apps.googleusercontent.com')
+  self.assertEqual(PLAN['consent_state_entropy_bits'],256)
+  nonce=base64.urlsafe_b64decode(PLAN['consent_state']+'=')
+  self.assertEqual(len(nonce),32)
+  self.assertFalse(PLAN['client_id_owner_verified']);self.assertFalse(PLAN['enabled'])
+  self.assertFalse(PLAN['owner_approved']);self.assertFalse(PLAN['writer_permissions_reviewed'])
+ def test_false_activation_cannot_bypass_unverified_client_gate(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   p=copy.deepcopy(PLAN);p.update(enabled=True,owner_approved=True,writer_permissions_reviewed=True,handoff_approved=True,operational_exclusion_attested=True)
+   dest=Path(tmp)/x.PLAN;dest.parent.mkdir(parents=True);dest.write_text(json.dumps(p))
+   with patch.object(x,'GitAudit') as git:
+    with self.assertRaises(Stop) as cm:x.local_gate(tmp,{})
+    self.assertEqual(str(cm.exception),'PUBLIC_CLIENT_ID_UNVERIFIED_STOP');git.assert_not_called()
  def test_full_workflow_parked_secret_after_gate_only(self):
   w=(ROOT/PLAN['workflow_path']).read_text()
   self.assertIn('if: ${{ false }}',w);self.assertNotIn('workflow_dispatch',w)
@@ -177,7 +191,7 @@ class HistoryTests(unittest.TestCase):
   def git(*args):return subprocess.check_output(['git','-C',str(root),*args],stderr=subprocess.DEVNULL).decode().strip()
   git('init');git('config','user.email','fixture@example.invalid');git('config','user.name','Offline fixture')
   (root/'base.txt').write_text('base');git('add','.');git('commit','-m','fixture base');parent=git('rev-parse','HEAD')
-  p=copy.deepcopy(PLAN);p.update(enabled=True,owner_approved=True,operational_exclusion_attested=True,writer_permissions_reviewed=True,handoff_approved=True,client_id=CID,consent_state='s'*48,preparation_parent=parent)
+  p=copy.deepcopy(PLAN);p.update(enabled=True,client_id_owner_verified=True,owner_approved=True,operational_exclusion_attested=True,writer_permissions_reviewed=True,handoff_approved=True,client_id=CID,consent_state='s'*48,preparation_parent=parent)
   p['preparation_files']=sorted([x.PLAN,x.MANIFEST,p['workflow_path'],p['executor_path'],p['schema_path']]+(['base.txt'] if extra_expected else []))
   for f in p['preparation_files']:
    (root/f).parent.mkdir(parents=True,exist_ok=True);(root/f).write_text('fixture')
