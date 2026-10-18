@@ -2,7 +2,7 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-recovery-20261015-r1",
-  "preparation_parent": "5ae4455d339df7622b13014680ace49add4eb0fa",
+  "preparation_parent": "3fde582a713ad6c72eb8ede08336bf56cec08bb3",
   "preparation_files": [
     "plm/automation/executors/oauth_exchange.py",
     "readiness/oauth-client-reuse-exchange-hashes.json",
@@ -64,7 +64,12 @@
     "NO_PUBLISH": true,
     "EMERGENCY_STOP": true
   },
-  "client_id_owner_verified": false,
-  "client_id_evidence": "OWNER_SUPPLIED_SCREENSHOT_TRANSCRIPTION_NOT_INDEPENDENTLY_VERIFIED",
-  "consent_state_entropy_bits": 256
+  "client_id_owner_verified": true,
+  "client_id_evidence": "OWNER_CONFIRMED_EXACT_COPY_FROM_EXISTING_GOOGLE_CLOUD_CLIENT",
+  "consent_state_entropy_bits": 256,
+  "execution_policy": "BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE",
+  "success_within_window_guaranteed": false,
+  "consumed_on_marker_even_if_oauth_post_zero": true,
+  "consent_state_first_published_at": "2026-10-16T12:05:09Z",
+  "consent_state_used": false
 }

@@ -277,3 +277,81 @@ Before owner consent, a separately reviewed release must confirm the public ID,
 redirect and writer permissions, freeze exact source/plan/manifest/commit pins
 and populate the three nonsecret Environment pin variables referenced by the
 workflow. Do not enable the runner or consume its marker in this preparation.
+
+## 2026-10-18 bounded-attempt policy (supersedes the success-guarantee blocker)
+
+Owner no longer requires exchange success within 300 seconds. The ONLY accepted
+policy is BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE. The 300s local cutoff,
+Google's own code validity, pre-POST recheck and all no-retry limits are unchanged.
+Owner-confirmed exact Client ID copy is now recorded; this is owner evidence,
+not an independent Google Cloud API verification. Writer registration is previously
+independently observed; current PAT permissions/expiry remain owner-attested and
+must be checked in the owner UI before consent, without exercising the token.
+Current enabled/owner_approved/handoff_approved/writer_permissions_reviewed and
+operational_exclusion_attested remain false; workflow is still unconditional PARKED.
+
+The existing 256-bit nonce is unused. First publication 2026-10-16T12:05:09Z is
+recorded separately from exact generation time (not recorded). It is not an
+authorization code and its age alone does not extend/shorten Google's code TTL.
+Build a fresh timed ConsentContext immediately before actual owner consent under
+separate approval; no Google URL has been opened. If any prior consent use is
+unknown, STOP, never assume nonce or identity reuse is safe.
+
+BEFORE consent, without code/token exchange:
+- Freeze final reviewed commit/workflow/plan/manifest pins and marker bytes; verify
+  clean full history, unused identity, no existing exchange run and candidate absent.
+- Review workflow activation separately; keep safe flags true. Complete Environment
+  reviewer/branch/no-admin-bypass settings, owner review availability, and writer
+  selected-repository Secrets read/write + expiration check before asking for code.
+- Separately authorize exact nonsecret Environment variables PLM_OAUTH_REUSE_PREPARED,
+  PLM_OAUTH_REUSE_PLAN_SHA256 and PLM_OAUTH_REUSE_MANIFEST_SHA256 for that release.
+  Do not set enabled/approval flags merely because these preparation tests pass.
+- Prepare an empty local handoff FORM/TEMPLATE in the owner's trusted input surface,
+  never a placeholder Secret. Prepare exact marker-only operation and review screen.
+  No secret/candidate write, PAT use or marker creation occurs in this preparation.
+- Owner agrees to exclusive updates of candidate/handoff for the entire attempt.
+  Repository Secrets API PUT is not atomic create-only; do not claim a race is solved
+  by a metadata GET. Public-key/absence GETs stay in the approved execution budget.
+
+AFTER separate explicit consent/exchange/save/marker approval, not now:
+1. Recheck HEAD, exact hashes, writer owner-visible expiration/permissions and
+   protections BEFORE opening the correctly pinned Google authorization URL.
+2. Owner logs in/consents; records actual code-receipt Unix time issued_at without
+   resetting it later. Google returns code/state via the registered callback query.
+   Never copy that URL into Work, logs, screenshots or artifacts. Playground/browser
+   retention is not proved absent. If this handling is unacceptable, STOP.
+3. Owner enters the handoff JSON directly into the exact Environment Secret ONCE;
+   complete its save before the marker push. Do not put it in repository Secrets.
+4. Commit the one marker, trigger attempt 1, promptly obtain Environment review.
+   Required review is per-run and cannot be pre-approved before the run exists.
+5. Runner starts and obtains Environment Secrets at job start; local source gate
+   runs before the explicit Secret-injection step. A running job is NOT assumed
+   to reload later updates. Metadata presence/updated time does not prove content
+   propagation. Missing/stale/mismatched/expired input => STOP; no updates and rerun.
+6. Validate code/state/client/redirect and issued_at <= now < issued_at+300, do
+   bounded candidate/key preflight GETs, then repeat the time check immediately
+   before sole Google POST. Runner/review/network queues can consume the window.
+7. Google rejection, timeout, redirect, UNKNOWN => terminal STOP, zero resend.
+   Require a new refresh token and both explicitly returned scopes; absent scope
+   is UNKNOWN. Encrypt candidate in memory; candidate PUT <=1, only 201 ACK passes.
+8. Preserve marker regardless of outcome or POST count; show sanitized outcome.
+   Cleanup handoff and revoke only this writer under separate cleanup authority.
+   Storage ACK is not grant-current-validity/channel match/upload permission.
+   Channel verification is a separately approved one-shot operation.
+
+POST=0 with a marker is PERMANENTLY CONSUMED, never resumable. Future recovery
+requires separately reviewed fixed new identity/state/source pins, evidence of
+previous terminal outcome and owner approval for any new consent/exchange.
+If POST/PUT was attempted and ACK is unknown, do not assume rollback/no token: use
+only separately approved metadata/recovery inspection, never automatic resend.
+Do not delete old consumed markers or recreate old handoffs.
+
+Alternatives (not implemented or authorized here): current Environment handoff
+uses existing infra and fails closed but incurs owner-review and runner latency;
+a prestarted runner cannot receive a later Secret value automatically. A dedicated
+short-lived encrypted authenticated handoff receiver could move queue/review before
+code receipt, but needs separate hosting/credential/retention/redirect/security
+review and authorization, and still cannot guarantee network success. Local owner
+exchange would require handling client secret outside existing Actions and is not
+selected. No measured success probability exists; do not claim either high or low
+probability, extend the deadline, bypass reviews, or add hosting automatically.

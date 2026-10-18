@@ -141,15 +141,23 @@ class ExchangeTests(unittest.TestCase):
   self.assertEqual(PLAN['consent_state_entropy_bits'],256)
   nonce=base64.urlsafe_b64decode(PLAN['consent_state']+'=')
   self.assertEqual(len(nonce),32)
-  self.assertFalse(PLAN['client_id_owner_verified']);self.assertFalse(PLAN['enabled'])
+  self.assertTrue(PLAN['client_id_owner_verified']);self.assertFalse(PLAN['enabled'])
   self.assertFalse(PLAN['owner_approved']);self.assertFalse(PLAN['writer_permissions_reviewed'])
  def test_false_activation_cannot_bypass_unverified_client_gate(self):
   with tempfile.TemporaryDirectory() as tmp:
-   p=copy.deepcopy(PLAN);p.update(enabled=True,owner_approved=True,writer_permissions_reviewed=True,handoff_approved=True,operational_exclusion_attested=True)
+   p=copy.deepcopy(PLAN);p.update(enabled=True,client_id_owner_verified=False,owner_approved=True,writer_permissions_reviewed=True,handoff_approved=True,operational_exclusion_attested=True)
    dest=Path(tmp)/x.PLAN;dest.parent.mkdir(parents=True);dest.write_text(json.dumps(p))
    with patch.object(x,'GitAudit') as git:
     with self.assertRaises(Stop) as cm:x.local_gate(tmp,{})
     self.assertEqual(str(cm.exception),'PUBLIC_CLIENT_ID_UNVERIFIED_STOP');git.assert_not_called()
+ def test_no_success_guarantee_or_deadline_extension_is_admitted(self):
+  for change in ({'handoff_window_seconds':301},{'success_within_window_guaranteed':True},{'execution_policy':'RETRY_UNTIL_SUCCESS'},{'consumed_on_marker_even_if_oauth_post_zero':False}):
+   with self.subTest(change=change),tempfile.TemporaryDirectory() as tmp:
+    p=copy.deepcopy(PLAN);p.update(enabled=True,**change)
+    dest=Path(tmp)/x.PLAN;dest.parent.mkdir(parents=True);dest.write_text(json.dumps(p))
+    with patch.object(x,'GitAudit') as git:
+     with self.assertRaises(Stop) as cm:x.local_gate(tmp,{})
+     self.assertEqual(str(cm.exception),'BOUNDED_EXECUTION_POLICY_STOP');git.assert_not_called()
  def test_full_workflow_parked_secret_after_gate_only(self):
   w=(ROOT/PLAN['workflow_path']).read_text()
   self.assertIn('if: ${{ false }}',w);self.assertNotIn('workflow_dispatch',w)
@@ -207,6 +215,15 @@ class HistoryTests(unittest.TestCase):
   return root,git,env,{'prepared':prepared,'plan_sha':plan_sha,'manifest_sha':manifest_sha}
  def test_actual_full_history_and_marker_chain_pass(self):
   root,git,env,pins=self.fixture();p=x.local_gate(root,env,**pins);self.assertEqual(p.mode,'LIVE_REVIEWED')
+ def test_marker_remains_consumed_when_expiry_sends_nothing(self):
+  root,git,env,pins=self.fixture();path=root/PLAN['marker_path'];marker=path.read_bytes()
+  p=x.local_gate(root,env,**pins);p.mode='OFFLINE_CONTRACT'
+  fixture=ExchangeTests();e,w,post=fixture.setup_engine();e.permit=p;e.clock=lambda:1300
+  with self.assertRaises(Stop):e.run(fixture.load)
+  self.assertTrue(p.used);self.assertEqual(e.posts,0);self.assertEqual(w.calls,[])
+  with self.assertRaises(Stop):e.run(fixture.load)
+  self.assertEqual(path.read_bytes(),marker);self.assertEqual(git('status','--porcelain'),'')
+  self.assertEqual(post.calls,[])
  def test_attempt_two_or_wrong_head_rejected(self):
   root,git,env,pins=self.fixture()
   for change in ({'GITHUB_RUN_ATTEMPT':'2'},{'GITHUB_SHA':'f'*40},{'GITHUB_REPOSITORY':'other/project'}):
