@@ -355,3 +355,33 @@ review and authorization, and still cannot guarantee network success. Local owne
 exchange would require handling client secret outside existing Actions and is not
 selected. No measured success probability exists; do not claim either high or low
 probability, extend the deadline, bypass reviews, or add hosting automatically.
+
+## Final release configuration: configuration is not execution consent
+
+This revision supersedes unconditional workflow PARKED and enabled=false statements
+above. The existing marker-only push trigger, exact branch and attempt=1 job filter
+are armed, with no dispatch/schedule/new entry. Plan enabled=true and
+release_configured=true mean configuration only. The four plan execution approval
+fields remain FALSE and changing them to true is rejected. Exact future marker
+execution_approval must contain all four separately owner-approved attestations
+TRUE. Missing marker returns PARKED before any Git/Secret/transport access.
+A later separately approved marker-only commit is the sole execution admission;
+no such marker is created by release configuration. Full history, exact preparation
+diff and all source pins still apply after that future marker exists.
+
+Owner attests writer selected repo, Secrets read/write, expiration 2026-10-23.
+This is not a token-value inspection or a live validity probe. Keep Environment
+reviewer, exact branch restriction, admin bypass prohibited. Populate ONLY the three
+nonsecret pin variables from this actual release commit/plan/manifest, never its
+PARKED predecessor. Settings approval is not OAuth consent or handoff approval.
+The existing 300s local admission and immediate pre-POST recheck are unchanged.
+Future exact marker includes identity/state/approved/prepared_commit_sha and five
+source hash fields plus execution_approval with owner_approved,
+operational_exclusion_attested, writer_permissions_reviewed, handoff_approved TRUE.
+These attest actual separate future approval and fresh exclusion/handoff checks;
+they must not be asserted from this configuration approval alone.
+
+No Google consent/POST, PAT use, Secret operation, execution marker, YouTube,
+Cloudflare or other project operation occurs in this release. Finalization stops
+after source/CI/pin-variable readback and reports marker preview outside consumed
+paths. Actual execution and cleanup require their separate owner approvals.

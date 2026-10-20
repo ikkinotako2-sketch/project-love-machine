@@ -2,12 +2,15 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-recovery-20261015-r1",
-  "preparation_parent": "3fde582a713ad6c72eb8ede08336bf56cec08bb3",
+  "preparation_parent": "7999ba0699131723d73e8958b732fb7ad741b9dd",
   "preparation_files": [
+    ".github/workflows/plm-youtube-client-reuse-exchange-once.yml",
     "plm/automation/executors/oauth_exchange.py",
     "readiness/oauth-client-reuse-exchange-hashes.json",
+    "readiness/oauth-client-reuse-exchange-marker.schema.json",
     "readiness/oauth-client-reuse-exchange-plan.json",
     "readiness/oauth-client-reuse.md",
+    "readiness/run_oauth_client_reuse.py",
     "tests/test_oauth_exchange.py"
   ],
   "identity": "provider-neutral-youtube-client-reuse-exchange-20261015-r1",
@@ -16,7 +19,7 @@
   "workflow_path": ".github/workflows/plm-youtube-client-reuse-exchange-once.yml",
   "executor_path": "plm/automation/executors/oauth_exchange.py",
   "schema_path": "readiness/oauth-client-reuse-exchange-marker.schema.json",
-  "enabled": false,
+  "enabled": true,
   "owner_approved": false,
   "operational_exclusion_attested": false,
   "writer_permissions_reviewed": false,
@@ -71,5 +74,7 @@
   "success_within_window_guaranteed": false,
   "consumed_on_marker_even_if_oauth_post_zero": true,
   "consent_state_first_published_at": "2026-10-16T12:05:09Z",
-  "consent_state_used": false
+  "consent_state_used": false,
+  "release_configured": true,
+  "execution_approval_source": "FUTURE_MARKER_ONLY"
 }

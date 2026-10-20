@@ -1,5 +1,5 @@
 {
-  "base_commit": "3fde582a713ad6c72eb8ede08336bf56cec08bb3",
+  "base_commit": "7999ba0699131723d73e8958b732fb7ad741b9dd",
   "source_sha256": {
     ".github/workflows/command-center.yml": "1212b5a8571595479de43aef83396c3a508aa7157a33756d48a5db591b994486",
     ".github/workflows/plm-executor-channel-parked.yml": "ecf03cad140aa7e64fda95bce0eb9228910b11e01629eeaefb537417e4e5df7c",
@@ -12,7 +12,7 @@
     ".github/workflows/plm-executor-worker-deploy-parked.yml": "1967cb0da5fdbd64a0763803e7230ecdb3349ea41bd7745154b7c0b20d155664",
     ".github/workflows/plm-executor-worker-postcheck-parked.yml": "25f9c272b4eab2dcced3829e50be82ef46bcb94a1570b835002fe7f634772aa3",
     ".github/workflows/plm-production-connections-offline.yml": "82eedcba1a3ae8dd291eb822be1bd860c485dd6e4055cca3b92880c2cabb53b9",
-    ".github/workflows/plm-youtube-client-reuse-exchange-once.yml": "8e5fe5b32460c7ee5d11a550e54fcaff089114190c39700225193d204b5333b6",
+    ".github/workflows/plm-youtube-client-reuse-exchange-once.yml": "3156add7b2a8c62b21c04a56fc8ea99312b920f4b61c06af883fc0c2b642a134",
     ".github/workflows/plm-youtube-client-reuse-offline.yml": "070a16b70b0c3621d50dd8518b0fe2143b431780ed4e4fe5baa7ccbf3829d594",
     ".github/workflows/plm-youtube-connections-offline.yml": "58737e9f640cc4922eb55a45e30b5ed0d85bdc144c2a0fc045cc65c8f92b9eab",
     ".github/workflows/plm-youtube-execution-package-offline.yml": "28af510267e9c8f8159d8e5094cf87af1e6db6f9713acea3d8b2f2363353dfd1",
@@ -56,7 +56,7 @@
     "plm/automation/executors/cloudflare.py": "54c1f76ae0fbb5e75dc83d1f3b6ec7ae7afcfeaa0e4eada93e26731e60ab7415",
     "plm/automation/executors/entrypoint.py": "d925cf896a8793b9cad70e8d9941825894a73b6235fd33e8887bad6a15c792b5",
     "plm/automation/executors/lifecycle.py": "c5c147d10a53e812b881119a5660f185204f5af5c4d39e4d6b1fa24b49fffd90",
-    "plm/automation/executors/oauth_exchange.py": "64a5ef0af459f5983dc7516a6ef05c57b7bb68948f0aed5d63a7945dfb9a87cf",
+    "plm/automation/executors/oauth_exchange.py": "0bb13286cf04d548bd7895df6352c6755d79199b0b3588930c49a1f738dc9d64",
     "plm/automation/executors/oauth_reuse.py": "ccf9217b937d43948c9c191a2f85dba72df41c76831b3b40daca75899906c640",
     "plm/automation/executors/posting.py": "0f7e434d66dc5f9e205d6a9b39748fe41990e232407f8e49a9c2069b7ce76710",
     "plm/automation/executors/release.py": "d604ed24a0503d209fa57b0d8743245a738093dd5ca88bd9b4dfd75eb8078ec7",
@@ -119,9 +119,9 @@
     "readiness/four-connections-package.json": "e32e32c0489e6634d0139bd362aff0a08faadec5aaa0afa4f30aa8db157367b1",
     "readiness/four-connections-source-hashes.json": "09ce63ce5b8d93736c38b5f88405e889c7b41367a8a5e50385554faf0cabe0f7",
     "readiness/four-connections-test-summary.json": "eb87caf0c09300ad5438bd5455d318f890a93d706241e47706d8e5568ba0ffe7",
-    "readiness/oauth-client-reuse-exchange-marker.schema.json": "2af8673a7681de5f1dac7e93c1bb92efa1d89f2bc3ffbe99b8af5b22ea9dc808",
-    "readiness/oauth-client-reuse-exchange-plan.json": "dd25b6bccb81cd0d4be2727b3d3764f7711d33eb80da201ab73980b837514862",
-    "readiness/oauth-client-reuse.md": "688ac2f12348185c75af08a440ff42ba354704ac2000e45e04d0678cfa144b25",
+    "readiness/oauth-client-reuse-exchange-marker.schema.json": "baa17685a42c65067e3b50a3345f74b0635ef8f6c5fef398204c3682f24ffac4",
+    "readiness/oauth-client-reuse-exchange-plan.json": "4ad8dfac105489b804a848e414996892e3a759014034864d77d769c503e27a33",
+    "readiness/oauth-client-reuse.md": "a6a0e4efb670164bb2af8e1d9ae62b5a3694d121da9c2f80200538a72c80a0e1",
     "readiness/offline_node_guard.mjs": "25320841c4fcbd5b7fd572c4c45339ee17104f144608e967b7b905175afbbb6e",
     "readiness/render_private_fixture.py": "d0a19991100d38d47e3c86d25a72b994c18b0c9127cfec9f830a6c3bb3861125",
     "readiness/reused-render-evidence.json": "c416db69ce5f08dfa3a8fd2c42e7ddbb5ad46d0e2710b6df8e6b0fcc55b7343f",
@@ -130,7 +130,7 @@
     "readiness/run_executor_final.py": "49e92f477616a62090d38fc3a0f21aada37a2c6b0099a793f7c68bad03f7c4dc",
     "readiness/run_final_candidate.py": "0abfa13c75eee6ed3e42417179a930f70aa308f1823b03def14fea0dd3542f2e",
     "readiness/run_four_connections.py": "bbc5896f19eb9495015daf91bafa0e0aab6208122cc95e9724793a84f6bec757",
-    "readiness/run_oauth_client_reuse.py": "553ad939bd3edda62d089cc3ae517a2ad33a6366d78527ecc5f86a2db8ff79d3",
+    "readiness/run_oauth_client_reuse.py": "d0963a561c63d5273b9e6078544ed25fad4ce4cf5e03f147773bce78be337e00",
     "readiness/run_production_connections.py": "ac6a0ec6697d75951583ecd7e316f289f391e583f7b17f82b9eec9592c8bdc95",
     "readiness/sandbox-contract-fixture/readiness/production-candidate/revised-source/.github/workflows/youtube-pipeline.yml": "3b46a638e1d7e7738c78cf43ab63f36587fcd3158c34a744c8b91969d9f32b55",
     "readiness/sandbox-contract-fixture/readiness/production-candidate/source/plm/entrypoints/yt_serverless_candidate.py": "75f0752db9500c178c496242f0f3b09f322201f6887eed9a4e7e130db779b5e5",
@@ -163,7 +163,7 @@
     "tests/test_execution_package.py": "4be27ee425496cbe31ef03c539e199ba426bd41752629dde81ee35499714ca01",
     "tests/test_executor_final.py": "5527b2cb713e40effc7d70456708b9c9c3ebb3d6759f0897c466990fb73bd482",
     "tests/test_oauth_client_reuse.py": "98175f07739a5842b5fdaf477aa5a618c8e78118575953f124d1ddd21dc21154",
-    "tests/test_oauth_exchange.py": "c8808f4e42a10749bcde187a173f2e774d81bef96df5d8c1264b8206e2e64b12",
+    "tests/test_oauth_exchange.py": "6e57d5a6ee8f8fae58bb09594a62fe0d4b817964707b32dcd8a61971c2daac1c",
     "tests/test_production_connections.py": "bbbab8ab5589980376fe2dbbf7a6a3303f3187ee465c7ee5ef4ac886fd82673e"
   }
 }

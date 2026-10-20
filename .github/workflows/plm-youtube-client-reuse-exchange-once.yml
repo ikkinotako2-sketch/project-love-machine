@@ -1,4 +1,4 @@
-name: PLM OAuth Client Reuse Exchange PARKED
+name: PLM OAuth Client Reuse Exchange Once
 on:
   push:
     branches: [plm-youtube-oauth-recovery-20261015-r1]
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   exchange:
-    if: ${{ false }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/plm-youtube-oauth-recovery-20261015-r1' && github.run_attempt == 1 }}
     environment: plm-oauth-client-reuse-once
     runs-on: ubuntu-latest
     timeout-minutes: 5

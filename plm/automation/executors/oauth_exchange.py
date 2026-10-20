@@ -43,11 +43,14 @@ def local_gate(root,env,*,prepared=None,plan_sha=None,manifest_sha=None):
     if p.get('enabled') is not True:return None
     require(p.get('client_id_owner_verified') is True,'PUBLIC_CLIENT_ID_UNVERIFIED_STOP')
     require(p.get('execution_policy')=='BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE' and p.get('success_within_window_guaranteed') is False and p.get('handoff_window_seconds')==300 and p.get('consumed_on_marker_even_if_oauth_post_zero') is True,'BOUNDED_EXECUTION_POLICY_STOP')
+    approval_keys=('owner_approved','operational_exclusion_attested','writer_permissions_reviewed','handoff_approved')
+    require(p.get('release_configured') is True and p.get('execution_approval_source')=='FUTURE_MARKER_ONLY' and all(p.get(k) is False for k in approval_keys),'RELEASE_APPROVAL_IN_PLAN_STOP')
+    path=p['marker_path'];require(path=='audit-evidence/consumed/'+p['identity']+'.json','MARKER_PATH_STOP')
+    if not (root/path).exists():return None # configured release is not execution approval
     require(re.fullmatch('[a-f0-9]{40}',prepared or '') and re.fullmatch('[a-f0-9]{64}',plan_sha or '') and re.fullmatch('[a-f0-9]{64}',manifest_sha or ''),'EXTERNAL_PINS_REQUIRED')
     g=GitAudit(root);head=g.git('rev-parse','HEAD').decode().strip()
     require(env.get('GITHUB_REPOSITORY')==REPO and env.get('GITHUB_REF')=='refs/heads/'+p['branch'] and env.get('GITHUB_EVENT_NAME')=='push' and env.get('GITHUB_RUN_ATTEMPT')=='1' and env.get('GITHUB_SHA')==head and re.fullmatch('[1-9][0-9]{0,19}',env.get('GITHUB_RUN_ID','')),'RUN_CONTEXT_STOP')
     require(all(env.get(k)==v for k,v in SAFE.items()),'SAFE_FLAGS_STOP')
-    require(p['owner_approved'] is True and p['operational_exclusion_attested'] is True and p['writer_permissions_reviewed'] is True and p['handoff_approved'] is True,'RELEASE_APPROVAL_REQUIRED')
     require(CLIENT.fullmatch(p.get('client_id') or '') and p['redirect_uri']==REDIRECT and p['scopes']==list(SCOPES) and re.fullmatch('[A-Za-z0-9_-]{43,128}',p.get('consent_state') or ''),'CONSENT_PINS_REQUIRED')
     require(p['identity']=='provider-neutral-youtube-client-reuse-exchange-20261015-r1' and p['workflow_path']=='.github/workflows/plm-youtube-client-reuse-exchange-once.yml' and p['executor_path']=='plm/automation/executors/oauth_exchange.py' and p['schema_path']=='readiness/oauth-client-reuse-exchange-marker.schema.json','EXECUTION_TARGET_STOP')
     require(p['repository']==REPO and p['existing_secret']==EXISTING and p['candidate_secret']==CANDIDATE and p['handoff_secret']==HANDOFF and p['writer_secret']==WRITER,'CREDENTIAL_ROLE_STOP')
@@ -59,7 +62,7 @@ def local_gate(root,env,*,prepared=None,plan_sha=None,manifest_sha=None):
     path=p['marker_path'];require(path=='audit-evidence/consumed/'+p['identity']+'.json','MARKER_PATH_STOP')
     require(g.absent(prepared,path) and g.git('diff','--name-status',prepared+'..'+head).decode().splitlines()==['A\t'+path],'MARKER_ONLY_STOP')
     m=duplicate_free(g.raw(head,path))
-    expected={'identity':p['identity'],'state':'CONSUMED_BEFORE_REMOTE','approved':True,'prepared_commit_sha':prepared,'plan_sha256':plan_sha,'manifest_sha256':manifest_sha,'workflow_sha256':sha(g.raw(prepared,p['workflow_path'])),'executor_sha256':sha(g.raw(prepared,p['executor_path'])),'schema_sha256':sha(g.raw(prepared,p['schema_path']))}
+    expected={'identity':p['identity'],'state':'CONSUMED_BEFORE_REMOTE','approved':True,'prepared_commit_sha':prepared,'plan_sha256':plan_sha,'manifest_sha256':manifest_sha,'workflow_sha256':sha(g.raw(prepared,p['workflow_path'])),'executor_sha256':sha(g.raw(prepared,p['executor_path'])),'schema_sha256':sha(g.raw(prepared,p['schema_path'])),'execution_approval':{k:True for k in approval_keys}}
     require(m==expected and sha(g.raw(prepared,PLAN))==plan_sha and (root/PLAN).read_bytes()==g.raw(prepared,PLAN),'MARKER_SOURCE_PINS_STOP')
     manifest=g.raw(prepared,MANIFEST);require(sha(manifest)==manifest_sha,'MANIFEST_PIN_STOP')
     pins=duplicate_free(manifest)['source_sha256']

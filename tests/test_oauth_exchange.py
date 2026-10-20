@@ -141,7 +141,7 @@ class ExchangeTests(unittest.TestCase):
   self.assertEqual(PLAN['consent_state_entropy_bits'],256)
   nonce=base64.urlsafe_b64decode(PLAN['consent_state']+'=')
   self.assertEqual(len(nonce),32)
-  self.assertTrue(PLAN['client_id_owner_verified']);self.assertFalse(PLAN['enabled'])
+  self.assertTrue(PLAN['client_id_owner_verified']);self.assertTrue(PLAN['enabled'])
   self.assertFalse(PLAN['owner_approved']);self.assertFalse(PLAN['writer_permissions_reviewed'])
  def test_false_activation_cannot_bypass_unverified_client_gate(self):
   with tempfile.TemporaryDirectory() as tmp:
@@ -158,9 +158,18 @@ class ExchangeTests(unittest.TestCase):
     with patch.object(x,'GitAudit') as git:
      with self.assertRaises(Stop) as cm:x.local_gate(tmp,{})
      self.assertEqual(str(cm.exception),'BOUNDED_EXECUTION_POLICY_STOP');git.assert_not_called()
+ def test_configuration_cannot_claim_execution_approval(self):
+  for key in ('owner_approved','handoff_approved','writer_permissions_reviewed','operational_exclusion_attested'):
+   with self.subTest(key=key),tempfile.TemporaryDirectory() as tmp:
+    p=copy.deepcopy(PLAN);p[key]=True
+    dest=Path(tmp)/x.PLAN;dest.parent.mkdir(parents=True);dest.write_text(json.dumps(p))
+    with patch.object(x,'GitAudit') as git:
+     with self.assertRaises(Stop) as cm:x.local_gate(tmp,{})
+     self.assertEqual(str(cm.exception),'RELEASE_APPROVAL_IN_PLAN_STOP');git.assert_not_called()
  def test_full_workflow_parked_secret_after_gate_only(self):
   w=(ROOT/PLAN['workflow_path']).read_text()
-  self.assertIn('if: ${{ false }}',w);self.assertNotIn('workflow_dispatch',w)
+  self.assertIn("github.event_name == 'push'",w);self.assertIn('github.run_attempt == 1',w);self.assertNotIn('workflow_dispatch',w)
+  self.assertNotIn('schedule:',w);self.assertIn('paths: ['+PLAN['marker_path']+']',w)
   self.assertLess(w.index('--prepare'),w.index('secrets.'));self.assertIn('persist-credentials: false',w)
   self.assertNotIn('upload-artifact',w)
   for key in x.SAFE:self.assertIn(key+": 'true'",w)
@@ -199,7 +208,7 @@ class HistoryTests(unittest.TestCase):
   def git(*args):return subprocess.check_output(['git','-C',str(root),*args],stderr=subprocess.DEVNULL).decode().strip()
   git('init');git('config','user.email','fixture@example.invalid');git('config','user.name','Offline fixture')
   (root/'base.txt').write_text('base');git('add','.');git('commit','-m','fixture base');parent=git('rev-parse','HEAD')
-  p=copy.deepcopy(PLAN);p.update(enabled=True,client_id_owner_verified=True,owner_approved=True,operational_exclusion_attested=True,writer_permissions_reviewed=True,handoff_approved=True,client_id=CID,consent_state='s'*48,preparation_parent=parent)
+  p=copy.deepcopy(PLAN);p.update(enabled=True,client_id_owner_verified=True,owner_approved=False,operational_exclusion_attested=False,writer_permissions_reviewed=False,handoff_approved=False,client_id=CID,consent_state='s'*48,preparation_parent=parent)
   p['preparation_files']=sorted([x.PLAN,x.MANIFEST,p['workflow_path'],p['executor_path'],p['schema_path']]+(['base.txt'] if extra_expected else []))
   for f in p['preparation_files']:
    (root/f).parent.mkdir(parents=True,exist_ok=True);(root/f).write_text('fixture')
@@ -209,7 +218,7 @@ class HistoryTests(unittest.TestCase):
   (root/x.MANIFEST).write_text(json.dumps({'source_sha256':{f:x.sha((root/f).read_bytes()) for f in p['preparation_files'] if f!=x.MANIFEST}}))
   git('add','.');git('commit','-m','fixture preparation');prepared=git('rev-parse','HEAD')
   plan_sha=x.sha((root/x.PLAN).read_bytes());manifest_sha=x.sha((root/x.MANIFEST).read_bytes())
-  m={'identity':p['identity'],'state':'CONSUMED_BEFORE_REMOTE','approved':True,'prepared_commit_sha':prepared,'plan_sha256':plan_sha,'manifest_sha256':manifest_sha,'workflow_sha256':x.sha((root/p['workflow_path']).read_bytes()),'executor_sha256':x.sha((root/p['executor_path']).read_bytes()),'schema_sha256':x.sha((root/p['schema_path']).read_bytes())}
+  m={'identity':p['identity'],'state':'CONSUMED_BEFORE_REMOTE','approved':True,'prepared_commit_sha':prepared,'plan_sha256':plan_sha,'manifest_sha256':manifest_sha,'workflow_sha256':x.sha((root/p['workflow_path']).read_bytes()),'executor_sha256':x.sha((root/p['executor_path']).read_bytes()),'schema_sha256':x.sha((root/p['schema_path']).read_bytes()),'execution_approval':{k:True for k in ('owner_approved','operational_exclusion_attested','writer_permissions_reviewed','handoff_approved')}}
   (root/p['marker_path']).parent.mkdir(parents=True);(root/p['marker_path']).write_text(json.dumps(m));git('add','.');git('commit','-m',p['marker_message']);head=git('rev-parse','HEAD')
   env={'GITHUB_REPOSITORY':x.REPO,'GITHUB_REF':'refs/heads/'+p['branch'],'GITHUB_EVENT_NAME':'push','GITHUB_RUN_ATTEMPT':'1','GITHUB_SHA':head,'GITHUB_RUN_ID':'123',**x.SAFE}
   return root,git,env,{'prepared':prepared,'plan_sha':plan_sha,'manifest_sha':manifest_sha}
@@ -224,6 +233,17 @@ class HistoryTests(unittest.TestCase):
   with self.assertRaises(Stop):e.run(fixture.load)
   self.assertEqual(path.read_bytes(),marker);self.assertEqual(git('status','--porcelain'),'')
   self.assertEqual(post.calls,[])
+ def test_future_marker_requires_separate_execution_attestations(self):
+  for key in ('missing','owner_approved','handoff_approved','writer_permissions_reviewed','operational_exclusion_attested'):
+   root,git,env,pins=self.fixture();path=root/PLAN['marker_path'];m=json.loads(path.read_text())
+   if key=='missing':m.pop('execution_approval')
+   else:m['execution_approval'][key]=False
+   git('reset','--soft','HEAD^');path.write_text(json.dumps(m));git('add','.');git('commit','-m',PLAN['marker_message']);env['GITHUB_SHA']=git('rev-parse','HEAD')
+   with self.subTest(key=key),self.assertRaises(Stop) as cm:x.local_gate(root,env,**pins)
+   self.assertEqual(str(cm.exception),'MARKER_SOURCE_PINS_STOP')
+ def test_release_head_without_marker_cannot_get_live_permit(self):
+  root,git,env,pins=self.fixture();git('reset','--hard',pins['prepared']);env['GITHUB_SHA']=pins['prepared']
+  self.assertIsNone(x.local_gate(root,env,**pins))
  def test_attempt_two_or_wrong_head_rejected(self):
   root,git,env,pins=self.fixture()
   for change in ({'GITHUB_RUN_ATTEMPT':'2'},{'GITHUB_SHA':'f'*40},{'GITHUB_REPOSITORY':'other/project'}):
