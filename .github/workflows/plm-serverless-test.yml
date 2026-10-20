@@ -1,0 +1,46 @@
+name: PLM Serverless Test Only
+on:
+  pull_request:
+    paths: ['serverless/**', 'tests/test_serverless_schema.py', '.github/workflows/plm-serverless-test.yml']
+  workflow_dispatch:
+    inputs:
+      job_id:
+        required: true
+        type: string
+      dispatch_id:
+        required: true
+        type: string
+      TEST_ONLY:
+        required: true
+        type: string
+      DRY_RUN:
+        required: true
+        type: string
+      NO_PUBLISH:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test serverless/test-worker.mjs
+      - name: Test-only callback round trip
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          job_id: ${{ inputs.job_id }}
+          dispatch_id: ${{ inputs.dispatch_id }}
+          TEST_ONLY: ${{ inputs.TEST_ONLY }}
+          DRY_RUN: ${{ inputs.DRY_RUN }}
+          NO_PUBLISH: ${{ inputs.NO_PUBLISH }}
+          PLM_TEST_CALLBACK_URL: ${{ vars.PLM_TEST_CALLBACK_URL }}
+          PLM_TEST_CALLBACK_KEY: ${{ secrets.PLM_TEST_CALLBACK_KEY }}
+        run: node serverless/test-runner.mjs
