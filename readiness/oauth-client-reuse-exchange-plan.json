@@ -2,11 +2,15 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-recovery-20261015-r1",
-  "preparation_parent": "771d9e9c096efc3f24162f3ff8df759b66f82200",
+  "preparation_parent": "5f79c976ca51264ac46b89cec1c409186c42b2ed",
   "preparation_files": [
     "readiness/oauth-client-reuse-exchange-hashes.json",
     "readiness/oauth-client-reuse-exchange-plan.json",
-    "readiness/oauth-client-reuse.md"
+    "readiness/oauth-client-reuse.md",
+    "readiness/oauth-handoff-local.cjs",
+    "readiness/oauth-handoff-local.html",
+    "readiness/run_oauth_client_reuse.py",
+    "tests/test_oauth_handoff_local.cjs"
   ],
   "identity": "provider-neutral-youtube-client-reuse-exchange-20261015-r1",
   "marker_path": "audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261015-r1.json",
@@ -25,7 +29,7 @@
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.readonly"
   ],
-  "consent_state": "0ImLSelPJbdTnMbm2pRgPvlFpv2SMI4L3qTSC79SFxs",
+  "consent_state": "ngtNeK8I_wHYkQZ0PKx-r7WyZ15xUtUKHkkhJb82je0",
   "existing_secret": "PLM_YOUTUBE_GAME_001",
   "candidate_secret": "PLM_YOUTUBE_GAME_001_REFRESH_V2",
   "handoff_secret": "PLM_YOUTUBE_REAUTH_HANDOFF_ONCE",
@@ -68,17 +72,37 @@
   "execution_policy": "BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE",
   "success_within_window_guaranteed": false,
   "consumed_on_marker_even_if_oauth_post_zero": true,
-  "consent_state_first_published_at": "2026-10-22T13:20:25Z",
+  "consent_state_first_published_at": "2026-10-22T14:00:37Z",
   "consent_state_used": false,
   "release_configured": true,
   "execution_approval_source": "FUTURE_MARKER_ONLY",
-  "superseded_consent_context": {
-    "state_sha256": "36a7d6817918123dc90a7c0565d89faed907a68f5b08fc6a4734203db53b1416",
-    "owner_reported_code_received_at": "2026-10-22T22:03:00+09:00",
-    "receipt_seconds_precision": "UNKNOWN_CONSERVATIVE_MINUTE_START",
-    "terminal_reason": "HANDOFF_NOT_SAVED_LOCAL_WINDOW_ELAPSED_BEFORE_MARKER",
-    "marker_created": false,
-    "oauth_post_attempted": false,
-    "state_reuse_forbidden": true
+  "superseded_consent_contexts": [
+    {
+      "state_sha256": "36a7d6817918123dc90a7c0565d89faed907a68f5b08fc6a4734203db53b1416",
+      "owner_reported_code_received_at": "2026-10-22T22:03:00+09:00",
+      "receipt_seconds_precision": "UNKNOWN_CONSERVATIVE_MINUTE_START",
+      "terminal_reason": "HANDOFF_NOT_SAVED_LOCAL_WINDOW_ELAPSED_BEFORE_MARKER",
+      "marker_created": false,
+      "oauth_post_attempted": false,
+      "state_reuse_forbidden": true
+    },
+    {
+      "state_sha256": "461214b83ce7b13be4a6e4a9e3b78bb083834f300ffd98b8ad90f6b433a88694",
+      "owner_reported_code_received_at": "2026-10-22T22:41:00+09:00",
+      "receipt_seconds_precision": "UNKNOWN_CONSERVATIVE_MINUTE_START",
+      "terminal_reason": "HANDOFF_CONTENT_NOT_CONFIRMED_LOCAL_WINDOW_ELAPSED_BEFORE_MARKER",
+      "marker_created": false,
+      "oauth_post_attempted": false,
+      "state_reuse_forbidden": true
+    }
+  ],
+  "local_handoff_helper": {
+    "entry": "readiness/oauth-handoff-local.html",
+    "mode": "OWNER_LOCAL_FILE_ONLY",
+    "remote_io": false,
+    "input": "REGISTERED_CALLBACK_URL_AND_ORIGINAL_RECEIPT_TIME",
+    "secret_retention": "MEMORY_AND_OWNER_CLIPBOARD_ONLY",
+    "execution_authority": false,
+    "owner_workflow_change_requires_separate_approval": true
   }
 }

@@ -418,3 +418,42 @@ Once a marker exists the identity is consumed even with POST zero; no retry.
 Keep existing client secrets and PLM_YOUTUBE_GAME_001 intact. Do not exercise the
 writer PAT in this preparation. Recheck its owner-visible expiration before any
 future consent. No cleanup/revocation is performed by this configuration update.
+
+## 2026-10-22 local handoff formatter; preparation only
+
+The next consent also expired before a verified handoff and execution marker.
+Retire its code and state. No marker, OAuth POST or candidate PUT was performed.
+The existing handoff Secret now exists; its contents are UNKNOWN. Do not read,
+automatically replace, delete, or execute using it. No cleanup authority is implied.
+A third fresh state is pinned only for a separately approved future consent.
+
+readiness/oauth-handoff-local.html is a standalone OWNER-LOCAL FILE, not a web
+service and not a ChatGPT preview. Never enter a real callback into Work. It has
+no network/retention adapters and CSP denies connections and submissions. It
+parses the registered callback in the owner's browser memory, validates returned
+state and exact redirect, converts the ORIGINAL receipt time (JST) to Unix time,
+and copies the existing exact handoff JSON once to the owner's clipboard. It
+never displays raw JSON or logs inputs. Clipboard failure is terminal for that
+page; it does not retry, download a credential, or write any Secret. This removes
+manual JSON editing; it does NOT automate owner consent or the secure handoff.
+Local clipboard support must be confirmed with FIXTURES before new consent.
+
+Copying the callback into this local-only helper is a changed handoff mechanism.
+Obtain explicit owner approval for that exact destination and protected GitHub
+handoff update before using real data. No callback/code/token is uploaded to
+Work, a hosting provider, artifacts, commits, logs or another origin. The browser
+and clipboard are owner-controlled; zero browser-history/clipboard retention is
+NOT guaranteed. Owner must not sync/share clipboard or send screenshots.
+
+The formatter's 300-second check is convenience only; the original runner's
+immediate pre-POST cutoff remains authoritative. Receipt time is NEVER guessed
+from paste time, Secret update metadata or runner start. Returning UNKNOWN or
+being unable to establish original receipt time prevents execution. No success
+guarantee is made about Environment review or runner queues. The identity remains
+unconsumed until the exact marker exists. Neither this helper nor an approval
+checkbox can mint a live executor permit, consume a marker or enable posting.
+
+A fully automatic callback receiver would require separately reviewed hosting,
+redirect registration, retention/credential handling and explicit activation
+approval. None is deployed here. Keep Google client secrets, original repository
+Secret, Cloudflare, main, protected identities and all safety flags unchanged.

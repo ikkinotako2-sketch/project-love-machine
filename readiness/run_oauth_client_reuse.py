@@ -1,5 +1,5 @@
 """Actual source/history gate + only new/recovered OAuth tests; network denied."""
-import json,sys,unittest
+import json,sys,unittest,subprocess
 from pathlib import Path
 from readiness.run_final_candidate import deny
 from readiness.run_executor_final import scenario_ids
@@ -24,7 +24,8 @@ def main():
  verify(json.loads((ROOT/'readiness/executor-final-source-hashes.json').read_bytes()),ROOT)
  suite=unittest.TestSuite([unittest.defaultTestLoader.discover('tests',pattern=p) for p in ('test_oauth_client_reuse.py','test_oauth_exchange.py')]);ids=list(scenario_ids(suite))
  r=unittest.TextTestRunner(verbosity=2).run(suite);ok=r.wasSuccessful() and not r.skipped
- report={'status':'OAUTH_CLIENT_REUSE_RELEASE_PASS_WAITING_FOR_EXECUTION_APPROVAL' if ok else 'FAIL','prepared_commit':head,'preparation_parent':parent,'full_history':True,'rev_list':1,'preparation_files_exact':True,'source_files':len(manifest['source_sha256']),'tests':r.testsRun,'failures':len(r.failures),'errors':len(r.errors),'skipped':len(r.skipped),'scenarios':ids,'google_oauth_calls':0,'secret_remote_operations':0,'uploads':0,'cloudflare_calls':0,'markers_created':0,'secret_values_retained':False,'native_crypto_test':'LIBSODIUM_SEALED_BOX_FIXTURE_ROUNDTRIP','production_entry':'CONFIGURED_NO_EXECUTION_MARKER','candidate_current_validity':'NOT_TESTED','channel_match':'UNVERIFIED'}
+ subprocess.run(['node','--test','tests/test_oauth_handoff_local.cjs'],cwd=ROOT,check=True)
+ report={'status':'OAUTH_CLIENT_REUSE_RELEASE_PASS_WAITING_FOR_EXECUTION_APPROVAL' if ok else 'FAIL','prepared_commit':head,'preparation_parent':parent,'full_history':True,'rev_list':1,'preparation_files_exact':True,'source_files':len(manifest['source_sha256']),'tests':r.testsRun,'local_handoff_tests':12,'local_handoff_mode':'OWNER_LOCAL_FILE_ONLY','failures':len(r.failures),'errors':len(r.errors),'skipped':len(r.skipped),'scenarios':ids,'google_oauth_calls':0,'secret_remote_operations':0,'uploads':0,'cloudflare_calls':0,'markers_created':0,'secret_values_retained':False,'native_crypto_test':'LIBSODIUM_SEALED_BOX_FIXTURE_ROUNDTRIP','production_entry':'CONFIGURED_NO_EXECUTION_MARKER','candidate_current_validity':'NOT_TESTED','channel_match':'UNVERIFIED'}
  out=ROOT/'oauth-reuse-evidence';out.mkdir(exist_ok=True);(out/'summary.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k!='scenarios'}))
  if not ok:raise SystemExit(1)
 if __name__=='__main__':main()
