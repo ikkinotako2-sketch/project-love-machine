@@ -385,3 +385,36 @@ No Google consent/POST, PAT use, Secret operation, execution marker, YouTube,
 Cloudflare or other project operation occurs in this release. Finalization stops
 after source/CI/pin-variable readback and reports marker preview outside consumed
 paths. Actual execution and cleanup require their separate owner approvals.
+
+## 2026-10-22 unused consent state replacement (configuration only)
+
+The owner obtained a code under the prior consent context and reported receipt
+at 22:03 JST. The secure handoff was not saved, no execution marker was created,
+and no OAuth POST or candidate Secret PUT was attempted. The local 300-second
+window elapsed. That authorization code and consent state are retired permanently;
+do not reuse the old authorization URL or reset the actual receipt timestamp.
+
+A fresh 32-byte cryptographic state is pinned in this plan. It has NOT been used
+for Google consent. This state replacement does not authorize consent/exchange/
+Secret writes/marker creation. The exchange identity remains unused because its
+marker and exchange run do not exist; old consumed identities remain unchanged.
+Any future execution needs separate owner approval tied to this new release.
+The exact preparation history is this single commit after the preceding release,
+with only plan, manifest and this document changed. No history limit is relaxed.
+
+Prepare the unsaved Environment handoff form in the SAME browser the owner will
+use before any new consent. It is not a saved Secret and is not synchronized to
+the owner's other browser. Confirm the owner can see that exact form before
+opening a new consent URL. Prepopulate only public client ID, redirect URI and
+this release's new state. Leave code and actual receipt Unix time unset. Never
+save placeholders. The owner enters a new returned code and its original receipt
+time directly into GitHub; compare the returned state, never assume it matches.
+Save once, then create the separately approved marker-only commit, then approve
+that run's Environment gate. Required review cannot precede the run's creation.
+Review/runner/propagation latency remains within the unchanged 300-second window;
+there is no success guarantee. At expiry stop before OAuth POST and candidate PUT.
+Once a marker exists the identity is consumed even with POST zero; no retry.
+
+Keep existing client secrets and PLM_YOUTUBE_GAME_001 intact. Do not exercise the
+writer PAT in this preparation. Recheck its owner-visible expiration before any
+future consent. No cleanup/revocation is performed by this configuration update.

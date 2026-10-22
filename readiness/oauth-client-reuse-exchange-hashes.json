@@ -1,5 +1,5 @@
 {
-  "base_commit": "7999ba0699131723d73e8958b732fb7ad741b9dd",
+  "base_commit": "771d9e9c096efc3f24162f3ff8df759b66f82200",
   "source_sha256": {
     ".github/workflows/command-center.yml": "1212b5a8571595479de43aef83396c3a508aa7157a33756d48a5db591b994486",
     ".github/workflows/plm-executor-channel-parked.yml": "ecf03cad140aa7e64fda95bce0eb9228910b11e01629eeaefb537417e4e5df7c",
@@ -120,8 +120,8 @@
     "readiness/four-connections-source-hashes.json": "09ce63ce5b8d93736c38b5f88405e889c7b41367a8a5e50385554faf0cabe0f7",
     "readiness/four-connections-test-summary.json": "eb87caf0c09300ad5438bd5455d318f890a93d706241e47706d8e5568ba0ffe7",
     "readiness/oauth-client-reuse-exchange-marker.schema.json": "baa17685a42c65067e3b50a3345f74b0635ef8f6c5fef398204c3682f24ffac4",
-    "readiness/oauth-client-reuse-exchange-plan.json": "4ad8dfac105489b804a848e414996892e3a759014034864d77d769c503e27a33",
-    "readiness/oauth-client-reuse.md": "a6a0e4efb670164bb2af8e1d9ae62b5a3694d121da9c2f80200538a72c80a0e1",
+    "readiness/oauth-client-reuse-exchange-plan.json": "1576485ee5c3b6332ee7ac0862eb7d2d649c80851070c81fecff5d5f0ff5e162",
+    "readiness/oauth-client-reuse.md": "9048f6f3d39aa862ffcd128581debc25973a5aee1d0548f459906d44cd5a4d69",
     "readiness/offline_node_guard.mjs": "25320841c4fcbd5b7fd572c4c45339ee17104f144608e967b7b905175afbbb6e",
     "readiness/render_private_fixture.py": "d0a19991100d38d47e3c86d25a72b994c18b0c9127cfec9f830a6c3bb3861125",
     "readiness/reused-render-evidence.json": "c416db69ce5f08dfa3a8fd2c42e7ddbb5ad46d0e2710b6df8e6b0fcc55b7343f",
