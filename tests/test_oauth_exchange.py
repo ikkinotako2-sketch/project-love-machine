@@ -132,10 +132,14 @@ class ExchangeTests(unittest.TestCase):
  def test_native_provider_rejects_no_permit(self):
   with self.assertRaises(Stop):x.CandidateOAuthTokenProvider(Mock(),Mock(offline_mock=False),lambda:1000)
  def test_parked_gate_does_not_load_credentials(self):
-  self.assertIsNone(x.local_gate(ROOT,{}))
+  consumed=(ROOT/PLAN['marker_path']).exists()
+  if consumed:
+   with self.assertRaises(Stop):x.local_gate(ROOT,{})
+  else:self.assertIsNone(x.local_gate(ROOT,{}))
   with patch.dict(os.environ,{'PLM_YOUTUBE_GAME_001':'PRIVATE_FIXTURE'}):
-   out=subprocess.check_output(['python','-m','plm.automation.executors.oauth_exchange','--execute'],cwd=ROOT)
-  self.assertEqual(json.loads(out)['status'],'PARKED');self.assertNotIn(b'PRIVATE_FIXTURE',out)
+   proc=subprocess.run(['python','-m','plm.automation.executors.oauth_exchange','--execute'],cwd=ROOT,stdout=subprocess.PIPE,check=False);out=proc.stdout
+  self.assertEqual(json.loads(out)['status'],'BLOCKED' if consumed else 'PARKED');self.assertNotIn(b'PRIVATE_FIXTURE',out)
+  self.assertEqual(json.loads(out)['oauth_POST'],0);self.assertEqual(json.loads(out)['secret_PUT'],0)
  def test_candidate_client_and_256_bit_state_are_pinned_without_execution(self):
   self.assertEqual(PLAN['client_id'],'559247977069-e50008qnmkuath6qbkbmetqsu6lvls84.apps.googleusercontent.com')
   self.assertEqual(PLAN['consent_state_entropy_bits'],256)
@@ -174,7 +178,11 @@ class ExchangeTests(unittest.TestCase):
   self.assertNotIn('upload-artifact',w)
   for key in x.SAFE:self.assertIn(key+": 'true'",w)
  def test_marker_absent_and_old_identity_unmodified(self):
-  self.assertFalse((ROOT/PLAN['marker_path']).exists())
+  path=ROOT/PLAN['marker_path']
+  if path.exists():
+   self.assertEqual(x.sha(path.read_bytes()),'b836f8d0ac4f20cdf7fe1a42bebdae9978139798ae37e7dfcd0182b0f4d348d8')
+   with self.assertRaises(Stop):x.local_gate(ROOT,{})
+  else:self.assertFalse(path.exists())
   self.assertNotIn('oauth-verify-20261012-r1',PLAN['identity'])
   self.assertFalse((ROOT/('audit-evidence/consumed/'+PLAN['protected_identity']+'.json')).exists())
  def test_libsodium_encryption_real_roundtrip_and_randomness(self):

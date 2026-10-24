@@ -1,0 +1,86 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; connect-src &#x27;none&#x27;; script-src &#x27;sha256-IryE1wd40evE+0yGUsdvXEecrO+cbeYLgWWQZ6gvVWg=&#x27;; style-src &#x27;sha256-UpD/K3TvSR8S7Qy9ZYf6vyPi7gOWhXturulw5GUI1W0=&#x27;; img-src &#x27;none&#x27;; form-action &#x27;none&#x27;; base-uri &#x27;none&#x27;; object-src &#x27;none&#x27;"><title>PLM 本人専用・一時Secret入力補助</title><style>body{font:18px system-ui;max-width:760px;margin:40px auto;padding:20px;line-height:1.65;background:#f4f7fb;color:#17243a}main{background:white;padding:28px;border-radius:16px}label{display:block;margin-top:20px;font-weight:650}input:not([type=checkbox]){display:block;width:100%;box-sizing:border-box;padding:12px;font:inherit;margin-top:6px}button{font:inherit;padding:12px 18px;margin:18px 8px 0 0}#status{padding:14px;background:#fff4d1;border-radius:8px}small{display:block;font-weight:400}h1{font-size:25px}</style></head><body><main><h1>JSONを編集せず、一時Secretへ渡す</h1><p><strong>準備版です。新しい本人同意・実行は別承認後です。</strong></p><p>本人の端末でこのファイルを開く専用です。通信・Secret保存・OAuth交換は行いません。入力はブラウザのメモリ内だけで処理し、コピー先は本人のクリップボードです。チャット、Workプレビュー、スクリーンショットには入れないでください。</p><label for="callback">1. Googleから戻ったURLをここへ貼る<small>登録済みPlaygroundへの戻り先だけを受け付け、codeと返却stateを自動照合します。認可コード単体やClient secretではありません。このURLをチャットへ送らないでください。</small></label><input id="callback" type="password" autocomplete="off" spellcheck="false" autocapitalize="off"><label for="date">2. コードを最初に受け取った日付（日本時間）</label><input id="date" type="date" autocomplete="off"><label for="time">最初に受け取った時刻<small>例：22:41 または22:41:12。現在時刻への置き換え・延長は禁止。秒が不明なら分の先頭で判定します。</small></label><input id="time" type="text" inputmode="numeric" placeholder="HH:MM または HH:MM:SS" autocomplete="off"><label><input id="approved" type="checkbox">この新しい認可と受け渡しについて別途承認済み</label><button id="copy" type="button">3. 一時Secret用の内容をコピー</button><label for="pasteback">4. コピー内容をこの欄へ貼り戻して検査（本人端末内のみ）</label><input id="pasteback" type="password" autocomplete="off" spellcheck="false"><button id="verify" type="button">貼り戻し検査</button><button id="clear" type="button">消去して停止</button><p id="status" role="status" aria-live="polite">まだコピーしていません。300秒を過ぎた入力は拒否します。</p><p>コピー後はGitHubの PLM_YOUTUBE_REAUTH_HANDOFF_R2_ONCE のValue欄<strong>全体</strong>へ貼り付けます。JSONの一部分を探す操作は不要です。GitHub保存後に実行markerとEnvironment承認が別途必要です。保存成功や交換成功をこのページでは判定しません。</p></main><script>'use strict';
+// Pure browser-local formatter. It has no HTTP, storage, file or logging adapter.
+(function (root) {
+  const fail = reason => { throw new Error(reason); };
+  function timestamp(date, time) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}(:\d{2})?$/.test(time)) fail('RECEIPT_TIME_REQUIRED');
+    const full = time.length === 5 ? time + ':00' : time;
+    const ms = Date.parse(date + 'T' + full + '+09:00');
+    if (!Number.isFinite(ms) || new Date(ms + 32400000).toISOString().slice(0, 19) !== date + 'T' + full) fail('RECEIPT_TIME_INVALID');
+    return ms / 1000;
+  }
+  function compose(config, callback, date, time, now) {
+    if (!config || !/^\d+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/.test(config.client_id) ||
+        config.redirect_uri !== 'https://developers.google.com/oauthplayground' ||
+        !/^[A-Za-z0-9_-]{43,128}$/.test(config.state)) fail('PUBLIC_PINS_INVALID');
+    let url;
+    try { url = new URL(callback); } catch { fail('CALLBACK_INVALID'); }
+    if (url.origin + url.pathname !== config.redirect_uri || url.hash || url.username || url.password) fail('CALLBACK_TARGET_MISMATCH');
+    const allowed = new Set(['code', 'state', 'scope', 'authuser', 'prompt']);
+    for (const key of url.searchParams.keys()) {
+      if (!allowed.has(key) || url.searchParams.getAll(key).length !== 1) fail('CALLBACK_FIELDS_INVALID');
+    }
+    const code = url.searchParams.get('code');
+    const state = url.searchParams.get('state');
+    if (state !== config.state) fail('RETURNED_STATE_MISMATCH');
+    if (!code || code.length > 16384 || !/^[!-~]+$/.test(code)) fail('CODE_INVALID');
+    const issued = timestamp(date, time);
+    if (!Number.isFinite(now) || now < issued || now >= issued + 300) fail('LOCAL_300_SECOND_STOP');
+    return JSON.stringify({client_id: config.client_id, code, state, redirect_uri: config.redirect_uri, issued_at: issued});
+  }
+  function session(config, clock) {
+    let used = false, expected = null;
+    return Object.freeze({
+      async copy(callback, date, time, write) {
+        if (used) fail('LOCAL_HANDOFF_ALREADY_USED');
+        const payload = compose(config, callback, date, time, clock());
+        if (typeof write !== 'function') fail('CLIPBOARD_UNAVAILABLE_STOP');
+        used = true;
+        expected = payload;
+        // Attempt once. Unknown clipboard result is terminal for this page.
+        try { await write(payload); } catch { expected = null; fail('CLIPBOARD_UNKNOWN_NO_RETRY'); }
+        return 'HANDOFF_COPIED_NOT_SAVED_NOT_EXCHANGED';
+      },
+      verifyPaste(raw) {
+        if (!used || expected === null) fail('PASTEBACK_NOT_READY_STOP');
+        if (raw !== expected) { expected = null; fail('PASTEBACK_MISMATCH_STOP'); }
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.issued_at !== 'number' || !Number.isSafeInteger(parsed.issued_at)) fail('PASTEBACK_SHAPE_STOP');
+        if (clock() < parsed.issued_at || clock() >= parsed.issued_at + 300) fail('LOCAL_300_SECOND_STOP');
+        return 'PASTEBACK_EXACT_JSON_CONFIRMED';
+      },
+      clear() { expected = null; used = true; }
+    });
+  }
+  const api = Object.freeze({timestamp, compose, session});
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.PLMHandoff = api;
+})(typeof window === 'undefined' ? {} : window);
+
+'use strict';
+const CONFIG={"client_id": "559247977069-e50008qnmkuath6qbkbmetqsu6lvls84.apps.googleusercontent.com", "state": "USVKlrf1RzYsZkjnPkWW3-6Hx7d8EDfkOCPIw0fkqPo", "redirect_uri": "https://developers.google.com/oauthplayground"};
+const byId=id=>document.getElementById(id);
+const status=byId('status');
+const setStatus=s=>{status.textContent=s;};
+const local=location.protocol==='file:';
+const once=PLMHandoff.session(CONFIG,()=>Date.now()/1000);
+const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+byId('date').value=today;
+if(!local){byId('copy').disabled=true;setStatus('停止：このページは本人の端末にダウンロードして開く専用です。Workのプレビューには秘密値を入力しないでください。');}
+byId('copy').addEventListener('click',async()=>{
+ if(!local||!byId('approved').checked){setStatus('停止：別途の実行承認が必要です。');return;}
+ const writer=navigator.clipboard&&navigator.clipboard.writeText?text=>navigator.clipboard.writeText(text):null;
+ try{await once.copy(byId('callback').value,byId('date').value,byId('time').value,writer);
+ byId('callback').value='';byId('copy').disabled=true;setStatus('コピー済み。まず下の貼り戻し検査を行ってください。検査PASS後のみ、同じコピー内容をGitHubのValue欄全体へ貼ります。');}
+ catch(e){const allowed=['RECEIPT_TIME_REQUIRED','RECEIPT_TIME_INVALID','PUBLIC_PINS_INVALID','CALLBACK_INVALID','CALLBACK_TARGET_MISMATCH','CALLBACK_FIELDS_INVALID','RETURNED_STATE_MISMATCH','CODE_INVALID','LOCAL_300_SECOND_STOP','CLIPBOARD_UNAVAILABLE_STOP','LOCAL_HANDOFF_ALREADY_USED','CLIPBOARD_UNKNOWN_NO_RETRY'];
+ setStatus('停止：'+(allowed.includes(e.message)?e.message:'LOCAL_HANDOFF_STOP'));
+ if(['LOCAL_300_SECOND_STOP','LOCAL_HANDOFF_ALREADY_USED','CLIPBOARD_UNKNOWN_NO_RETRY'].includes(e.message)){byId('callback').value='';byId('copy').disabled=true;}
+ }
+});
+byId('verify').addEventListener('click',()=>{
+ try{once.verifyPaste(byId('pasteback').value);byId('pasteback').value='';setStatus('貼り戻しJSON完全一致。クリップボードを他のコピーで上書きせず、GitHubの一時SecretのValue欄全体へ貼り付けます。保存成功は別確認です。');}
+ catch{byId('pasteback').value='';setStatus('停止：貼り戻し不一致または期限切れ。GitHubへ保存しないでください。');}
+});
+byId('clear').addEventListener('click',()=>{once.clear();byId('pasteback').value='';byId('callback').value='';byId('time').value='';byId('copy').disabled=true;setStatus('入力を消去して停止しました。このページでのやり直しは行いません。');});
+window.addEventListener('pagehide',()=>{once.clear();byId('pasteback').value='';byId('callback').value='';byId('time').value='';});
+</script></body></html>

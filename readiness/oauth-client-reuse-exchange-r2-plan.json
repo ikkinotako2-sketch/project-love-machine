@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "repository": "ikkinotako2-sketch/project-love-machine",
+  "branch": "plm-youtube-oauth-repair-20261024-r2",
+  "preparation_parent": "ee6bd6526e9d59c28ef0e42dbc069232125cc6a7",
+  "preparation_files": [
+    ".github/workflows/plm-youtube-client-reuse-exchange-r2-parked.yml",
+    ".github/workflows/plm-youtube-client-reuse-r2-offline.yml",
+    "plm/automation/executors/oauth_exchange_r2.py",
+    "plm/automation/executors/oauth_handoff_r2.py",
+    "readiness/oauth-client-reuse-exchange-r2-hashes.json",
+    "readiness/oauth-client-reuse-exchange-r2-marker.schema.json",
+    "readiness/oauth-client-reuse-exchange-r2-plan.json",
+    "readiness/oauth-handoff-local-r2.cjs",
+    "readiness/oauth-handoff-local-r2.html",
+    "readiness/oauth-repair-r2-operations.md",
+    "readiness/run_oauth_repair_r2.py",
+    "tests/oauth_handoff_r2_dom.cjs",
+    "tests/test_oauth_exchange.py",
+    "tests/test_oauth_exchange_r2.py",
+    "tests/test_oauth_handoff_r2.cjs"
+  ],
+  "identity": "provider-neutral-youtube-client-reuse-exchange-20261024-r2",
+  "marker_path": "audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261024-r2.json",
+  "marker_message": "PLM OAuth client reuse exchange once provider-neutral-youtube-client-reuse-exchange-20261024-r2",
+  "workflow_path": ".github/workflows/plm-youtube-client-reuse-exchange-r2-parked.yml",
+  "executor_path": "plm/automation/executors/oauth_exchange_r2.py",
+  "schema_path": "readiness/oauth-client-reuse-exchange-r2-marker.schema.json",
+  "enabled": false,
+  "owner_approved": false,
+  "operational_exclusion_attested": false,
+  "writer_permissions_reviewed": false,
+  "handoff_approved": false,
+  "client_id": "559247977069-e50008qnmkuath6qbkbmetqsu6lvls84.apps.googleusercontent.com",
+  "redirect_uri": "https://developers.google.com/oauthplayground",
+  "scopes": [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.readonly"
+  ],
+  "consent_state": "USVKlrf1RzYsZkjnPkWW3-6Hx7d8EDfkOCPIw0fkqPo",
+  "existing_secret": "PLM_YOUTUBE_GAME_001",
+  "candidate_secret": "PLM_YOUTUBE_GAME_001_REFRESH_V2",
+  "handoff_secret": "PLM_YOUTUBE_REAUTH_HANDOFF_R2_ONCE",
+  "writer_secret": "PLM_GITHUB_OAUTH_SECRET_WRITER",
+  "environment": "plm-oauth-client-reuse-once",
+  "limits": {
+    "authorization_code_POST": 1,
+    "refresh_POST": 0,
+    "candidate_metadata_GET": 1,
+    "repository_public_key_GET": 1,
+    "candidate_Secret_PUT": 1,
+    "YouTube": 0,
+    "Cloudflare": 0,
+    "retry": 0,
+    "rerun": 0,
+    "resume": 0,
+    "redirect": 0,
+    "fallback": 0,
+    "raw_retention": 0
+  },
+  "handoff_window_seconds": 300,
+  "candidate_current_validity": "NOT_TESTED",
+  "candidate_adoption": "EXPLICIT_V2_PROVIDER_ONLY",
+  "google_client_secrets": {
+    "owner_reported_count": 2,
+    "modify": false
+  },
+  "historical_success_run": 38225716925,
+  "historical_success_fresh": false,
+  "protected_identity": "provider-neutral-youtube-channel-verify-20261012-r1",
+  "safe_flags": {
+    "TEST_ONLY": true,
+    "DRY_RUN": true,
+    "NO_PUBLISH": true,
+    "EMERGENCY_STOP": true
+  },
+  "client_id_owner_verified": true,
+  "client_id_evidence": "OWNER_CONFIRMED_EXACT_COPY_FROM_EXISTING_GOOGLE_CLOUD_CLIENT",
+  "consent_state_entropy_bits": 256,
+  "execution_policy": "BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE",
+  "success_within_window_guaranteed": false,
+  "consumed_on_marker_even_if_oauth_post_zero": true,
+  "consent_state_first_published_at": "2026-10-24",
+  "consent_state_used": false,
+  "release_configured": false,
+  "execution_approval_source": "FUTURE_MARKER_ONLY",
+  "local_handoff_helper": {
+    "entry": "readiness/oauth-handoff-local-r2.html",
+    "mode": "OWNER_LOCAL_FILE_ONLY",
+    "remote_io": false,
+    "input": "REGISTERED_CALLBACK_URL_AND_ORIGINAL_RECEIPT_TIME",
+    "secret_retention": "MEMORY_AND_OWNER_CLIPBOARD_ONLY",
+    "execution_authority": false
+  },
+  "historical_consumed_markers": {
+    "audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261015-r1.json": "b836f8d0ac4f20cdf7fe1a42bebdae9978139798ae37e7dfcd0182b0f4d348d8"
+  },
+  "failure_evidence": {
+    "run_id": 40092439824,
+    "attempt": 1,
+    "reason_code": "INPUT_JSON_STOP",
+    "oauth_POST": 0,
+    "secret_PUT": 0,
+    "cause": "HANDOFF_JSON_PARSE_OR_DUPLICATE_UNKNOWN_EXACT_INPUT"
+  },
+  "environment_variables": {
+    "prepared": "PLM_OAUTH_REUSE_R2_PREPARED",
+    "plan": "PLM_OAUTH_REUSE_R2_PLAN_SHA256",
+    "manifest": "PLM_OAUTH_REUSE_R2_MANIFEST_SHA256"
+  },
+  "required_environment_branch_change": true
+}

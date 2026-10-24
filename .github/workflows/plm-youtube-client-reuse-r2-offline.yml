@@ -1,0 +1,43 @@
+name: PLM OAuth Recovery R2 OFFLINE
+on:
+  push:
+    branches: [plm-youtube-oauth-repair-20261024-r2]
+    paths:
+      - 'plm/**'
+      - 'tests/**'
+      - 'readiness/*r2*'
+      - '.github/workflows/plm-youtube-client-reuse-r2-offline.yml'
+permissions:
+  contents: read
+concurrency:
+  group: plm-oauth-repair-r2-offline
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source pins, consumed evidence, dummy HTML-to-runner roundtrip
+        run: python -m readiness.run_oauth_repair_r2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plm-oauth-r2-offline-${{ github.sha }}
+          path: oauth-repair-r2-evidence/summary.json
+          retention-days: 7
+          if-no-files-found: error

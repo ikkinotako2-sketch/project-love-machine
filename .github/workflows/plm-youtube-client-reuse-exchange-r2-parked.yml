@@ -1,0 +1,40 @@
+name: PLM OAuth Client Reuse Exchange R2 PARKED
+on:
+  push:
+    branches: [plm-youtube-oauth-repair-20261024-r2]
+    paths: [audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261024-r2.json]
+permissions:
+  contents: read
+concurrency:
+  group: provider-neutral-youtube-client-reuse-exchange-20261024-r2
+  cancel-in-progress: false
+jobs:
+  exchange:
+    if: ${{ false && github.event_name == 'push' && github.ref == 'refs/heads/plm-youtube-oauth-repair-20261024-r2' && github.run_attempt == 1 }}
+    environment: plm-oauth-client-reuse-once
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TEST_ONLY: 'true'
+      DRY_RUN: 'true'
+      NO_PUBLISH: 'true'
+      EMERGENCY_STOP: 'true'
+      PLM_PREPARED: ${{ vars.PLM_OAUTH_REUSE_R2_PREPARED }}
+      PLM_PLAN_SHA: ${{ vars.PLM_OAUTH_REUSE_R2_PLAN_SHA256 }}
+      PLM_MANIFEST_SHA: ${{ vars.PLM_OAUTH_REUSE_R2_MANIFEST_SHA256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Local gate before any Secret injection
+        id: local
+        run: python -m plm.automation.executors.oauth_exchange_r2 --prepare --prepared "$PLM_PREPARED" --plan-sha "$PLM_PLAN_SHA" --manifest-sha "$PLM_MANIFEST_SHA"
+      - name: Separately approved one-shot exchange and encrypted candidate creation
+        if: ${{ steps.local.outputs.ready == 'true' }}
+        env:
+          PLM_YOUTUBE_GAME_001: ${{ secrets.PLM_YOUTUBE_GAME_001 }}
+          PLM_YOUTUBE_REAUTH_HANDOFF_R2_ONCE: ${{ secrets.PLM_YOUTUBE_REAUTH_HANDOFF_R2_ONCE }}
+          PLM_GITHUB_OAUTH_SECRET_WRITER: ${{ secrets.PLM_GITHUB_OAUTH_SECRET_WRITER }}
+        run: python -m plm.automation.executors.oauth_exchange_r2 --execute --prepared "$PLM_PREPARED" --plan-sha "$PLM_PLAN_SHA" --manifest-sha "$PLM_MANIFEST_SHA"
