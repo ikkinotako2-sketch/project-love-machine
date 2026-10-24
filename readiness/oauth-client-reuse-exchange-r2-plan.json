@@ -2,23 +2,14 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-repair-20261024-r2",
-  "preparation_parent": "ee6bd6526e9d59c28ef0e42dbc069232125cc6a7",
+  "preparation_parent": "9f97d58c95c2e31b9b99ed2cf817c2410110688d",
   "preparation_files": [
     ".github/workflows/plm-youtube-client-reuse-exchange-r2-parked.yml",
-    ".github/workflows/plm-youtube-client-reuse-r2-offline.yml",
-    "plm/automation/executors/oauth_exchange_r2.py",
-    "plm/automation/executors/oauth_handoff_r2.py",
     "readiness/oauth-client-reuse-exchange-r2-hashes.json",
-    "readiness/oauth-client-reuse-exchange-r2-marker.schema.json",
     "readiness/oauth-client-reuse-exchange-r2-plan.json",
-    "readiness/oauth-handoff-local-r2.cjs",
-    "readiness/oauth-handoff-local-r2.html",
     "readiness/oauth-repair-r2-operations.md",
     "readiness/run_oauth_repair_r2.py",
-    "tests/oauth_handoff_r2_dom.cjs",
-    "tests/test_oauth_exchange.py",
-    "tests/test_oauth_exchange_r2.py",
-    "tests/test_oauth_handoff_r2.cjs"
+    "tests/test_oauth_exchange_r2.py"
   ],
   "identity": "provider-neutral-youtube-client-reuse-exchange-20261024-r2",
   "marker_path": "audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261024-r2.json",
@@ -26,7 +17,7 @@
   "workflow_path": ".github/workflows/plm-youtube-client-reuse-exchange-r2-parked.yml",
   "executor_path": "plm/automation/executors/oauth_exchange_r2.py",
   "schema_path": "readiness/oauth-client-reuse-exchange-r2-marker.schema.json",
-  "enabled": false,
+  "enabled": true,
   "owner_approved": false,
   "operational_exclusion_attested": false,
   "writer_permissions_reviewed": false,
@@ -82,7 +73,7 @@
   "consumed_on_marker_even_if_oauth_post_zero": true,
   "consent_state_first_published_at": "2026-10-24",
   "consent_state_used": false,
-  "release_configured": false,
+  "release_configured": true,
   "execution_approval_source": "FUTURE_MARKER_ONLY",
   "local_handoff_helper": {
     "entry": "readiness/oauth-handoff-local-r2.html",
@@ -108,5 +99,5 @@
     "plan": "PLM_OAUTH_REUSE_R2_PLAN_SHA256",
     "manifest": "PLM_OAUTH_REUSE_R2_MANIFEST_SHA256"
   },
-  "required_environment_branch_change": true
+  "required_environment_branch_change": false
 }

@@ -12,7 +12,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--local',action='store_true');args=parser.parse_args()
     sys.addaudithook(deny)
     p=json.loads((ROOT/PLAN).read_text());m=json.loads((ROOT/MANIFEST).read_text());verify(m,ROOT)
-    assert p['enabled'] is False and p['release_configured'] is False
+    assert type(p['enabled']) is bool and p['enabled'] is p['release_configured']
     assert all(p[k] is False for k in ['owner_approved','operational_exclusion_attested','writer_permissions_reviewed','handoff_approved'])
     assert not (ROOT/p['marker_path']).exists() and local_gate(ROOT,{}) is None
     for path,digest in p['historical_consumed_markers'].items():
@@ -33,7 +33,7 @@ def main():
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     subprocess.run(['node','--test','tests/test_oauth_handoff_r2.cjs'],cwd=ROOT,check=True)
     assert result.wasSuccessful() and not result.skipped
-    report={'status':'OFFLINE_R2_PREPARATION_PASS','python_tests':result.testsRun,'node_tests':8,'history':history,'source_files':len(m['source_sha256']),'r1_marker_unchanged':True,'r2_marker_created':False,'r2_entry':'PARKED','actual_handoff_contents':'NOT_READ','exact_historical_cause':'UNKNOWN','google_oauth_calls':0,'secret_operations':0,'uploads':0,'cloudflare_calls':0}
+    report={'status':'OFFLINE_R2_PREPARATION_PASS','python_tests':result.testsRun,'node_tests':8,'history':history,'source_files':len(m['source_sha256']),'r1_marker_unchanged':True,'r2_marker_created':False,'r2_entry':'CONFIGURED_NO_EXECUTION_MARKER' if p['enabled'] else 'PARKED','actual_handoff_contents':'NOT_READ','exact_historical_cause':'UNKNOWN','google_oauth_calls':0,'secret_operations':0,'uploads':0,'cloudflare_calls':0}
     out=ROOT/'oauth-repair-r2-evidence';out.mkdir(exist_ok=True);(out/'summary.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
 
 if __name__=='__main__':main()

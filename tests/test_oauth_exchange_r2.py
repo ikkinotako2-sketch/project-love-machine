@@ -150,14 +150,29 @@ class R2Tests(unittest.TestCase):
         self.assertEqual(hashlib.sha256((ROOT/R1).read_bytes()).hexdigest(),R1_HASH)
         self.assertFalse((ROOT/PLAN['marker_path']).exists());self.assertNotIn('20261015-r1',PLAN['identity'])
         self.assertEqual(PLAN['historical_consumed_markers'],{R1:R1_HASH})
-        self.assertNotEqual(x.HANDOFF,'PLM_YOUTUBE_REAUTH_HANDOFF_ONCE');self.assertFalse(PLAN['enabled'])
+        self.assertNotEqual(x.HANDOFF,'PLM_YOUTUBE_REAUTH_HANDOFF_ONCE');self.assertIs(PLAN['enabled'],PLAN['release_configured'])
 
     def test_marker_workflow_cannot_start_or_load_secrets(self):
-        w=(ROOT/PLAN['workflow_path']).read_text();self.assertIn('${{ false &&',w)
+        w=(ROOT/PLAN['workflow_path']).read_text();self.assertIn("github.event_name == 'push'",w);self.assertIn('paths: ['+PLAN['marker_path']+']',w)
+        if not PLAN['enabled']:self.assertIn('${{ false &&',w)
         self.assertNotIn('workflow_dispatch',w);self.assertNotIn('schedule:',w)
         self.assertIn('github.run_attempt == 1',w);self.assertIn('persist-credentials: false',w)
         self.assertLess(w.index('--prepare'),w.index('secrets.'))
         for k in x.SAFE:self.assertIn(k+": 'true'",w)
+
+    def test_release_configuration_is_not_execution_approval(self):
+        self.assertTrue(PLAN['enabled']);self.assertTrue(PLAN['release_configured'])
+        self.assertFalse((ROOT/PLAN['marker_path']).exists())
+        self.assertIsNone(x.local_gate(ROOT,{}))
+        for key in ['owner_approved','handoff_approved','operational_exclusion_attested','writer_permissions_reviewed']:
+            self.assertIs(PLAN[key],False)
+
+    def test_plan_cannot_claim_separate_execution_approval(self):
+        for key in ['owner_approved','handoff_approved','operational_exclusion_attested','writer_permissions_reviewed']:
+            with self.subTest(key=key),tempfile.TemporaryDirectory() as tmp:
+                p=copy.deepcopy(PLAN);p[key]=True;f=Path(tmp)/x.PLAN;f.parent.mkdir(parents=True);f.write_text(json.dumps(p))
+                with patch.object(x,'GitAudit') as git,self.assertRaises(Stop) as cm:x.local_gate(tmp,{})
+                self.assertEqual(str(cm.exception),'RELEASE_APPROVAL_IN_PLAN_STOP');git.assert_not_called()
 
     def test_old_secret_other_repo_and_redirect_forbidden(self):
         p=copy.deepcopy(PLAN);permit=x.Permit(p,'LIVE_REVIEWED',x._SEAL);connect=Mock()

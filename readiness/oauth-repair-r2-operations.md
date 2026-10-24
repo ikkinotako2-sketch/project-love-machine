@@ -33,7 +33,8 @@ Identity: provider-neutral-youtube-client-reuse-exchange-20261024-r2
 
 Marker: audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261024-r2.json
 
-Current entry is blocked twice: plan enabled=false and workflow job `false &&`.
+The separately authorized release enables the plan and marker-only workflow.
+Execution is still blocked before credential injection because no R2 marker exists.
 All approval flags remain false. No marker is created by this preparation.
 R1 marker SHA256 is pinned in the R2 plan and checked in parent, preparation,
 execution HEAD and worktree by the future gate. R1 cannot be rerun. Legacy tests
@@ -46,7 +47,7 @@ unchanged. The independent branch never changes main or the recovery branch.
 2. A separately approved final release is required to enable the plan/workflow,
    pin that release's exact preparation history, and set R2 nonsecret variables:
    PLM_OAUTH_REUSE_R2_PREPARED, PLM_OAUTH_REUSE_R2_PLAN_SHA256,
-   PLM_OAUTH_REUSE_R2_MANIFEST_SHA256. This preparation sets none of them.
+   PLM_OAUTH_REUSE_R2_MANIFEST_SHA256. Release configuration may set only those three nonsecret variables.
 3. The protected Environment currently restricts R1's branch. Separately approve
    an exact R2 branch rule; retain Required reviewer and no admin bypass. Do not
    loosen protection or change another project's settings.
@@ -73,3 +74,27 @@ supersede an unused state explicitly if needed; never reset a receipt timestamp.
 
 Secret persistence ACK does not prove current token validity, channel match,
 upload permission in practice, or any posting approval.
+
+## Final release configuration (not OAuth execution authorization)
+
+The final release is one exact commit after 9f97d58c95c2e31b9b99ed2cf817c2410110688d.
+Its plan binds the six release preparation files exactly; the manifest covers the
+complete candidate plus historical evidence. Executor, schema, state and local
+helper remain unchanged. No state, code, token or credential is displayed.
+
+Enabling the marker-only trigger is configuration only. All four plan approval
+flags remain false and local_gate returns no permit before Secret injection if
+the marker is absent. No dispatch, schedule or alternate execution entry is added.
+The future exact marker requires independently authorized execution approvals.
+
+Environment rule must be replaced from the consumed R1 branch to exactly
+plm-youtube-oauth-repair-20261024-r2 (one branch, zero tags), never All branches.
+Keep the existing reviewer and no administrator bypass. Do not edit old Secrets,
+old nonsecret variables, or the consumed R1 marker. The new R2 handoff Secret
+creation dialog may be opened empty; do not submit until separately approved.
+
+Before a new Google consent, all screens and original-receipt clock entry must
+be ready. The owner-local helper performs pasteback validation. Then only the
+owner may save the new handoff and approve the Environment review; neither action
+is authorized by final release configuration. The 300-second limit remains,
+and marker creation consumes R2 permanently even if POST count stays zero.
