@@ -1,0 +1,17 @@
+{
+  "identity": "provider-neutral-youtube-client-reuse-exchange-20261015-r1",
+  "state": "CONSUMED_BEFORE_REMOTE",
+  "approved": true,
+  "prepared_commit_sha": "f1a09aea76fa33a16c94c9185fe4c196d1e23e83",
+  "plan_sha256": "a88ac21b0c930a6c872647c3fb861a6d0d757929d35f929dbf0d19766f61b2c1",
+  "manifest_sha256": "7c5f244d7dff3fa4c001b1359ea74293ae64c7cd6a7d4c393de4fbdb18eb49b5",
+  "workflow_sha256": "3156add7b2a8c62b21c04a56fc8ea99312b920f4b61c06af883fc0c2b642a134",
+  "executor_sha256": "0bb13286cf04d548bd7895df6352c6755d79199b0b3588930c49a1f738dc9d64",
+  "schema_sha256": "baa17685a42c65067e3b50a3345f74b0635ef8f6c5fef398204c3682f24ffac4",
+  "execution_approval": {
+    "owner_approved": true,
+    "operational_exclusion_attested": true,
+    "writer_permissions_reviewed": true,
+    "handoff_approved": true
+  }
+}
