@@ -1,4 +1,4 @@
-import base64,copy,contextlib,hashlib,io,json,os,subprocess,tempfile,unittest
+import base64,copy,contextlib,hashlib,io,json,os,re,subprocess,tempfile,unittest
 from pathlib import Path
 from unittest.mock import Mock,patch
 from plm.automation.executors import oauth_exchange_r2 as x
@@ -166,6 +166,19 @@ class R2Tests(unittest.TestCase):
         self.assertIsNone(x.local_gate(ROOT,{}))
         for key in ['owner_approved','handoff_approved','operational_exclusion_attested','writer_permissions_reviewed']:
             self.assertIs(PLAN[key],False)
+
+    def test_unused_state_matches_actual_helper_and_retires_prior_consent(self):
+        html=(ROOT/PLAN['local_handoff_helper']['entry']).read_text()
+        config=json.loads(re.search(r'const CONFIG=(.*?);',html).group(1))
+        self.assertEqual(config['state'],PLAN['consent_state'])
+        self.assertEqual(config['client_id'],PLAN['client_id'])
+        self.assertEqual(config['redirect_uri'],PLAN['redirect_uri'])
+        self.assertEqual(len(base64.urlsafe_b64decode(config['state']+'=')),32)
+        self.assertIs(PLAN['consent_state_used'],False)
+        retired=PLAN['superseded_consent_contexts']
+        self.assertTrue(retired)
+        self.assertNotIn(hashlib.sha256(config['state'].encode()).hexdigest(),[v['state_sha256'] for v in retired])
+        self.assertTrue(all(v['state_reuse_forbidden'] and not v['marker_created'] and not v['oauth_post_attempted'] for v in retired))
 
     def test_plan_cannot_claim_separate_execution_approval(self):
         for key in ['owner_approved','handoff_approved','operational_exclusion_attested','writer_permissions_reviewed']:

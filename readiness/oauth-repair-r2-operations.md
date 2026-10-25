@@ -77,10 +77,16 @@ upload permission in practice, or any posting approval.
 
 ## Final release configuration (not OAuth execution authorization)
 
-The final release is one exact commit after 9f97d58c95c2e31b9b99ed2cf817c2410110688d.
-Its plan binds the six release preparation files exactly; the manifest covers the
-complete candidate plus historical evidence. Executor, schema, state and local
-helper remain unchanged. No state, code, token or credential is displayed.
+The state-refresh release is one exact commit after
+680083fb5dca00bee6c288f00bafa76a25090c17. Its plan binds the five preparation
+files exactly; the manifest covers the complete candidate plus historical
+evidence. Executor, schema and workflow remain unchanged. The owner confirmed
+using the prior R2 consent; that state is retired by hash. The replacement is
+a fresh 256-bit preparation state, unused in Google consent. Only the helper
+configuration and matching CSP hash change; no state value, code, token or
+credential is logged. This update neither authorizes nor performs consent,
+Secret operations, marker creation or exchange. A future execution approval
+must explicitly bind the new immutable release HEAD.
 
 Enabling the marker-only trigger is configuration only. All four plan approval
 flags remain false and local_gate returns no permit before Secret injection if

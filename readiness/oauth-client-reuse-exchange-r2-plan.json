@@ -2,13 +2,12 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-repair-20261024-r2",
-  "preparation_parent": "9f97d58c95c2e31b9b99ed2cf817c2410110688d",
+  "preparation_parent": "680083fb5dca00bee6c288f00bafa76a25090c17",
   "preparation_files": [
-    ".github/workflows/plm-youtube-client-reuse-exchange-r2-parked.yml",
     "readiness/oauth-client-reuse-exchange-r2-hashes.json",
     "readiness/oauth-client-reuse-exchange-r2-plan.json",
+    "readiness/oauth-handoff-local-r2.html",
     "readiness/oauth-repair-r2-operations.md",
-    "readiness/run_oauth_repair_r2.py",
     "tests/test_oauth_exchange_r2.py"
   ],
   "identity": "provider-neutral-youtube-client-reuse-exchange-20261024-r2",
@@ -28,7 +27,7 @@
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.readonly"
   ],
-  "consent_state": "USVKlrf1RzYsZkjnPkWW3-6Hx7d8EDfkOCPIw0fkqPo",
+  "consent_state": "grCyzLfAvOo0a6ARmiyhxhHtnfJBwh0DR8b33p05vgs",
   "existing_secret": "PLM_YOUTUBE_GAME_001",
   "candidate_secret": "PLM_YOUTUBE_GAME_001_REFRESH_V2",
   "handoff_secret": "PLM_YOUTUBE_REAUTH_HANDOFF_R2_ONCE",
@@ -71,7 +70,7 @@
   "execution_policy": "BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE",
   "success_within_window_guaranteed": false,
   "consumed_on_marker_even_if_oauth_post_zero": true,
-  "consent_state_first_published_at": "2026-10-24",
+  "consent_state_first_published_at": "2026-10-25T01:23:34.332240+00:00",
   "consent_state_used": false,
   "release_configured": true,
   "execution_approval_source": "FUTURE_MARKER_ONLY",
@@ -99,5 +98,15 @@
     "plan": "PLM_OAUTH_REUSE_R2_PLAN_SHA256",
     "manifest": "PLM_OAUTH_REUSE_R2_MANIFEST_SHA256"
   },
-  "required_environment_branch_change": false
+  "required_environment_branch_change": false,
+  "superseded_consent_contexts": [
+    {
+      "state_sha256": "6f87ffb2c3a69496a71d94783150dd3a91e3c805bf6a8640198529ddfef0bc29",
+      "owner_confirmed_state_used": true,
+      "terminal_reason": "OWNER_REPORTED_CODE_EXPIRED_BEFORE_MARKER",
+      "marker_created": false,
+      "oauth_post_attempted": false,
+      "state_reuse_forbidden": true
+    }
+  ]
 }
