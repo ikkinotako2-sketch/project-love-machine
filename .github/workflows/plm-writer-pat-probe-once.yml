@@ -1,0 +1,50 @@
+name: PLM Writer PAT Independent Read Once
+on:
+  push:
+    branches: [plm-writer-pat-probe-20261028-r1]
+    paths: [readiness/writer-pat-probe/**, .github/workflows/plm-writer-pat-probe-once.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: plm-writer-pat-probe-20261028-r1
+  cancel-in-progress: false
+env:
+  TEST_ONLY: 'true'
+  DRY_RUN: 'true'
+  NO_PUBLISH: 'true'
+  EMERGENCY_STOP: 'true'
+jobs:
+  offline:
+    if: ${{ github.event.created == true && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - run: python -m unittest discover -s readiness/writer-pat-probe -p 'test_probe.py' -v
+  verify:
+    needs: offline
+    if: ${{ github.event.created == true && github.run_attempt == 1 }}
+    environment: plm-oauth-client-reuse-once
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Gate before writer injection
+        id: local
+        env:
+          PROVENANCE_TOKEN: ${{ github.token }}
+        run: python readiness/writer-pat-probe/probe.py prepare
+      - name: One repository Secrets metadata GET only
+        if: ${{ steps.local.outputs.ready == 'true' }}
+        env:
+          LOCAL_READY: ${{ steps.local.outputs.ready }}
+          WRITER_PAT: ${{ secrets.PLM_GITHUB_OAUTH_SECRET_WRITER }}
+        run: python readiness/writer-pat-probe/probe.py execute
