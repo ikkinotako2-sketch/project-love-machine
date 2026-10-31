@@ -15,7 +15,11 @@
         !/^[A-Za-z0-9_-]{43,128}$/.test(config.state)) fail('PUBLIC_PINS_INVALID');
     let url;
     try { url = new URL(callback); } catch { fail('CALLBACK_INVALID'); }
-    if (url.origin + url.pathname !== config.redirect_uri || url.hash || url.username || url.password) fail('CALLBACK_TARGET_MISMATCH');
+    // Google Playground canonically redirects its registered no-slash URI to a slash path.
+    // Only these two exact HTTPS targets are accepted. The exchange redirect_uri stays pinned.
+    if (url.origin !== 'https://developers.google.com' ||
+        !['/oauthplayground', '/oauthplayground/'].includes(url.pathname) ||
+        url.hash || url.username || url.password) fail('CALLBACK_TARGET_MISMATCH');
     const allowed = new Set(['code', 'state', 'scope', 'authuser', 'prompt']);
     for (const key of url.searchParams.keys()) {
       if (!allowed.has(key) || url.searchParams.getAll(key).length !== 1) fail('CALLBACK_FIELDS_INVALID');

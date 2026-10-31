@@ -33,7 +33,7 @@ def main():
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     subprocess.run(['node','--test','tests/test_oauth_handoff_r2.cjs'],cwd=ROOT,check=True)
     assert result.wasSuccessful() and not result.skipped
-    report={'status':'OFFLINE_R2_PREPARATION_PASS','python_tests':result.testsRun,'node_tests':8,'history':history,'source_files':len(m['source_sha256']),'r1_marker_unchanged':True,'r2_marker_created':False,'r2_entry':'CONFIGURED_NO_EXECUTION_MARKER' if p['enabled'] else 'PARKED','actual_handoff_contents':'NOT_READ','exact_historical_cause':'UNKNOWN','google_oauth_calls':0,'secret_operations':0,'uploads':0,'cloudflare_calls':0}
+    report={'status':'OFFLINE_R2_PREPARATION_PASS','python_tests':result.testsRun,'node_tests':12,'history':history,'source_files':len(m['source_sha256']),'r1_marker_unchanged':True,'r2_marker_created':False,'r2_entry':'CONFIGURED_NO_EXECUTION_MARKER' if p['enabled'] else 'PARKED','actual_handoff_contents':'NOT_READ','exact_historical_cause':'UNKNOWN','google_oauth_calls':0,'secret_operations':0,'uploads':0,'cloudflare_calls':0}
     out=ROOT/'oauth-repair-r2-evidence';out.mkdir(exist_ok=True);(out/'summary.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
 
 if __name__=='__main__':main()

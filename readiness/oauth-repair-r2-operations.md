@@ -104,3 +104,8 @@ be ready. The owner-local helper performs pasteback validation. Then only the
 owner may save the new handoff and approve the Environment review; neither action
 is authorized by final release configuration. The 300-second limit remains,
 and marker creation consumes R2 permanently even if POST count stays zero.
+
+
+## 2026-10-31 callback repair and fresh state
+Confirmed public behavior: https://developers.google.com/oauthplayground redirects to the exact slash path /oauthplayground/. Old helper rejected that path with CALLBACK_TARGET_MISMATCH (reproduced with dummy input). Owner screenshots do not expose the actual URL, so that specific input's cause remains unproven. Accept ONLY the two fixed HTTPS paths on developers.google.com; keep OAuth request/exchange redirect_uri unchanged. No arbitrary redirect normalization. All state, duplicate-field, fragment, userinfo, and 300-second checks remain.
+Retire the previous state and all previous links/codes; new state is preparation only. No execution approval carries over to the new HEAD. Before consent, open the helper and GitHub handoff form, and rehearse with existing dummy tests. Owner copies the final Playground address bar URL, never the initial accounts.google.com consent link. Do not press Playground's exchange button. No secrets or callback URLs in chat.

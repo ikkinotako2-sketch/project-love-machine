@@ -2,13 +2,15 @@
   "version": 1,
   "repository": "ikkinotako2-sketch/project-love-machine",
   "branch": "plm-youtube-oauth-repair-20261024-r2",
-  "preparation_parent": "680083fb5dca00bee6c288f00bafa76a25090c17",
+  "preparation_parent": "e2b47c43163ea42a23044457c24c9347445b253d",
   "preparation_files": [
     "readiness/oauth-client-reuse-exchange-r2-hashes.json",
     "readiness/oauth-client-reuse-exchange-r2-plan.json",
+    "readiness/oauth-handoff-local-r2.cjs",
     "readiness/oauth-handoff-local-r2.html",
     "readiness/oauth-repair-r2-operations.md",
-    "tests/test_oauth_exchange_r2.py"
+    "readiness/run_oauth_repair_r2.py",
+    "tests/test_oauth_handoff_r2.cjs"
   ],
   "identity": "provider-neutral-youtube-client-reuse-exchange-20261024-r2",
   "marker_path": "audit-evidence/consumed/provider-neutral-youtube-client-reuse-exchange-20261024-r2.json",
@@ -27,7 +29,7 @@
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.readonly"
   ],
-  "consent_state": "grCyzLfAvOo0a6ARmiyhxhHtnfJBwh0DR8b33p05vgs",
+  "consent_state": "JisqUoWiOIxkK5ntlWjHDXMpkGUAEI_r-qAKeu9gZHk",
   "existing_secret": "PLM_YOUTUBE_GAME_001",
   "candidate_secret": "PLM_YOUTUBE_GAME_001_REFRESH_V2",
   "handoff_secret": "PLM_YOUTUBE_REAUTH_HANDOFF_R2_ONCE",
@@ -70,7 +72,7 @@
   "execution_policy": "BOUNDED_SINGLE_ATTEMPT_NO_SUCCESS_GUARANTEE",
   "success_within_window_guaranteed": false,
   "consumed_on_marker_even_if_oauth_post_zero": true,
-  "consent_state_first_published_at": "2026-10-25T01:23:34.332240+00:00",
+  "consent_state_first_published_at": "2026-10-31",
   "consent_state_used": false,
   "release_configured": true,
   "execution_approval_source": "FUTURE_MARKER_ONLY",
@@ -107,6 +109,14 @@
       "marker_created": false,
       "oauth_post_attempted": false,
       "state_reuse_forbidden": true
+    },
+    {
+      "prepared_commit": "e2b47c43163ea42a23044457c24c9347445b253d",
+      "state_sha256": "97d1c8d9f1e978cf0ab37bfe8da1a7d67843a66e313c91bbe63a970132d9cc90",
+      "state_reuse_forbidden": true,
+      "marker_created": false,
+      "oauth_post_attempted": false,
+      "reason": "OWNER_CALLBACK_TARGET_MISMATCH_AND_300_SECOND_EXPIRY_20261031"
     }
   ]
 }
