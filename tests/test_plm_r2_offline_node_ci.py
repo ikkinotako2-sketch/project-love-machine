@@ -15,7 +15,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 class R2NodeAndCspCI(unittest.TestCase):
     def test_node_handoff_regression(self):
         result = subprocess.run(
-            ["node", "--test", "tests/test_oauth_handoff_r2.cjs", "tests/test_oauth_handoff_r2_nonfinite_clock.cjs"],
+            ["node", "--test", "tests/test_oauth_handoff_r2.cjs", "tests/test_oauth_handoff_r2_nonfinite_clock.cjs", "tests/test_plm_r2_dom_offline.test.mjs"],
             cwd=ROOT,
             capture_output=True,
             text=True,
