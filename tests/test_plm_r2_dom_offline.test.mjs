@@ -21,6 +21,9 @@ function scenario(protocol,approved=false){
     navigator:{clipboard:{async writeText(){attemptedClipboardWrites++;throw Error('CLIPBOARD_MUST_NOT_BE_USED');}}},
     URL,Date,Intl,Set,JSON,Number,Object,Error,console
   };
+  // Browser window === global object. Reflect that identity in the VM harness.
+  context.window=context;
+  context.addEventListener=(type,fn)=>windowHandlers.set(type,fn);
   runInNewContext(matches[0][1],context,{timeout:1500,filename:'oauth-handoff-local-r2.html'});
   return {elem:id=>elems.get(id),click:async id=>{const fn=listeners.get(id+':click');assert.ok(fn,'listener '+id);return fn();},pagehide:()=>windowHandlers.get('pagehide')?.(),clipboardWrites:()=>attemptedClipboardWrites};
 }
