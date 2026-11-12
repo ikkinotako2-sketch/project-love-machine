@@ -59,3 +59,22 @@ test('Clear and pagehide terminally disable the local handoff',async()=>{
   s.pagehide();
   assert.equal(s.clipboardWrites(),0);
 });
+
+test('unapproved local attempt erases callback and disables copy',async()=>{
+  const s=scenario('file:');
+  s.elem('callback').value='DUMMY_CALLBACK_NOT_A_REAL_CODE';
+  await s.click('copy');
+  assert.equal(s.elem('callback').value,'');
+  assert.equal(s.elem('copy').disabled,true);
+  assert.equal(s.clipboardWrites(),0);
+});
+test('invalid callback failure erases callback and disables copy',async()=>{
+  const s=scenario('file:',true);
+  s.elem('callback').value='INVALID_DUMMY_CALLBACK';
+  s.elem('date').value='2026-11-11';
+  s.elem('time').value='00:00';
+  await s.click('copy');
+  assert.equal(s.elem('callback').value,'');
+  assert.equal(s.elem('copy').disabled,true);
+  assert.equal(s.clipboardWrites(),0);
+});
