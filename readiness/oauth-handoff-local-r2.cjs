@@ -50,7 +50,8 @@
         if (raw !== expected) { expected = null; fail('PASTEBACK_MISMATCH_STOP'); }
         const parsed = JSON.parse(raw);
         if (typeof parsed.issued_at !== 'number' || !Number.isSafeInteger(parsed.issued_at)) fail('PASTEBACK_SHAPE_STOP');
-        if (clock() < parsed.issued_at || clock() >= parsed.issued_at + 300) fail('LOCAL_300_SECOND_STOP');
+        const now = clock();
+        if (!Number.isFinite(now) || now < parsed.issued_at || now >= parsed.issued_at + 300) { expected = null; fail('LOCAL_300_SECOND_STOP'); }
         return 'PASTEBACK_EXACT_JSON_CONFIRMED';
       },
       clear() { expected = null; used = true; }
