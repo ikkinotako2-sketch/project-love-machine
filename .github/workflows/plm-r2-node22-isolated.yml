@@ -12,6 +12,7 @@ on:
       - tests/test_oauth_handoff_r2_nonfinite_clock.cjs
       - tests/test_plm_r2_dom_offline.test.mjs
       - tests/test_plm_r2_offline_node_ci.py
+      - tests/plm_r2_file_browser_isolated.mjs
 
 permissions:
   contents: read
@@ -91,6 +92,13 @@ jobs:
           python -m unittest discover -s tests -p "test_plm_r2_offline_node_ci.py" -v \
             2>&1 | tee "$RUNNER_TEMP/plm-r2-python-node.log"
           echo "PLM local HTML/CSP and dummy Node tests passed without OAuth" >> "$GITHUB_STEP_SUMMARY"
+      - name: Actual Chrome file URL with dummy-only blocked interactions
+        id: file_browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/plm_r2_file_browser_isolated.mjs \
+            2>&1 | tee "$RUNNER_TEMP/plm-r2-file-browser.log"
       - name: Write machine-readable offline gate receipt (not OAuth approval)
         id: receipt
         if: always()
@@ -100,6 +108,7 @@ jobs:
           RUNTIME_OUTCOME: ${{ steps.runtime.outcome }}
           NODE_TEST_OUTCOME: ${{ steps.node_tests.outcome }}
           CSP_TEST_OUTCOME: ${{ steps.csp_tests.outcome }}
+          BROWSER_OUTCOME: ${{ steps.file_browser.outcome }}
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -107,12 +116,14 @@ jobs:
             source_pin: process.env.SOURCE_PIN_OUTCOME || 'unknown',
             runtime: process.env.RUNTIME_OUTCOME || 'unknown',
             node_24: process.env.NODE_TEST_OUTCOME || 'unknown',
-            python_csp_2: process.env.CSP_TEST_OUTCOME || 'unknown'
+            python_csp_2: process.env.CSP_TEST_OUTCOME || 'unknown',
+            isolated_chrome_file_5: process.env.BROWSER_OUTCOME || 'unknown'
           };
           const reason = statuses.source_pin !== 'success' ? 'SOURCE_UNVERIFIED'
             : statuses.runtime !== 'success' ? 'RUNTIME_UNAVAILABLE'
             : statuses.node_24 !== 'success' ? 'NODE_TEST_FAILED'
             : statuses.python_csp_2 !== 'success' ? 'CSP_OR_PYTHON_TEST_FAILED'
+            : statuses.isolated_chrome_file_5 !== 'success' ? 'CHROME_FILE_BROWSER_FAILED'
             : 'OFFLINE_TEST_PASS';
           const receipt = {
             schema: 'offline-gate-receipt/v1',
@@ -123,11 +134,13 @@ jobs:
             github_run_id: process.env.GITHUB_RUN_ID,
             expected_node_tests: 24,
             expected_python_csp_checks: 2,
+            expected_chrome_file_checks: 5,
             stages: statuses,
             status: reason,
             retry_same_sha_without_new_evidence: false,
             oauth_exchange: 'NOT_RUN',
             real_file_browser_acceptance: 'NOT_RUN',
+            isolated_chrome_file_url_acceptance: statuses.isolated_chrome_file_5 === 'success' ? 'PASS' : 'FAIL_OR_NOT_RUN',
             live_readiness: 'BLOCKED_UNVERIFIED',
             allowed_production_writes: false
           };
@@ -144,6 +157,7 @@ jobs:
           path: |
             ${{ runner.temp }}/plm-r2-node22.tap
             ${{ runner.temp }}/plm-r2-python-node.log
+            ${{ runner.temp }}/plm-r2-file-browser.log
             ${{ runner.temp }}/plm-r2-offline-gate-receipt.json
           if-no-files-found: ignore
           retention-days: 7
