@@ -1,0 +1,99 @@
+name: PLM R2 Local Handoff Node22 Isolated (NO OAUTH)
+
+on:
+  push:
+    branches:
+      - offline/plm-r2-node22-ci-20261116-r1
+    paths:
+      - .github/workflows/plm-r2-node22-isolated.yml
+      - readiness/oauth-handoff-local-r2.cjs
+      - readiness/oauth-handoff-local-r2.html
+      - tests/test_oauth_handoff_r2.cjs
+      - tests/test_oauth_handoff_r2_nonfinite_clock.cjs
+      - tests/test_plm_r2_dom_offline.test.mjs
+      - tests/test_plm_r2_offline_node_ci.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plm-r2-node22-isolated-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  read-only-local-tests:
+    name: Node 22 + Python 3.12 local OAuth handoff fixtures
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    env:
+      CI: "true"
+      DRY_RUN: "true"
+      TEST_ONLY: "true"
+      NO_PUBLISH: "true"
+      EMERGENCY_STOP: "true"
+      GOOGLE_CLIENT_SECRET: ""
+      YOUTUBE_REFRESH_TOKEN: ""
+      CLOUDFLARE_API_TOKEN: ""
+    steps:
+      - name: Read-only checkout of exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Prepare Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Prepare Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify exact reviewed local source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object readiness/oauth-handoff-local-r2.cjs)" = "87ca4f4cb7663ab7e83397a4341fa50be0cd36c5"
+          test "$(git hash-object readiness/oauth-handoff-local-r2.html)" = "ed2d281c9aafc867dc4dd46ffaaef0341ecc2e64"
+          test "$(git hash-object tests/test_oauth_handoff_r2.cjs)" = "e50261a1ceba8a9a67a60090ebc5b31721168446"
+          test "$(git hash-object tests/test_oauth_handoff_r2_nonfinite_clock.cjs)" = "8ee96377fabf883f637cf1dea85d64b8e8b66a1f"
+          test "$(git hash-object tests/test_plm_r2_dom_offline.test.mjs)" = "15e77dc603c88da33f1002b7989244d9f63b3ed8"
+          test "$(git hash-object tests/test_plm_r2_offline_node_ci.py)" = "039a1b38cd778da3d916ed2f12584749363ddb0a"
+          test "$(git hash-object tests/oauth_handoff_r2_dom.cjs)" = "2208204f9c8123543b788e5204c2abc4285b86be"
+      - name: Check runtime and local code syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          python --version
+          node -e 'if(process.versions.node.split(".")[0] !== "22") process.exit(1)'
+          node --check readiness/oauth-handoff-local-r2.cjs
+          node --check tests/test_oauth_handoff_r2.cjs
+          node --check tests/test_oauth_handoff_r2_nonfinite_clock.cjs
+          node --check tests/test_plm_r2_dom_offline.test.mjs
+      - name: Node-only local handoff and dummy DOM regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap \
+            tests/test_oauth_handoff_r2.cjs \
+            tests/test_oauth_handoff_r2_nonfinite_clock.cjs \
+            tests/test_plm_r2_dom_offline.test.mjs \
+            | tee "$RUNNER_TEMP/plm-r2-node22.tap"
+          grep -qx '# fail 0' "$RUNNER_TEMP/plm-r2-node22.tap"
+      - name: Python source embedding, exact CSP hash, and Node bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p "test_plm_r2_offline_node_ci.py" -v \
+            2>&1 | tee "$RUNNER_TEMP/plm-r2-python-node.log"
+          echo "PLM local HTML/CSP and dummy Node tests passed without OAuth" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve both offline evidence outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plm-r2-offline-node22-csp-evidence
+          path: |
+            ${{ runner.temp }}/plm-r2-node22.tap
+            ${{ runner.temp }}/plm-r2-python-node.log
+          if-no-files-found: ignore
+          retention-days: 7
