@@ -1,0 +1,163 @@
+name: PLM R2 Local Handoff Node22 Isolated (NO OAUTH)
+
+on:
+  push:
+    branches:
+      - offline/plm-r2-node22-ci-20261116-r1
+    paths:
+      - .github/workflows/plm-r2-node22-isolated.yml
+      - readiness/oauth-handoff-local-r2.cjs
+      - readiness/oauth-handoff-local-r2.html
+      - tests/test_oauth_handoff_r2.cjs
+      - tests/test_oauth_handoff_r2_nonfinite_clock.cjs
+      - tests/test_plm_r2_dom_offline.test.mjs
+      - tests/test_plm_r2_offline_node_ci.py
+      - tests/plm_r2_file_browser_isolated.mjs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plm-r2-node22-isolated-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  read-only-local-tests:
+    name: Node 22 + Python 3.12 local OAuth handoff fixtures
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    env:
+      CI: "true"
+      DRY_RUN: "true"
+      TEST_ONLY: "true"
+      NO_PUBLISH: "true"
+      EMERGENCY_STOP: "true"
+      GOOGLE_CLIENT_SECRET: ""
+      YOUTUBE_REFRESH_TOKEN: ""
+      CLOUDFLARE_API_TOKEN: ""
+    steps:
+      - name: Read-only checkout of exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Prepare Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Prepare Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify exact reviewed local source identities
+        id: source_pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object readiness/oauth-handoff-local-r2.cjs)" = "87ca4f4cb7663ab7e83397a4341fa50be0cd36c5"
+          test "$(git hash-object readiness/oauth-handoff-local-r2.html)" = "ed2d281c9aafc867dc4dd46ffaaef0341ecc2e64"
+          test "$(git hash-object tests/test_oauth_handoff_r2.cjs)" = "e50261a1ceba8a9a67a60090ebc5b31721168446"
+          test "$(git hash-object tests/test_oauth_handoff_r2_nonfinite_clock.cjs)" = "8ee96377fabf883f637cf1dea85d64b8e8b66a1f"
+          test "$(git hash-object tests/test_plm_r2_dom_offline.test.mjs)" = "15e77dc603c88da33f1002b7989244d9f63b3ed8"
+          test "$(git hash-object tests/test_plm_r2_offline_node_ci.py)" = "039a1b38cd778da3d916ed2f12584749363ddb0a"
+          test "$(git hash-object tests/oauth_handoff_r2_dom.cjs)" = "2208204f9c8123543b788e5204c2abc4285b86be"
+      - name: Check runtime and local code syntax
+        id: runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          python --version
+          node -e 'if(process.versions.node.split(".")[0] !== "22") process.exit(1)'
+          node --check readiness/oauth-handoff-local-r2.cjs
+          node --check tests/test_oauth_handoff_r2.cjs
+          node --check tests/test_oauth_handoff_r2_nonfinite_clock.cjs
+          node --check tests/test_plm_r2_dom_offline.test.mjs
+      - name: Node-only local handoff and dummy DOM regression
+        id: node_tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap \
+            tests/test_oauth_handoff_r2.cjs \
+            tests/test_oauth_handoff_r2_nonfinite_clock.cjs \
+            tests/test_plm_r2_dom_offline.test.mjs \
+            | tee "$RUNNER_TEMP/plm-r2-node22.tap"
+          grep -qx '# fail 0' "$RUNNER_TEMP/plm-r2-node22.tap"
+      - name: Python source embedding, exact CSP hash, and Node bridge
+        id: csp_tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p "test_plm_r2_offline_node_ci.py" -v \
+            2>&1 | tee "$RUNNER_TEMP/plm-r2-python-node.log"
+          echo "PLM local HTML/CSP and dummy Node tests passed without OAuth" >> "$GITHUB_STEP_SUMMARY"
+      - name: Actual Chrome file URL with dummy-only blocked interactions
+        id: file_browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/plm_r2_file_browser_isolated.mjs \
+            2>&1 | tee "$RUNNER_TEMP/plm-r2-file-browser.log"
+      - name: Write machine-readable offline gate receipt (not OAuth approval)
+        id: receipt
+        if: always()
+        shell: bash
+        env:
+          SOURCE_PIN_OUTCOME: ${{ steps.source_pin.outcome }}
+          RUNTIME_OUTCOME: ${{ steps.runtime.outcome }}
+          NODE_TEST_OUTCOME: ${{ steps.node_tests.outcome }}
+          CSP_TEST_OUTCOME: ${{ steps.csp_tests.outcome }}
+          BROWSER_OUTCOME: ${{ steps.file_browser.outcome }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const statuses = {
+            source_pin: process.env.SOURCE_PIN_OUTCOME || 'unknown',
+            runtime: process.env.RUNTIME_OUTCOME || 'unknown',
+            node_24: process.env.NODE_TEST_OUTCOME || 'unknown',
+            python_csp_2: process.env.CSP_TEST_OUTCOME || 'unknown',
+            isolated_chrome_file_5: process.env.BROWSER_OUTCOME || 'unknown'
+          };
+          const reason = statuses.source_pin !== 'success' ? 'SOURCE_UNVERIFIED'
+            : statuses.runtime !== 'success' ? 'RUNTIME_UNAVAILABLE'
+            : statuses.node_24 !== 'success' ? 'NODE_TEST_FAILED'
+            : statuses.python_csp_2 !== 'success' ? 'CSP_OR_PYTHON_TEST_FAILED'
+            : statuses.isolated_chrome_file_5 !== 'success' ? 'CHROME_FILE_BROWSER_FAILED'
+            : 'OFFLINE_TEST_PASS';
+          const receipt = {
+            schema: 'offline-gate-receipt/v1',
+            project: 'project-love-machine',
+            branch: 'offline/plm-r2-node22-ci-20261116-r1',
+            head_sha: process.env.GITHUB_SHA,
+            reviewed_patch_sha: '5a83563d34a6d43017b819f0efc7b5f1040fba28',
+            github_run_id: process.env.GITHUB_RUN_ID,
+            expected_node_tests: 24,
+            expected_python_csp_checks: 2,
+            expected_chrome_file_checks: 5,
+            stages: statuses,
+            status: reason,
+            retry_same_sha_without_new_evidence: false,
+            oauth_exchange: 'NOT_RUN',
+            real_file_browser_acceptance: 'NOT_RUN',
+            isolated_chrome_file_url_acceptance: statuses.isolated_chrome_file_5 === 'success' ? 'PASS' : 'FAIL_OR_NOT_RUN',
+            live_readiness: 'BLOCKED_UNVERIFIED',
+            allowed_production_writes: false
+          };
+          const out = process.env.RUNNER_TEMP + '/plm-r2-offline-gate-receipt.json';
+          fs.writeFileSync(out, JSON.stringify(receipt, null, 2) + '\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '\nOFFLINE_GATE_RECEIPT: ' + reason + '\n');
+          console.log('OFFLINE_GATE_RECEIPT ' + JSON.stringify(receipt));
+          NODE
+      - name: Preserve both offline evidence outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plm-r2-offline-node22-csp-evidence
+          path: |
+            ${{ runner.temp }}/plm-r2-node22.tap
+            ${{ runner.temp }}/plm-r2-python-node.log
+            ${{ runner.temp }}/plm-r2-file-browser.log
+            ${{ runner.temp }}/plm-r2-offline-gate-receipt.json
+          if-no-files-found: ignore
+          retention-days: 7
